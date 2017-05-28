@@ -5,6 +5,7 @@ namespace Tests\Innmind\Server\Control\Server\Process\Output;
 
 use Innmind\Server\Control\Server\Process\{
     Output\GeneratedOutput,
+    Output\Type,
     Output
 };
 use Innmind\Immutable\{
@@ -40,7 +41,7 @@ class GeneratedOutputTest extends TestCase
     {
         $start = time();
         $count = 0;
-        $result = $this->output->foreach(function(Str $data, string $type) use (&$count, $start) {
+        $result = $this->output->foreach(function(Str $data, Type $type) use (&$count, $start) {
             $this->assertSame((string) $count, (string) $data);
             $this->assertTrue((time() - $start) > (int) (string) $data);
             ++$count;
@@ -60,7 +61,7 @@ class GeneratedOutputTest extends TestCase
         $start = time();
         $result = $this->output->reduce(
             0,
-            function(int $carry, Str $data, string $type) use ($start) {
+            function(int $carry, Str $data, Type $type) use ($start) {
                 $this->assertTrue((time() - $start) > (int) (string) $data);
 
                 return $carry + (int) (string) $data;
@@ -79,7 +80,7 @@ class GeneratedOutputTest extends TestCase
     {
         $start = time();
         $result = $this->output->filter(
-            function(Str $data, string $type) use ($start) {
+            function(Str $data, Type $type) use ($start) {
                 $this->assertTrue((time() - $start) > (int) (string) $data);
 
                 return (int) (string) $data % 2 === 0;
@@ -100,7 +101,7 @@ class GeneratedOutputTest extends TestCase
     {
         $start = time();
         $result = $this->output->groupBy(
-            function(Str $data, string $type) use ($start) {
+            function(Str $data, Type $type) use ($start) {
                 $this->assertTrue((time() - $start) > (int) (string) $data);
 
                 return (int) (string) $data % 2;
@@ -126,7 +127,7 @@ class GeneratedOutputTest extends TestCase
     {
         $start = time();
         $result = $this->output->partition(
-            function(Str $data, string $type) use ($start) {
+            function(Str $data, Type $type) use ($start) {
                 $this->assertTrue((time() - $start) > (int) (string) $data);
 
                 return (int) (string) $data % 2 === 0;

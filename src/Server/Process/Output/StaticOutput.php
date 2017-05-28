@@ -21,7 +21,7 @@ final class StaticOutput implements Output
     {
         if (
             (string) $output->keyType() !== Str::class ||
-            (string) $output->valueType() !== 'string'
+            (string) $output->valueType() !== Type::class
         ) {
             throw new InvalidOutputMap;
         }

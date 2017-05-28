@@ -10,14 +10,14 @@ use Innmind\Server\Control\{
 use Innmind\Immutable\{
     MapInterface,
     Map,
-    Type,
+    Type as TypeDeterminator,
     Str
 };
 use Symfony\Component\Process\Process;
 
 final class GeneratedOutput implements Output
 {
-    use Type;
+    use TypeDeterminator;
 
     private $generator;
     private $output;
@@ -25,7 +25,7 @@ final class GeneratedOutput implements Output
     public function __construct(\Generator $generator)
     {
         $this->generator = $generator;
-        $this->output = new Map(Str::class, 'string');
+        $this->output = new Map(Str::class, Type::class);
     }
 
     public function foreach(callable $function): Output
@@ -218,8 +218,8 @@ final class GeneratedOutput implements Output
         return !$this->generator->valid();
     }
 
-    private function type(string $type): string
+    private function type(string $type): Type
     {
-        return $type === Process::OUT ? Output::OUTPUT : Output::ERROR;
+        return $type === Process::OUT ? Type::output() : Type::error();
     }
 }

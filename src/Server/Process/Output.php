@@ -7,9 +7,6 @@ use Innmind\Immutable\MapInterface;
 
 interface Output
 {
-    public const OUTPUT = 'stdout';
-    public const ERROR = 'stderr';
-
     public function foreach(callable $function): self;
 
     /**

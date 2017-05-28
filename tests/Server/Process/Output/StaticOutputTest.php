@@ -5,6 +5,7 @@ namespace Tests\Innmind\Server\Control\Server\Process\Output;
 
 use Innmind\Server\Control\Server\Process\{
     Output\StaticOutput,
+    Output\Type,
     Output
 };
 use Innmind\Immutable\{
@@ -20,7 +21,7 @@ class StaticOutputTest extends TestCase
     {
         $this->assertInstanceOf(
             Output::class,
-            new StaticOutput(new Map(Str::class, 'string'))
+            new StaticOutput(new Map(Str::class, Type::class))
         );
     }
 
@@ -29,7 +30,7 @@ class StaticOutputTest extends TestCase
      */
     public function testThrowWhenInvalidMapKey()
     {
-        new StaticOutput(new Map('string', 'string'));
+        new StaticOutput(new Map('string', Type::class));
     }
 
     /**
@@ -43,16 +44,16 @@ class StaticOutputTest extends TestCase
     public function testForeach()
     {
         $output = new StaticOutput(
-            (new Map(Str::class, 'string'))
-                ->put(new Str('0'), Output::OUTPUT)
-                ->put(new Str('1'), Output::OUTPUT)
-                ->put(new Str('2'), Output::OUTPUT)
+            (new Map(Str::class, Type::class))
+                ->put(new Str('0'), Type::output())
+                ->put(new Str('1'), Type::output())
+                ->put(new Str('2'), Type::output())
         );
         $count = 0;
 
         $this->assertSame(
             $output,
-            $output->foreach(function(Str $data, string $type) use (&$count) {
+            $output->foreach(function(Str $data, Type $type) use (&$count) {
                 $this->assertSame((string) $count, (string) $data);
                 ++$count;
             })
@@ -63,17 +64,17 @@ class StaticOutputTest extends TestCase
     public function testReduce()
     {
         $output = new StaticOutput(
-            (new Map(Str::class, 'string'))
-                ->put(new Str('0'), Output::OUTPUT)
-                ->put(new Str('1'), Output::OUTPUT)
-                ->put(new Str('2'), Output::OUTPUT)
+            (new Map(Str::class, Type::class))
+                ->put(new Str('0'), Type::output())
+                ->put(new Str('1'), Type::output())
+                ->put(new Str('2'), Type::output())
         );
 
         $this->assertSame(
             3,
             $output->reduce(
                 0,
-                function(int $carry, Str $data, string $type) {
+                function(int $carry, Str $data, Type $type) {
                     return $carry + (int) (string) $data;
                 }
             )
@@ -83,12 +84,12 @@ class StaticOutputTest extends TestCase
     public function testFilter()
     {
         $output = new StaticOutput(
-            (new Map(Str::class, 'string'))
-                ->put(new Str('0'), Output::OUTPUT)
-                ->put(new Str('1'), Output::OUTPUT)
-                ->put(new Str('2'), Output::OUTPUT)
+            (new Map(Str::class, Type::class))
+                ->put(new Str('0'), Type::output())
+                ->put(new Str('1'), Type::output())
+                ->put(new Str('2'), Type::output())
         );
-        $output2 = $output->filter(function(Str $data, string $type) {
+        $output2 = $output->filter(function(Str $data, Type $type) {
             return (int) (string) $data % 2 === 0;
         });
 
@@ -101,12 +102,12 @@ class StaticOutputTest extends TestCase
     public function testGroupBy()
     {
         $output = new StaticOutput(
-            (new Map(Str::class, 'string'))
-                ->put(new Str('0'), Output::OUTPUT)
-                ->put(new Str('1'), Output::OUTPUT)
-                ->put(new Str('2'), Output::OUTPUT)
+            (new Map(Str::class, Type::class))
+                ->put(new Str('0'), Type::output())
+                ->put(new Str('1'), Type::output())
+                ->put(new Str('2'), Type::output())
         );
-        $groups = $output->groupBy(function(Str $data, string $type) {
+        $groups = $output->groupBy(function(Str $data, Type $type) {
             return (int) (string) $data % 2;
         });
 
@@ -121,12 +122,12 @@ class StaticOutputTest extends TestCase
     public function testPartition()
     {
         $output = new StaticOutput(
-            (new Map(Str::class, 'string'))
-                ->put(new Str('0'), Output::OUTPUT)
-                ->put(new Str('1'), Output::OUTPUT)
-                ->put(new Str('2'), Output::OUTPUT)
+            (new Map(Str::class, Type::class))
+                ->put(new Str('0'), Type::output())
+                ->put(new Str('1'), Type::output())
+                ->put(new Str('2'), Type::output())
         );
-        $partitions = $output->partition(function(Str $data, string $type) {
+        $partitions = $output->partition(function(Str $data, Type $type) {
             return (int) (string) $data % 2 === 0;
         });
 
@@ -141,10 +142,10 @@ class StaticOutputTest extends TestCase
     public function testStringCast()
     {
         $output = new StaticOutput(
-            (new Map(Str::class, 'string'))
-                ->put(new Str('0'), Output::OUTPUT)
-                ->put(new Str('1'), Output::OUTPUT)
-                ->put(new Str('2'), Output::OUTPUT)
+            (new Map(Str::class, Type::class))
+                ->put(new Str('0'), Type::output())
+                ->put(new Str('1'), Type::output())
+                ->put(new Str('2'), Type::output())
         );
 
         $this->assertSame('012', (string) $output);
