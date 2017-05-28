@@ -15,7 +15,8 @@
     },
     "require": {
         "php": "~7.1",
-        "innmind/immutable": "^2.3"
+        "innmind/immutable": "^2.3",
+        "symfony/process": "^3.2"
     },
     "autoload": {
         "psr-4": {
