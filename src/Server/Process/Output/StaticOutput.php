@@ -52,7 +52,7 @@ final class StaticOutput implements Output
     }
 
     /**
-     * @return MapInterface<mixed, self>
+     * {@inheritdoc}
      */
     public function groupBy(callable $discriminator): MapInterface
     {
