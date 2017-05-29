@@ -9,6 +9,7 @@ use Innmind\Server\Control\{
     Exception\EmptyExecutableNotAllowed,
     Exception\EmptyEnvironmentKeyNotAllowed
 };
+use Innmind\Filesystem\StreamInterface;
 use Innmind\Immutable\{
     Stream,
     Map,
@@ -21,6 +22,7 @@ final class Command
     private $parameters;
     private $environment;
     private $workingDirectory;
+    private $input;
 
     public function __construct(string $executable)
     {
@@ -81,6 +83,14 @@ final class Command
         return $self;
     }
 
+    public function withInput(StreamInterface $input): self
+    {
+        $self = clone $this;
+        $self->input = $input;
+
+        return $self;
+    }
+
     public function environment(): MapInterface
     {
         return $this->environment;
@@ -94,6 +104,16 @@ final class Command
     public function workingDirectory(): string
     {
         return $this->workingDirectory;
+    }
+
+    public function hasInput(): bool
+    {
+        return $this->input instanceof StreamInterface;
+    }
+
+    public function input(): StreamInterface
+    {
+        return $this->input;
     }
 
     public function __toString(): string

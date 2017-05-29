@@ -8,7 +8,8 @@ use Innmind\Server\Control\Server\{
     Command,
     Process,
     Process\Pid,
-    Signal
+    Signal,
+    Process\Input\Bridge
 };
 use Symfony\Component\Process\Process as SfProcess;
 
@@ -29,7 +30,9 @@ final class UnixProcesses implements Processes
 
                         return $env;
                     }
-                )
+                ),
+            $command->hasInput() ?
+                new Bridge($command->input()) : null
         );
         $process->start();
 

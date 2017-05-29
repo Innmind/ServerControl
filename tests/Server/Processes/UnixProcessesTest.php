@@ -10,6 +10,7 @@ use Innmind\Server\Control\Server\{
     Process,
     Signal
 };
+use Innmind\Filesystem\Stream\StringStream;
 use PHPUnit\Framework\TestCase;
 
 class UnixProcessesTest extends TestCase
@@ -31,6 +32,17 @@ class UnixProcessesTest extends TestCase
         $this->assertInstanceOf(Process::class, $process);
         $process->wait();
         $this->assertTrue((time() - $start) >= 6);
+    }
+
+    public function testExecuteWithInput()
+    {
+        $processes = new UnixProcesses;
+        $process = $processes->execute(
+            (new Command('cat'))->withInput(new StringStream('foobar'))
+        );
+        $process->wait();
+
+        $this->assertSame('foobar', (string) $process->output());
     }
 
     public function testKill()

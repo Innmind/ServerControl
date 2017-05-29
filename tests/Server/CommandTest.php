@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\Server\Command;
+use Innmind\Filesystem\StreamInterface;
 use Innmind\Immutable\MapInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -14,6 +15,7 @@ class CommandTest extends TestCase
         $command = new Command('ps');
 
         $this->assertFalse($command->hasWorkingDirectory());
+        $this->assertFalse($command->hasInput());
         $this->assertSame('ps', (string) $command);
     }
 
@@ -99,5 +101,17 @@ class CommandTest extends TestCase
         $this->assertTrue($command->hasWorkingDirectory());
         $this->assertSame('bin/console', (string) $command);
         $this->assertSame('/var/www/app', $command->workingDirectory());
+    }
+
+    public function testWithInput()
+    {
+        $command = (new Command('bin/console'))
+            ->withInput(
+                $input = $this->createMock(StreamInterface::class)
+            );
+
+        $this->assertInstanceOf(Command::class, $command);
+        $this->assertTrue($command->hasInput());
+        $this->assertSame($input, $command->input());
     }
 }
