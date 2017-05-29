@@ -1,0 +1,38 @@
+{
+    "name": "innmind/server-control",
+    "type": "library",
+    "description": "Allows to control the server from php",
+    "homepage": "http://github.com/Innmind/ServerControl",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Baptiste Langlade",
+            "email": "langlade.baptiste@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "http://github.com/Innmind/ServerControl/issues"
+    },
+    "require": {
+        "php": "~7.1",
+        "innmind/immutable": "^2.3",
+        "symfony/process": "^3.2",
+        "innmind/filesystem": "^2.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Innmind\\Server\\Control\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Innmind\\Server\\Control\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~6.0"
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit --colors=always"
+    }
+}
