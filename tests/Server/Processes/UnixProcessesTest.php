@@ -45,6 +45,7 @@ class UnixProcessesTest extends TestCase
             $processes,
             $processes->kill($process->pid(), Signal::kill())
         );
+        $this->assertFalse($process->isRunning());
         $this->assertTrue((time() - $start) < 2);
     }
 }
