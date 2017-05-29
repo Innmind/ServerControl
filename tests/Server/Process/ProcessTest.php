@@ -96,7 +96,7 @@ class ProcessTest extends TestCase
         $slow = new SfProcess('php fixtures/slow.php');
         $slow->start();
         $process = new Process($slow);
-        $process->wait();
+        $this->assertSame($process, $process->wait());
 
         $this->assertFalse($process->isRunning());
     }
