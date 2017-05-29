@@ -17,32 +17,20 @@ use Innmind\Immutable\{
 
 final class Command
 {
-    private $background;
     private $executable;
     private $parameters;
     private $environment;
     private $workingDirectory;
 
-    private function __construct(bool $background, string $executable)
+    public function __construct(string $executable)
     {
         if (empty($executable)) {
             throw new EmptyExecutableNotAllowed;
         }
 
-        $this->background = $background;
         $this->executable = $executable;
         $this->parameters = new Stream('object');
         $this->environment = new Map('string', 'string');
-    }
-
-    public static function foreground(string $executable): self
-    {
-        return new self(false, $executable);
-    }
-
-    public static function background(string $executable): self
-    {
-        return new self(true, $executable);
     }
 
     public function withArgument(string $value): self
@@ -91,11 +79,6 @@ final class Command
         $self->workingDirectory = $path;
 
         return $self;
-    }
-
-    public function toBeRunInBackground(): bool
-    {
-        return $this->background;
     }
 
     public function environment(): MapInterface

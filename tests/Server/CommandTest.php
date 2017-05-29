@@ -9,22 +9,10 @@ use PHPUnit\Framework\TestCase;
 
 class CommandTest extends TestCase
 {
-    public function testForeground()
+    public function testInterface()
     {
-        $command = Command::foreground('ps');
+        $command = new Command('ps');
 
-        $this->assertInstanceOf(Command::class, $command);
-        $this->assertFalse($command->toBeRunInBackground());
-        $this->assertFalse($command->hasWorkingDirectory());
-        $this->assertSame('ps', (string) $command);
-    }
-
-    public function testBackground()
-    {
-        $command = Command::background('ps');
-
-        $this->assertInstanceOf(Command::class, $command);
-        $this->assertTrue($command->toBeRunInBackground());
         $this->assertFalse($command->hasWorkingDirectory());
         $this->assertSame('ps', (string) $command);
     }
@@ -34,20 +22,12 @@ class CommandTest extends TestCase
      */
     public function testThrowWhenEmptyForegroundExecutable()
     {
-        Command::foreground('');
-    }
-
-    /**
-     * @expectedException Innmind\Server\Control\Exception\EmptyExecutableNotAllowed
-     */
-    public function testThrowWhenEmptyBackgroundExecutable()
-    {
-        Command::background('');
+        new Command('');
     }
 
     public function testWithArgument()
     {
-        $command = Command::foreground('echo')
+        $command = (new Command('echo'))
             ->withArgument('foo');
 
         $this->assertInstanceOf(Command::class, $command);
@@ -59,12 +39,12 @@ class CommandTest extends TestCase
      */
     public function testThrowWhenEmptyArgument()
     {
-        Command::foreground('echo')->withArgument('');
+        (new Command('echo'))->withArgument('');
     }
 
     public function testWithOption()
     {
-        $command = Command::foreground('bin/console')
+        $command = (new Command('bin/console'))
             ->withOption('env', 'prod');
 
         $this->assertInstanceOf(Command::class, $command);
@@ -76,12 +56,12 @@ class CommandTest extends TestCase
      */
     public function testThrowWhenEmptyOption()
     {
-        Command::foreground('bin/console')->withOption('');
+        (new Command('bin/console'))->withOption('');
     }
 
     public function testWithShortOption()
     {
-        $command = Command::foreground('bin/console')
+        $command = (new Command('bin/console'))
             ->withShortOption('e', 'prod');
 
         $this->assertInstanceOf(Command::class, $command);
@@ -93,12 +73,12 @@ class CommandTest extends TestCase
      */
     public function testThrowWhenEmptyShortOption()
     {
-        Command::foreground('bin/console')->withShortOption('');
+        (new Command('bin/console'))->withShortOption('');
     }
 
     public function testWithEnvironment()
     {
-        $command = Command::foreground('bin/console')
+        $command = (new Command('bin/console'))
             ->withEnvironment('SYMFONY_ENV', 'prod');
 
         $this->assertInstanceOf(Command::class, $command);
@@ -112,7 +92,7 @@ class CommandTest extends TestCase
 
     public function testWithWorkingDirectory()
     {
-        $command = Command::foreground('bin/console')
+        $command = (new Command('bin/console'))
             ->withWorkingDirectory('/var/www/app');
 
         $this->assertInstanceOf(Command::class, $command);
