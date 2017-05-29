@@ -8,6 +8,9 @@ final class Type
     public const OUTPUT = 'stdout';
     public const ERROR = 'stderr';
 
+    private static $output;
+    private static $error;
+
     private $value;
 
     private function __construct(string $type)
@@ -17,12 +20,12 @@ final class Type
 
     public static function output(): self
     {
-        return new self(self::OUTPUT);
+        return self::$output ?? self::$output = new self(self::OUTPUT);
     }
 
     public static function error(): self
     {
-        return new self(self::ERROR);
+        return self::$error ?? self::$error =  new self(self::ERROR);
     }
 
     public function __toString(): string
