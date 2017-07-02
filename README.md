@@ -46,3 +46,26 @@ $server
         Signal::kill()
     );
 ```
+
+### Remote server control
+
+```php
+use Innmind\Server\Control\Servers\Remote;
+use Innmind\Url\Authority\{
+    Host,
+    Port,
+    UserInformation\User
+};
+
+$server = new Remote(
+    $server,
+    new User('john'),
+    new Host('example.com'),
+    new Port(42)
+);
+$server->processes()->execute(new Command('ls'));
+```
+
+This will run `ssh -p 42 john@example.com ls`.
+
+**Important**: specifying environment variables, a working directory or an input stream will not be taken into account on the remote server.
