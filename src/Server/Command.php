@@ -23,6 +23,7 @@ final class Command
     private $environment;
     private $workingDirectory;
     private $input;
+    private $background = false;
 
     public function __construct(string $executable)
     {
@@ -33,6 +34,30 @@ final class Command
         $this->executable = $executable;
         $this->parameters = new Stream('object');
         $this->environment = new Map('string', 'string');
+    }
+
+    /**
+     * Will run the command in the background and will survive even if the
+     * current process ends
+     *
+     * You will not have access to the process output nor if the process is
+     * still running
+     */
+    public static function background(string $executable): self
+    {
+        $self = new self($executable);
+        $self->background = true;
+
+        return $self;
+    }
+
+    /**
+     * Will run the command in a non blocking way but will be killed when the
+     * current process ends
+     */
+    public static function foreground(string $executable): self
+    {
+        return new self($executable);
     }
 
     public function withArgument(string $value): self
@@ -114,6 +139,11 @@ final class Command
     public function input(): StreamInterface
     {
         return $this->input;
+    }
+
+    public function toBeRunInBackground(): bool
+    {
+        return $this->background;
     }
 
     public function __toString(): string

@@ -11,16 +11,16 @@ use Innmind\Server\Control\{
     Server\Process\Output\GeneratedOutput,
     Exception\ProcessStillRunning
 };
-use Symfony\Component\Process\Process as SfProcess;
+use Symfony\Component\Process\Process;
 
-final class Process implements ProcessInterface
+final class ForegroundProcess implements ProcessInterface
 {
     private $process;
     private $pid;
     private $output;
     private $exitCode;
 
-    public function __construct(SfProcess $process)
+    public function __construct(Process $process)
     {
         $this->process = $process;
         $this->output = new GeneratedOutput($process->getIterator());

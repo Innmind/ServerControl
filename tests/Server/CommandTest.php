@@ -16,7 +16,22 @@ class CommandTest extends TestCase
 
         $this->assertFalse($command->hasWorkingDirectory());
         $this->assertFalse($command->hasInput());
+        $this->assertFalse($command->toBeRunInBackground());
         $this->assertSame('ps', (string) $command);
+    }
+
+    public function testBackground()
+    {
+        $command = Command::background('ps');
+
+        $this->assertTrue($command->toBeRunInBackground());
+    }
+
+    public function testForeground()
+    {
+        $command = Command::foreground('ps');
+
+        $this->assertFalse($command->toBeRunInBackground());
     }
 
     /**

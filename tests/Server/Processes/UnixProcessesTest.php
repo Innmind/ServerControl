@@ -7,7 +7,8 @@ use Innmind\Server\Control\Server\{
     Processes\UnixProcesses,
     Processes,
     Command,
-    Process,
+    Process\ForegroundProcess,
+    Process\BackgroundProcess,
     Signal
 };
 use Innmind\Filesystem\Stream\StringStream;
@@ -29,9 +30,21 @@ class UnixProcessesTest extends TestCase
         );
 
         $this->assertTrue($process->isRunning());
-        $this->assertInstanceOf(Process::class, $process);
+        $this->assertInstanceOf(ForegroundProcess::class, $process);
         $process->wait();
         $this->assertTrue((time() - $start) >= 6);
+    }
+
+    public function testExecuteInBackground()
+    {
+        $processes = new UnixProcesses;
+        $start = time();
+        $process = $processes->execute(
+            Command::background('php')->withArgument('fixtures/slow.php')
+        );
+
+        $this->assertInstanceOf(BackgroundProcess::class, $process);
+        $this->assertTrue((time() - $start) < 2);
     }
 
     public function testExecuteWithInput()
