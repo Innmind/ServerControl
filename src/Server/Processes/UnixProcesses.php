@@ -8,6 +8,7 @@ use Innmind\Server\Control\Server\{
     Command,
     Process,
     Process\Pid,
+    Process\ForegroundProcess,
     Signal,
     Process\Input\Bridge
 };
@@ -37,7 +38,7 @@ final class UnixProcesses implements Processes
         $process->setTimeout(0);
         $process->start();
 
-        return new Process\Process($process);
+        return new ForegroundProcess($process);
     }
 
     public function kill(Pid $pid, Signal $signal): Processes
