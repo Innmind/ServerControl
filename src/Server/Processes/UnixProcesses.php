@@ -34,6 +34,7 @@ final class UnixProcesses implements Processes
             $command->hasInput() ?
                 new Bridge($command->input()) : null
         );
+        $process->setTimeout(0);
         $process->start();
 
         return new Process\Process($process);
