@@ -9,6 +9,7 @@ use Innmind\Server\Control\Server\{
     Process,
     Process\Pid,
     Process\ForegroundProcess,
+    Process\BackgroundProcess,
     Signal,
     Process\Input\Bridge
 };
@@ -19,7 +20,7 @@ final class UnixProcesses implements Processes
     public function execute(Command $command): Process
     {
         $process = new SfProcess(
-            (string) $command,
+            (string) $command.($command->toBeRunInBackground() ? ' &' : ''),
             $command->hasWorkingDirectory() ?
                 $command->workingDirectory() : null,
             $command
@@ -37,6 +38,10 @@ final class UnixProcesses implements Processes
         );
         $process->setTimeout(0);
         $process->start();
+
+        if ($command->toBeRunInBackground()) {
+            return new BackgroundProcess($process);
+        }
 
         return new ForegroundProcess($process);
     }
