@@ -5,9 +5,6 @@ namespace Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\{
     Server\Process as ProcessInterface,
-    Server\Process\Pid,
-    Server\Process\ExitCode,
-    Server\Process\Output,
     Server\Process\Output\StaticOutput,
     Server\Process\Output\Type,
     Exception\BackgroundProcessInformationNotAvailable
