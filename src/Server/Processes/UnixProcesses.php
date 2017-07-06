@@ -8,6 +8,8 @@ use Innmind\Server\Control\Server\{
     Command,
     Process,
     Process\Pid,
+    Process\ForegroundProcess,
+    Process\BackgroundProcess,
     Signal,
     Process\Input\Bridge
 };
@@ -18,7 +20,7 @@ final class UnixProcesses implements Processes
     public function execute(Command $command): Process
     {
         $process = new SfProcess(
-            (string) $command,
+            (string) $command.($command->toBeRunInBackground() ? ' &' : ''),
             $command->hasWorkingDirectory() ?
                 $command->workingDirectory() : null,
             $command
@@ -34,9 +36,14 @@ final class UnixProcesses implements Processes
             $command->hasInput() ?
                 new Bridge($command->input()) : null
         );
+        $process->setTimeout(0);
         $process->start();
 
-        return new Process\Process($process);
+        if ($command->toBeRunInBackground()) {
+            return new BackgroundProcess($process);
+        }
+
+        return new ForegroundProcess($process);
     }
 
     public function kill(Pid $pid, Signal $signal): Processes

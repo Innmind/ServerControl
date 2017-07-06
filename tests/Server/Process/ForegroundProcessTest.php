@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\{
-    Server\Process\Process,
+    Server\Process\ForegroundProcess,
     Server\Process as ProcessInterface,
     Server\Process\Pid,
     Server\Process\ExitCode,
@@ -16,13 +16,13 @@ use Innmind\Immutable\Str;
 use Symfony\Component\Process\Process as SfProcess;
 use PHPUnit\Framework\TestCase;
 
-class ProcessTest extends TestCase
+class ForegroundProcessTest extends TestCase
 {
     public function testInterface()
     {
         $this->assertInstanceOf(
             ProcessInterface::class,
-            new Process(
+            new ForegroundProcess(
                 new SfProcess('ps')
             )
         );
@@ -32,7 +32,7 @@ class ProcessTest extends TestCase
     {
         $ps = new SfProcess('ps');
         $ps->start();
-        $process = new Process($ps);
+        $process = new ForegroundProcess($ps);
 
         $this->assertInstanceOf(Pid::class, $process->pid());
         $this->assertTrue($process->pid()->toInt() >= 2);
@@ -42,7 +42,7 @@ class ProcessTest extends TestCase
     {
         $slow = new SfProcess('php fixtures/slow.php');
         $slow->start();
-        $process = new Process($slow);
+        $process = new ForegroundProcess($slow);
 
         $this->assertInstanceOf(Output::class, $process->output());
         $start = time();
@@ -65,7 +65,7 @@ class ProcessTest extends TestCase
     {
         $slow = new SfProcess('php fixtures/slow.php');
         $slow->start();
-        $process = new Process($slow);
+        $process = new ForegroundProcess($slow);
 
         try {
             $process->exitCode();
@@ -84,7 +84,7 @@ class ProcessTest extends TestCase
     {
         $slow = new SfProcess('php fixtures/fails.php');
         $slow->start();
-        $process = new Process($slow);
+        $process = new ForegroundProcess($slow);
 
         sleep(1);
 
@@ -95,7 +95,7 @@ class ProcessTest extends TestCase
     {
         $slow = new SfProcess('php fixtures/slow.php');
         $slow->start();
-        $process = new Process($slow);
+        $process = new ForegroundProcess($slow);
         $this->assertSame($process, $process->wait());
 
         $this->assertFalse($process->isRunning());
@@ -105,7 +105,7 @@ class ProcessTest extends TestCase
     {
         $slow = new SfProcess('php fixtures/slow.php');
         $slow->start();
-        $process = new Process($slow);
+        $process = new ForegroundProcess($slow);
 
         $this->assertTrue($process->isRunning());
         sleep(7);

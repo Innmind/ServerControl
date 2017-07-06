@@ -37,8 +37,7 @@ final class GeneratedOutput implements Output
         }
 
         while ($this->generator->valid()) {
-            $type = $this->type($this->generator->key());
-            $data = new Str((string) $this->generator->current());
+            [$type, $data] = $this->read();
             $this->output = $this->output->put($data, $type);
             $function($data, $type);
 
@@ -58,8 +57,7 @@ final class GeneratedOutput implements Output
         }
 
         while ($this->generator->valid()) {
-            $type = $this->type($this->generator->key());
-            $data = new Str((string) $this->generator->current());
+            [$type, $data] = $this->read();
             $this->output = $this->output->put($data, $type);
             $carry = $reducer($carry, $data, $type);
 
@@ -80,8 +78,7 @@ final class GeneratedOutput implements Output
         $output = $this->output->clear();
 
         while ($this->generator->valid()) {
-            $type = $this->type($this->generator->key());
-            $data = new Str((string) $this->generator->current());
+            [$type, $data] = $this->read();
             $this->output = $this->output->put($data, $type);
 
             if ($predicate($data, $type) === true) {
@@ -116,8 +113,7 @@ final class GeneratedOutput implements Output
         $output = null;
 
         while ($this->generator->valid()) {
-            $type = $this->type($this->generator->key());
-            $data = new Str((string) $this->generator->current());
+            [$type, $data] = $this->read();
             $this->output = $this->output->put($data, $type);
             $discriminent = $discriminator($data, $type);
 
@@ -183,8 +179,7 @@ final class GeneratedOutput implements Output
             ->put(false, $this->output->clear());
 
         while ($this->generator->valid()) {
-            $type = $this->type($this->generator->key());
-            $data = new Str((string) $this->generator->current());
+            [$type, $data] = $this->read();
 
             $result = $predicate($data, $type);
 
@@ -221,5 +216,16 @@ final class GeneratedOutput implements Output
     private function type(string $type): Type
     {
         return $type === Process::OUT ? Type::output() : Type::error();
+    }
+
+    /**
+     * @return [Type, Str]
+     */
+    private function read(): array
+    {
+        return [
+            $this->type($this->generator->key()),
+            new Str((string) $this->generator->current()),
+        ];
     }
 }
