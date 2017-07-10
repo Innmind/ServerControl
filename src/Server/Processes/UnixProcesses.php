@@ -36,8 +36,10 @@ final class UnixProcesses implements Processes
             $command->hasInput() ?
                 new Bridge($command->input()) : null
         );
-        $process->setTimeout(0);
-        $process->start();
+        $process
+            ->inheritEnvironmentVariables()
+            ->setTimeout(0)
+            ->start();
 
         if ($command->toBeRunInBackground()) {
             return new BackgroundProcess($process);
