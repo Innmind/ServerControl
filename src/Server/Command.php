@@ -9,7 +9,7 @@ use Innmind\Server\Control\{
     Exception\EmptyExecutableNotAllowed,
     Exception\EmptyEnvironmentKeyNotAllowed
 };
-use Innmind\Filesystem\StreamInterface;
+use Innmind\Stream\Readable;
 use Innmind\Immutable\{
     Stream,
     Map,
@@ -108,7 +108,7 @@ final class Command
         return $self;
     }
 
-    public function withInput(StreamInterface $input): self
+    public function withInput(Readable $input): self
     {
         $self = clone $this;
         $self->input = $input;
@@ -133,10 +133,10 @@ final class Command
 
     public function hasInput(): bool
     {
-        return $this->input instanceof StreamInterface;
+        return $this->input instanceof Readable;
     }
 
-    public function input(): StreamInterface
+    public function input(): Readable
     {
         return $this->input;
     }
