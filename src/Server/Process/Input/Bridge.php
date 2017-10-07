@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process\Input;
 
-use Innmind\Filesystem\StreamInterface;
+use Innmind\Stream\Readable;
 
 final class Bridge implements \Iterator
 {
@@ -11,7 +11,7 @@ final class Bridge implements \Iterator
 
     private $stream;
 
-    public function __construct(StreamInterface $stream)
+    public function __construct(Readable $stream)
     {
         $this->stream = $stream;
     }
@@ -22,12 +22,12 @@ final class Bridge implements \Iterator
         $text = $this->stream->read(self::CHUNK);
         $this->stream->seek($position);
 
-        return $text;
+        return (string) $text;
     }
 
     public function key(): int
     {
-        return $this->stream->position();
+        return $this->stream->position()->toInt();
     }
 
     public function next(): void
@@ -42,6 +42,6 @@ final class Bridge implements \Iterator
 
     public function valid(): bool
     {
-        return !$this->stream->isEof();
+        return !$this->stream->end();
     }
 }

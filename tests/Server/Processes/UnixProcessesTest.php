@@ -11,7 +11,7 @@ use Innmind\Server\Control\Server\{
     Process\BackgroundProcess,
     Signal
 };
-use Innmind\Filesystem\Stream\StringStream;
+use Innmind\Stream\Readable\Stream;
 use PHPUnit\Framework\TestCase;
 
 class UnixProcessesTest extends TestCase
@@ -51,11 +51,14 @@ class UnixProcessesTest extends TestCase
     {
         $processes = new UnixProcesses;
         $process = $processes->execute(
-            (new Command('cat'))->withInput(new StringStream('foobar'))
+            (new Command('cat'))->withInput(new Stream(fopen('fixtures/symfony.log', 'r')))
         );
         $process->wait();
 
-        $this->assertSame('foobar', (string) $process->output());
+        $this->assertSame(
+            file_get_contents('fixtures/symfony.log'),
+            (string) $process->output()
+        );
     }
 
     public function testKill()

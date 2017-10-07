@@ -4,14 +4,14 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server\Process\Input;
 
 use Innmind\Server\Control\Server\Process\Input\Bridge;
-use Innmind\Filesystem\Stream\Stream;
+use Innmind\Stream\Readable\Stream;
 use PHPUnit\Framework\TestCase;
 
 class BridgeTest extends TestCase
 {
     public function testInterface()
     {
-        $log = Stream::fromPath('fixtures/symfony.log');
+        $log = new Stream(fopen('fixtures/symfony.log', 'r'));
         $bridge = new Bridge($log);
 
         $this->assertInstanceOf(\Iterator::class, $bridge);
@@ -29,6 +29,6 @@ class BridgeTest extends TestCase
         }
 
         $this->assertFalse($bridge->valid());
-        $this->assertSame($log->size(), $bridge->key());
+        $this->assertSame($log->size()->toInt(), $bridge->key());
     }
 }

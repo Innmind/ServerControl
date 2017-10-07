@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\Server\Command;
-use Innmind\Filesystem\StreamInterface;
+use Innmind\Stream\Readable;
 use Innmind\Immutable\MapInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -122,7 +122,7 @@ class CommandTest extends TestCase
     {
         $command = (new Command('bin/console'))
             ->withInput(
-                $input = $this->createMock(StreamInterface::class)
+                $input = $this->createMock(Readable::class)
             );
 
         $this->assertInstanceOf(Command::class, $command);
