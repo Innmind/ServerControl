@@ -46,7 +46,7 @@ class RemoteProcessesTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function(Command $command): bool {
-                return (string) $command === 'ssh foo@example.com ls -l';
+                return (string) $command === "ssh 'foo@example.com' 'ls '\''-l'\'''";
             }))
             ->willReturn($process = $this->createMock(Process::class));
 
@@ -70,7 +70,7 @@ class RemoteProcessesTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function(Command $command): bool {
-                return (string) $command === 'ssh -p 24 foo@example.com ls -l';
+                return (string) $command === "ssh '-p' '24' 'foo@example.com' 'ls '\''-l'\'''";
             }))
             ->willReturn($process = $this->createMock(Process::class));
 
@@ -93,7 +93,7 @@ class RemoteProcessesTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function(Command $command): bool {
-                return (string) $command === 'ssh foo@example.com kill -9 42';
+                return (string) $command === "ssh 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''";
             }));
 
         $this->assertSame(
@@ -114,7 +114,7 @@ class RemoteProcessesTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function(Command $command): bool {
-                return (string) $command === 'ssh -p 24 foo@example.com kill -9 42';
+                return (string) $command === "ssh '-p' '24' 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''";
             }));
 
         $this->assertSame(
