@@ -15,7 +15,7 @@ final class Argument
             throw new EmptyArgumentNotAllowed;
         }
 
-        $this->value = $value;
+        $this->value = (string) new Str($value);
     }
 
     public function __toString(): string

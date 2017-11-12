@@ -34,22 +34,32 @@ final class Option
 
     public function __toString(): string
     {
-        $string = '-';
-
         if ($this->long) {
-            $string .= '-';
+            return $this->longString();
         }
 
-        $string .= $this->key;
+        return $this->shortString();
+    }
+
+    private function longString(): string
+    {
+        $string = '--'.$this->key;
 
         if (is_string($this->value)) {
-            $string .= sprintf(
-                '%s%s',
-                $this->long ? '=' : ' ',
-                $this->value
-            );
+            $string .= '='.$this->value;
         }
 
-        return $string;
+        return (string) new Str($string);
+    }
+
+    private function shortString(): string
+    {
+        $string = new Str('-'.$this->key);
+
+        if (is_string($this->value)) {
+            $string .= ' '.new Str($this->value);
+        }
+
+        return (string) $string;
     }
 }

@@ -12,7 +12,7 @@ class ArgumentTest extends TestCase
     {
         $argument = new Argument('some value');
 
-        $this->assertSame('some value', (string) $argument);
+        $this->assertSame("'some value'", (string) $argument);
     }
 
     /**
