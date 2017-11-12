@@ -13,7 +13,8 @@ final class Option
 
     private function __construct(bool $long, string $key, string $value = null)
     {
-        if (empty($key)) {
+
+        if ($key === '') {
             throw new EmptyOptionNotAllowed;
         }
 
