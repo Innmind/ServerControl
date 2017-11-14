@@ -13,12 +13,12 @@ class OptionTest extends TestCase
         $option = Option::short('e');
 
         $this->assertInstanceOf(Option::class, $option);
-        $this->assertSame('-e', (string) $option);
+        $this->assertSame("'-e'", (string) $option);
 
         $option = Option::short('e', 'dev');
 
         $this->assertInstanceOf(Option::class, $option);
-        $this->assertSame('-e dev', (string) $option);
+        $this->assertSame("'-e' 'dev'", (string) $option);
     }
 
     public function testLong()
@@ -26,12 +26,12 @@ class OptionTest extends TestCase
         $option = Option::long('env');
 
         $this->assertInstanceOf(Option::class, $option);
-        $this->assertSame('--env', (string) $option);
+        $this->assertSame("'--env'", (string) $option);
 
         $option = Option::long('env', 'dev');
 
         $this->assertInstanceOf(Option::class, $option);
-        $this->assertSame('--env=dev', (string) $option);
+        $this->assertSame("'--env=dev'", (string) $option);
     }
 
     /**

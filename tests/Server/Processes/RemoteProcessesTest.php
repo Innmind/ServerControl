@@ -46,7 +46,7 @@ class RemoteProcessesTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function(Command $command): bool {
-                return (string) $command === 'ssh foo@example.com ls -l';
+                return (string) $command === "ssh 'foo@example.com' 'ls '\''-l'\'''";
             }))
             ->willReturn($process = $this->createMock(Process::class));
 
@@ -70,7 +70,7 @@ class RemoteProcessesTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function(Command $command): bool {
-                return (string) $command === 'ssh -p 24 foo@example.com ls -l';
+                return (string) $command === "ssh '-p' '24' 'foo@example.com' 'ls '\''-l'\'''";
             }))
             ->willReturn($process = $this->createMock(Process::class));
 
@@ -78,6 +78,31 @@ class RemoteProcessesTest extends TestCase
             $process,
             $remote->execute(
                 (new Command('ls'))->withShortOption('l')
+            )
+        );
+    }
+
+    public function testExecuteWithWorkingDirectory()
+    {
+        $remote = new RemoteProcesses(
+            $processes = $this->createMock(Processes::class),
+            new User('foo'),
+            new Host('example.com')
+        );
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function(Command $command): bool {
+                return (string) $command === "ssh 'foo@example.com' 'cd /tmp/foo && ls '\''-l'\'''";
+            }))
+            ->willReturn($process = $this->createMock(Process::class));
+
+        $this->assertSame(
+            $process,
+            $remote->execute(
+                (new Command('ls'))
+                    ->withShortOption('l')
+                    ->withWorkingDirectory('/tmp/foo')
             )
         );
     }
@@ -93,7 +118,7 @@ class RemoteProcessesTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function(Command $command): bool {
-                return (string) $command === 'ssh foo@example.com kill -9 42';
+                return (string) $command === "ssh 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''";
             }));
 
         $this->assertSame(
@@ -114,7 +139,7 @@ class RemoteProcessesTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function(Command $command): bool {
-                return (string) $command === 'ssh -p 24 foo@example.com kill -9 42';
+                return (string) $command === "ssh '-p' '24' 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''";
             }));
 
         $this->assertSame(

@@ -11,11 +11,11 @@ final class Argument
 
     public function __construct(string $value)
     {
-        if (empty($value)) {
+        if ($value === '') {
             throw new EmptyArgumentNotAllowed;
         }
 
-        $this->value = $value;
+        $this->value = (string) new Str($value);
     }
 
     public function __toString(): string

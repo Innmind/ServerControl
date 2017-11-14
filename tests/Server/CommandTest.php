@@ -48,7 +48,7 @@ class CommandTest extends TestCase
             ->withArgument('foo');
 
         $this->assertInstanceOf(Command::class, $command);
-        $this->assertSame('echo foo', (string) $command);
+        $this->assertSame("echo 'foo'", (string) $command);
     }
 
     /**
@@ -65,7 +65,7 @@ class CommandTest extends TestCase
             ->withOption('env', 'prod');
 
         $this->assertInstanceOf(Command::class, $command);
-        $this->assertSame('bin/console --env=prod', (string) $command);
+        $this->assertSame("bin/console '--env=prod'", (string) $command);
     }
 
     /**
@@ -82,7 +82,7 @@ class CommandTest extends TestCase
             ->withShortOption('e', 'prod');
 
         $this->assertInstanceOf(Command::class, $command);
-        $this->assertSame('bin/console -e prod', (string) $command);
+        $this->assertSame("bin/console '-e' 'prod'", (string) $command);
     }
 
     /**
