@@ -19,6 +19,7 @@ class ServerFactoryTest extends TestCase
         }
 
         $this->assertInstanceOf(Server::class, (new ServerFactory)->make());
+        $this->assertInstanceOf(Server::class, ServerFactory::build());
     }
 
     public function testThrowWhenUnsupportedOperatingSystem()
