@@ -20,4 +20,9 @@ final class ServerFactory
 
         throw new UnsupportedOperatingSystem;
     }
+
+    public static function build(): Server
+    {
+        return (new self)->make();
+    }
 }
