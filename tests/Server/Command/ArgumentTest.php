@@ -15,11 +15,8 @@ class ArgumentTest extends TestCase
         $this->assertSame("'some value'", (string) $argument);
     }
 
-    /**
-     * @expectedException Innmind\Server\Control\Exception\EmptyArgumentNotAllowed
-     */
-    public function testThrowWhenEmptyArgument()
+    public function testDoesntThrowWhenEmptyArgument()
     {
-        new Argument('');
+        $this->assertSame("''", (string) new Argument(''));
     }
 }
