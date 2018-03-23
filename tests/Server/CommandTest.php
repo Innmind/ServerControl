@@ -51,12 +51,12 @@ class CommandTest extends TestCase
         $this->assertSame("echo 'foo'", (string) $command);
     }
 
-    /**
-     * @expectedException Innmind\Server\Control\Exception\EmptyArgumentNotAllowed
-     */
-    public function testThrowWhenEmptyArgument()
+    public function testDoesntThrowWhenEmptyArgument()
     {
-        (new Command('echo'))->withArgument('');
+        $this->assertSame(
+            "echo ''",
+            (string) (new Command('echo'))->withArgument('')
+        );
     }
 
     public function testWithOption()
