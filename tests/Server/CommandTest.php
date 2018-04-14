@@ -129,4 +129,40 @@ class CommandTest extends TestCase
         $this->assertTrue($command->hasInput());
         $this->assertSame($input, $command->input());
     }
+
+    public function testOverwrite()
+    {
+        $command = Command::foreground('echo')
+            ->withArgument('bar')
+            ->overwrite('foo.txt');
+
+        $this->assertSame("echo 'bar' > 'foo.txt'", (string) $command);
+    }
+
+    public function testDoesntOverwriteWhenEmptyPath()
+    {
+        $command = Command::foreground('echo')
+            ->withArgument('bar')
+            ->overwrite('');
+
+        $this->assertSame("echo 'bar'", (string) $command);
+    }
+
+    public function testAppend()
+    {
+        $command = Command::foreground('echo')
+            ->withArgument('bar')
+            ->append('foo.txt');
+
+        $this->assertSame("echo 'bar' >> 'foo.txt'", (string) $command);
+    }
+
+    public function testDoesntAppendWhenEmptyPath()
+    {
+        $command = Command::foreground('echo')
+            ->withArgument('bar')
+            ->append('');
+
+        $this->assertSame("echo 'bar'", (string) $command);
+    }
 }
