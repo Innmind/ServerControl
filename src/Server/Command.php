@@ -23,6 +23,7 @@ final class Command
     private $environment;
     private $workingDirectory;
     private $input;
+    private $redirection;
     private $background = false;
 
     public function __construct(string $executable)
@@ -116,6 +117,30 @@ final class Command
         return $self;
     }
 
+    public function overwrite(string $path): self
+    {
+        if (empty($path)) {
+            return $this;
+        }
+
+        $self = clone $this;
+        $self->redirection = '> '.new Argument($path);
+
+        return $self;
+    }
+
+    public function append(string $path): self
+    {
+        if (empty($path)) {
+            return $this;
+        }
+
+        $self = clone $this;
+        $self->redirection = '>> '.new Argument($path);
+
+        return $self;
+    }
+
     public function environment(): MapInterface
     {
         return $this->environment;
@@ -152,6 +177,10 @@ final class Command
 
         if ($this->parameters->size() > 0) {
             $string .= ' '.$this->parameters->join(' ');
+        }
+
+        if (is_string($this->redirection)) {
+            $string .= ' '.$this->redirection;
         }
 
         return $string;
