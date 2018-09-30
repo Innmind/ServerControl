@@ -47,6 +47,22 @@ $server
     );
 ```
 
+### Scripts
+
+Sometimes you may want to run a set of commands on your server. You can easily do so like this:
+
+```php
+use Innmind\Server\Control\Server\Script;
+
+$script = Script::of(
+    'apt-get install php-fpm -y',
+    'service nginx start'
+);
+$script($server);
+```
+
+If any command fails, it will stop the script and raise an exception.
+
 ### Remote server control
 
 ```php
