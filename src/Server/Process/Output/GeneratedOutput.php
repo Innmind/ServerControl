@@ -17,8 +17,6 @@ use Symfony\Component\Process\Process;
 
 final class GeneratedOutput implements Output
 {
-    use TypeDeterminator;
-
     private $generator;
     private $output;
 
@@ -119,7 +117,7 @@ final class GeneratedOutput implements Output
 
             if (is_null($output)) {
                 $output = new Map(
-                    $this->determineType($discriminent),
+                    TypeDeterminator::determine($discriminent),
                     MapInterface::class
                 );
             }
