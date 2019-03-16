@@ -165,4 +165,26 @@ class CommandTest extends TestCase
 
         $this->assertSame("echo 'bar'", (string) $command);
     }
+
+    public function testPipe()
+    {
+        $commandA = Command::foreground('echo')
+            ->withArgument('bar')
+            ->append('foo.txt');
+        $commandB = Command::foreground('cat')
+            ->withArgument('foo.txt');
+        $commandC = Command::foreground('wc')
+            ->overwrite('count.txt');
+
+        $command = $commandA->pipe($commandB)->pipe($commandC);
+
+        $this->assertInstanceOf(Command::class, $command);
+        $this->assertSame("echo 'bar' >> 'foo.txt'", (string) $commandA);
+        $this->assertSame("cat 'foo.txt'", (string) $commandB);
+        $this->assertSame("wc > 'count.txt'", (string) $commandC);
+        $this->assertSame(
+            "echo 'bar' >> 'foo.txt' | 'cat' 'foo.txt' | 'wc' > 'count.txt'",
+            (string) $command
+        );
+    }
 }
