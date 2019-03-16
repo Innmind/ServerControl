@@ -8,6 +8,7 @@ use Innmind\Server\Control\{
     Server\Command\Option,
     Server\Command\Overwrite,
     Server\Command\Append,
+    Server\Command\Pipe,
     Exception\LogicException,
     Exception\EmptyExecutableNotAllowed,
     Exception\EmptyEnvironmentKeyNotAllowed
@@ -144,6 +145,25 @@ final class Command
 
         $self = clone $this;
         $self->redirection = $argument;
+
+        return $self;
+    }
+
+    public function pipe(self $command): self
+    {
+        $self = clone $this;
+
+        if ($this->redirection) {
+            $self->parameters = $this->parameters->add($this->redirection);
+        }
+
+        $self->parameters = $self
+            ->parameters
+            ->add(new Pipe)
+            ->add(new Argument($command->executable))
+            ->append($command->parameters);
+        $self->environment = $this->environment->merge($command->environment);
+        $self->redirection = $command->redirection;
 
         return $self;
     }
