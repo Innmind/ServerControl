@@ -6,6 +6,9 @@ namespace Innmind\Server\Control\Server;
 use Innmind\Server\Control\{
     Server\Command\Argument,
     Server\Command\Option,
+    Server\Command\Overwrite,
+    Server\Command\Append,
+    Exception\LogicException,
     Exception\EmptyExecutableNotAllowed,
     Exception\EmptyEnvironmentKeyNotAllowed
 };
@@ -119,24 +122,28 @@ final class Command
 
     public function overwrite(string $path): self
     {
-        if (empty($path)) {
+        try {
+            $argument = new Overwrite($path);
+        } catch (LogicException $e) {
             return $this;
         }
 
         $self = clone $this;
-        $self->redirection = '> '.new Argument($path);
+        $self->redirection = $argument;
 
         return $self;
     }
 
     public function append(string $path): self
     {
-        if (empty($path)) {
+        try {
+            $argument = new Append($path);
+        } catch (LogicException $e) {
             return $this;
         }
 
         $self = clone $this;
-        $self->redirection = '>> '.new Argument($path);
+        $self->redirection = $argument;
 
         return $self;
     }
@@ -179,7 +186,7 @@ final class Command
             $string .= ' '.$this->parameters->join(' ');
         }
 
-        if (is_string($this->redirection)) {
+        if ($this->redirection) {
             $string .= ' '.$this->redirection;
         }
 
