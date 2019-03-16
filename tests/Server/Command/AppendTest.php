@@ -5,7 +5,7 @@ namespace Tests\Innmind\Server\Control\Server\Command;
 
 use Innmind\Server\Control\{
     Server\Command\Append,
-    Exception\LogicException,
+    Exception\LogicException
 };
 use PHPUnit\Framework\TestCase;
 
