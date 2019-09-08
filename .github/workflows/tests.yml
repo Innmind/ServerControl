@@ -23,3 +23,5 @@ jobs:
         run: composer validate
       - name: PHPUnit
         run: vendor/bin/phpunit --coverage-clover=coverage.clover
+      - name: Scrutinizer
+        run: if [ "$TRAVIS_PHP_VERSION" != "nightly" ]; then wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover coverage.clover; fi
