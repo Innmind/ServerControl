@@ -16,7 +16,7 @@ jobs:
         uses: shivammathur/setup-php@master
         with:
           php-version: ${{ matrix.php-versions }}
-          extension-csv: xdebug,intl,mbstring,fileinfo,curl
+          extension-csv: xdebug,intl,mbstring,fileinfo,curl,dom
       - name: Install dependencies
         run: composer install --no-progress
       - name: Validate composer.json
