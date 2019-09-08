@@ -39,7 +39,7 @@ final class Str
             $string = $string->replace("\0", '?');
         }
 
-        if (!$string->macthes('/[\/()%!^"<>&|\s]/')) {
+        if (!$string->matches('/[\/()%!^"<>&|\s]/')) {
             return $string;
         }
 
