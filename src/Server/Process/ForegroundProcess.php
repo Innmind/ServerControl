@@ -50,6 +50,7 @@ final class ForegroundProcess implements ProcessInterface
     public function wait(): ProcessInterface
     {
         $this->process->wait();
+        $this->process->stop();
 
         return $this;
     }
