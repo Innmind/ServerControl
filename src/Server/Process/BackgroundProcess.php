@@ -23,6 +23,7 @@ final class BackgroundProcess implements ProcessInterface
     {
         //read process pipes once otherwise the process will be killed
         $process->getIterator()->next();
+        $process->stop();
         $this->output = new StaticOutput(
             new Map(Str::class, Type::class)
         );
