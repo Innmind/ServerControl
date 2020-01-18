@@ -49,7 +49,7 @@ class BackgroundProcessTest extends TestCase
 
         $this->assertInstanceOf(StaticOutput::class, $process->output());
         $start = time();
-        $this->assertSame('', (string) $process->output());
+        $this->assertSame('', $process->output()->toString());
         $this->assertTrue((time() - $start) < 1);
     }
 

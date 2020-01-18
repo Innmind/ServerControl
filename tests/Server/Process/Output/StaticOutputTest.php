@@ -94,8 +94,8 @@ class StaticOutputTest extends TestCase
 
         $this->assertInstanceOf(Output::class, $output2);
         $this->assertNotSame($output, $output2);
-        $this->assertSame('012', (string) $output);
-        $this->assertSame('02', (string) $output2);
+        $this->assertSame('012', $output->toString());
+        $this->assertSame('02', $output2->toString());
     }
 
     public function testGroupBy()
@@ -114,8 +114,8 @@ class StaticOutputTest extends TestCase
         $this->assertSame('int', (string) $groups->keyType());
         $this->assertSame(Output::class, (string) $groups->valueType());
         $this->assertCount(2, $groups);
-        $this->assertSame('02', (string) $groups->get(0));
-        $this->assertSame('1', (string) $groups->get(1));
+        $this->assertSame('02', $groups->get(0)->toString());
+        $this->assertSame('1', $groups->get(1)->toString());
     }
 
     public function testPartition()
@@ -134,8 +134,8 @@ class StaticOutputTest extends TestCase
         $this->assertSame('bool', (string) $partitions->keyType());
         $this->assertSame(Output::class, (string) $partitions->valueType());
         $this->assertCount(2, $partitions);
-        $this->assertSame('02', (string) $partitions->get(true));
-        $this->assertSame('1', (string) $partitions->get(false));
+        $this->assertSame('02', $partitions->get(true)->toString());
+        $this->assertSame('1', $partitions->get(false)->toString());
     }
 
     public function testStringCast()
@@ -147,6 +147,6 @@ class StaticOutputTest extends TestCase
                 ->put(new Str('2'), Type::output())
         );
 
-        $this->assertSame('012', (string) $output);
+        $this->assertSame('012', $output->toString());
     }
 }

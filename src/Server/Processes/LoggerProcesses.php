@@ -28,7 +28,7 @@ final class LoggerProcesses implements Processes
     public function execute(Command $command): Process
     {
         $this->logger->info('About to execute a command', [
-            'command' => $command,
+            'command' => $command->toString(),
             'workingDirectory' => $command->hasWorkingDirectory() ? $command->workingDirectory() : null
         ]);
 

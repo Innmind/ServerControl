@@ -6,7 +6,7 @@ namespace Innmind\Server\Control\Server\Command;
 
 final class Pipe
 {
-    public function __toString(): string
+    public function toString(): string
     {
         return '|';
     }

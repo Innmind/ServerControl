@@ -21,7 +21,7 @@ class CommandTest extends TestCase
         $this->assertFalse($command->hasWorkingDirectory());
         $this->assertFalse($command->hasInput());
         $this->assertFalse($command->toBeRunInBackground());
-        $this->assertSame('ps', (string) $command);
+        $this->assertSame('ps', $command->toString());
     }
 
     public function testBackground()
@@ -51,14 +51,14 @@ class CommandTest extends TestCase
             ->withArgument('foo');
 
         $this->assertInstanceOf(Command::class, $command);
-        $this->assertSame("echo 'foo'", (string) $command);
+        $this->assertSame("echo 'foo'", $command->toString());
     }
 
     public function testDoesntThrowWhenEmptyArgument()
     {
         $this->assertSame(
             "echo ''",
-            (string) (new Command('echo'))->withArgument('')
+            (new Command('echo'))->withArgument('')->toString()
         );
     }
 
@@ -68,7 +68,7 @@ class CommandTest extends TestCase
             ->withOption('env', 'prod');
 
         $this->assertInstanceOf(Command::class, $command);
-        $this->assertSame("bin/console '--env=prod'", (string) $command);
+        $this->assertSame("bin/console '--env=prod'", $command->toString());
     }
 
     public function testThrowWhenEmptyOption()
@@ -84,7 +84,7 @@ class CommandTest extends TestCase
             ->withShortOption('e', 'prod');
 
         $this->assertInstanceOf(Command::class, $command);
-        $this->assertSame("bin/console '-e' 'prod'", (string) $command);
+        $this->assertSame("bin/console '-e' 'prod'", $command->toString());
     }
 
     public function testThrowWhenEmptyShortOption()
@@ -100,7 +100,7 @@ class CommandTest extends TestCase
             ->withEnvironment('SYMFONY_ENV', 'prod');
 
         $this->assertInstanceOf(Command::class, $command);
-        $this->assertSame('bin/console', (string) $command);
+        $this->assertSame('bin/console', $command->toString());
         $this->assertInstanceOf(MapInterface::class, $command->environment());
         $this->assertSame('string', (string) $command->environment()->keyType());
         $this->assertSame('string', (string) $command->environment()->valueType());
@@ -115,7 +115,7 @@ class CommandTest extends TestCase
 
         $this->assertInstanceOf(Command::class, $command);
         $this->assertTrue($command->hasWorkingDirectory());
-        $this->assertSame('bin/console', (string) $command);
+        $this->assertSame('bin/console', $command->toString());
         $this->assertSame('/var/www/app', $command->workingDirectory());
     }
 
@@ -137,7 +137,7 @@ class CommandTest extends TestCase
             ->withArgument('bar')
             ->overwrite('foo.txt');
 
-        $this->assertSame("echo 'bar' > 'foo.txt'", (string) $command);
+        $this->assertSame("echo 'bar' > 'foo.txt'", $command->toString());
     }
 
     public function testDoesntOverwriteWhenEmptyPath()
@@ -146,7 +146,7 @@ class CommandTest extends TestCase
             ->withArgument('bar')
             ->overwrite('');
 
-        $this->assertSame("echo 'bar'", (string) $command);
+        $this->assertSame("echo 'bar'", $command->toString());
     }
 
     public function testAppend()
@@ -155,7 +155,7 @@ class CommandTest extends TestCase
             ->withArgument('bar')
             ->append('foo.txt');
 
-        $this->assertSame("echo 'bar' >> 'foo.txt'", (string) $command);
+        $this->assertSame("echo 'bar' >> 'foo.txt'", $command->toString());
     }
 
     public function testDoesntAppendWhenEmptyPath()
@@ -164,7 +164,7 @@ class CommandTest extends TestCase
             ->withArgument('bar')
             ->append('');
 
-        $this->assertSame("echo 'bar'", (string) $command);
+        $this->assertSame("echo 'bar'", $command->toString());
     }
 
     public function testPipe()
@@ -180,12 +180,12 @@ class CommandTest extends TestCase
         $command = $commandA->pipe($commandB)->pipe($commandC);
 
         $this->assertInstanceOf(Command::class, $command);
-        $this->assertSame("echo 'bar' >> 'foo.txt'", (string) $commandA);
-        $this->assertSame("cat 'foo.txt'", (string) $commandB);
-        $this->assertSame("wc > 'count.txt'", (string) $commandC);
+        $this->assertSame("echo 'bar' >> 'foo.txt'", $commandA->toString());
+        $this->assertSame("cat 'foo.txt'", $commandB->toString());
+        $this->assertSame("wc > 'count.txt'", $commandC->toString());
         $this->assertSame(
             "echo 'bar' >> 'foo.txt' | 'cat' 'foo.txt' | 'wc' > 'count.txt'",
-            (string) $command
+            $command->toString()
         );
     }
 }

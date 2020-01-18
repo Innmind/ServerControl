@@ -197,7 +197,7 @@ final class GeneratedOutput implements Output
         );
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         if (!$this->loaded()) {
             $this->foreach(function(){}); //load the whole thing

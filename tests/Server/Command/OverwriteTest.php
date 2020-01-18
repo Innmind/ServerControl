@@ -15,7 +15,7 @@ class OverwriteTest extends TestCase
     {
         $argument = new Overwrite('some value');
 
-        $this->assertSame("> 'some value'", (string) $argument);
+        $this->assertSame("> 'some value'", $argument->toString());
     }
 
     public function testThrowWhenEmptyArgument()

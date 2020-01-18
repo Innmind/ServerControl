@@ -26,5 +26,5 @@ interface Output
      * @return MapInterface<bool, self>
      */
     public function partition(callable $predicate): MapInterface;
-    public function __toString(): string;
+    public function toString(): string;
 }

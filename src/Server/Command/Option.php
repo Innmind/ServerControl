@@ -33,7 +33,7 @@ final class Option
         return new self(false, $key, $value);
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         if ($this->long) {
             return $this->longString();
@@ -50,17 +50,17 @@ final class Option
             $string .= '='.$this->value;
         }
 
-        return (string) new Str($string);
+        return (new Str($string))->toString();
     }
 
     private function shortString(): string
     {
-        $string = new Str('-'.$this->key);
+        $string = (new Str('-'.$this->key))->toString();
 
         if (is_string($this->value)) {
-            $string .= ' '.new Str($this->value);
+            $string .= ' '.(new Str($this->value))->toString();
         }
 
-        return (string) $string;
+        return $string;
     }
 }

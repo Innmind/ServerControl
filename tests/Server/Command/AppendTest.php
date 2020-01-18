@@ -15,7 +15,7 @@ class AppendTest extends TestCase
     {
         $argument = new Append('some value');
 
-        $this->assertSame(">> 'some value'", (string) $argument);
+        $this->assertSame(">> 'some value'", $argument->toString());
     }
 
     public function testThrowWhenEmptyArgument()

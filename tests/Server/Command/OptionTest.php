@@ -16,12 +16,12 @@ class OptionTest extends TestCase
         $option = Option::short('e');
 
         $this->assertInstanceOf(Option::class, $option);
-        $this->assertSame("'-e'", (string) $option);
+        $this->assertSame("'-e'", $option->toString());
 
         $option = Option::short('e', 'dev');
 
         $this->assertInstanceOf(Option::class, $option);
-        $this->assertSame("'-e' 'dev'", (string) $option);
+        $this->assertSame("'-e' 'dev'", $option->toString());
     }
 
     public function testLong()
@@ -29,12 +29,12 @@ class OptionTest extends TestCase
         $option = Option::long('env');
 
         $this->assertInstanceOf(Option::class, $option);
-        $this->assertSame("'--env'", (string) $option);
+        $this->assertSame("'--env'", $option->toString());
 
         $option = Option::long('env', 'dev');
 
         $this->assertInstanceOf(Option::class, $option);
-        $this->assertSame("'--env=dev'", (string) $option);
+        $this->assertSame("'--env=dev'", $option->toString());
     }
 
     public function testThrowWhenEmptyShortOptionKey()

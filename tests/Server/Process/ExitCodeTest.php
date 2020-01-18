@@ -17,7 +17,7 @@ class ExitCodeTest extends TestCase
 
         $this->assertTrue($exit->isSuccessful());
         $this->assertSame(0, $exit->toInt());
-        $this->assertSame('0', (string) $exit);
+        $this->assertSame('0', $exit->toString());
     }
 
     public function testErrorCode()
@@ -26,7 +26,7 @@ class ExitCodeTest extends TestCase
 
         $this->assertFalse($exit->isSuccessful());
         $this->assertSame(255, $exit->toInt());
-        $this->assertSame('255', (string) $exit);
+        $this->assertSame('255', $exit->toString());
     }
 
     public function testThrowWhenCodeTooLow()

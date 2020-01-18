@@ -16,10 +16,10 @@ final class Overwrite
             throw new LogicException;
         }
 
-        $this->value = '> '.new Argument($path);
+        $this->value = '> '.(new Argument($path))->toString();
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

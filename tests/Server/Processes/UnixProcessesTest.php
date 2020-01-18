@@ -57,7 +57,7 @@ class UnixProcessesTest extends TestCase
 
         $this->assertSame(
             file_get_contents('fixtures/symfony.log'),
-            (string) $process->output()
+            $process->output()->toString(),
         );
     }
 

@@ -9,10 +9,10 @@ final class Argument
 
     public function __construct(string $value)
     {
-        $this->value = (string) new Str($value);
+        $this->value = (new Str($value))->toString();
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

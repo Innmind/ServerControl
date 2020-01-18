@@ -14,7 +14,7 @@ final class Str
         $this->value = (string) $this->escape(new S($string));
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

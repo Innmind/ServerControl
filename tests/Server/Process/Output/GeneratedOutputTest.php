@@ -88,8 +88,8 @@ class GeneratedOutputTest extends TestCase
         );
 
         $this->assertInstanceOf(Output::class, $result);
-        $this->assertSame('0123456789', (string) $this->output);
-        $this->assertSame('02468', (string) $result);
+        $this->assertSame('0123456789', $this->output->toString());
+        $this->assertSame('02468', $result->toString());
         $this->assertTrue((time() - $start) >= 10);
 
         $start = time();
@@ -112,8 +112,8 @@ class GeneratedOutputTest extends TestCase
         $this->assertSame('int', (string) $result->keyType());
         $this->assertSame(Output::class, (string) $result->valueType());
         $this->assertCount(2, $result);
-        $this->assertSame('02468', (string) $result->get(0));
-        $this->assertSame('13579', (string) $result->get(1));
+        $this->assertSame('02468', $result->get(0)->toString());
+        $this->assertSame('13579', $result->get(1)->toString());
         $this->assertTrue((time() - $start) >= 10);
 
         $start = time();
@@ -138,8 +138,8 @@ class GeneratedOutputTest extends TestCase
         $this->assertSame('bool', (string) $result->keyType());
         $this->assertSame(Output::class, (string) $result->valueType());
         $this->assertCount(2, $result);
-        $this->assertSame('02468', (string) $result->get(true));
-        $this->assertSame('13579', (string) $result->get(false));
+        $this->assertSame('02468', $result->get(true)->toString());
+        $this->assertSame('13579', $result->get(false)->toString());
         $this->assertTrue((time() - $start) >= 10);
 
         $start = time();
@@ -152,11 +152,11 @@ class GeneratedOutputTest extends TestCase
     public function testStringCast()
     {
         $start = time();
-        $this->assertSame('0123456789', (string) $this->output);
+        $this->assertSame('0123456789', $this->output->toString());
         $this->assertTrue((time() - $start) >= 10);
 
         $start = time();
-        $this->assertSame('0123456789', (string) $this->output);
+        $this->assertSame('0123456789', $this->output->toString());
         $this->assertTrue((time() - $start) < 2);
     }
 }

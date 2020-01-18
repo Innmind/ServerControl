@@ -199,16 +199,21 @@ final class Command
         return $this->background;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         $string = $this->executable;
 
         if ($this->parameters->size() > 0) {
-            $string .= ' '.$this->parameters->join(' ');
+            $parameters = \iterator_to_array($this->parameters);
+            $parameters = \array_map(
+                fn($parameter): string => $parameter->toString(),
+                $parameters,
+            );
+            $string .= ' '.\implode(' ', $parameters);
         }
 
         if ($this->redirection) {
-            $string .= ' '.$this->redirection;
+            $string .= ' '.$this->redirection->toString();
         }
 
         return $string;

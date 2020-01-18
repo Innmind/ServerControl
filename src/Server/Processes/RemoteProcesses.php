@@ -47,14 +47,14 @@ final class RemoteProcesses implements Processes
             $command = Command::foreground(sprintf(
                 'cd %s && %s',
                 $command->workingDirectory(),
-                $command
+                $command->toString(),
             ));
         }
 
         return $this
             ->processes
             ->execute(
-                $this->command->withArgument((string) $command)
+                $this->command->withArgument($command->toString())
             );
     }
 
@@ -63,8 +63,8 @@ final class RemoteProcesses implements Processes
         $this
             ->execute(
                 (new Command('kill'))
-                    ->withShortOption((string) $signal)
-                    ->withArgument((string) $pid)
+                    ->withShortOption($signal->toString())
+                    ->withArgument($pid->toString())
             )
             ->wait();
 

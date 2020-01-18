@@ -87,7 +87,7 @@ final class StaticOutput implements Output
         );
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return (string) $this->output->keys()->join('');
     }

@@ -16,7 +16,7 @@ class PidTest extends TestCase
         $pid = new Pid(2);
 
         $this->assertSame(2, $pid->toInt());
-        $this->assertSame('2', (string) $pid);
+        $this->assertSame('2', $pid->toString());
     }
 
     public function testThrowWhenUsingInvalidPid()

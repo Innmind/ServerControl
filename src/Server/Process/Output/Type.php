@@ -28,7 +28,7 @@ final class Type
         return self::$error ?? self::$error =  new self(self::ERROR);
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

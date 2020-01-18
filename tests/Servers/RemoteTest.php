@@ -44,7 +44,7 @@ class RemoteTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function(Command $command): bool {
-                return (string) $command === "ssh 'foo@example.com' 'ls'";
+                return $command->toString() === "ssh 'foo@example.com' 'ls'";
             }));
 
         $remote = new Remote(
@@ -71,7 +71,7 @@ class RemoteTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function(Command $command): bool {
-                return (string) $command === "ssh '-p' '42' 'foo@example.com' 'ls'";
+                return $command->toString() === "ssh '-p' '42' 'foo@example.com' 'ls'";
             }));
 
         $remote = new Remote(

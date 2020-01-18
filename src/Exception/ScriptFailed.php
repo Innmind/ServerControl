@@ -15,7 +15,7 @@ final class ScriptFailed extends RuntimeException
 
     public function __construct(Command $command, Process $process)
     {
-        parent::__construct((string) $command, $process->exitCode()->toInt());
+        parent::__construct($command->toString(), $process->exitCode()->toInt());
         $this->command = $command;
         $this->process = $process;
     }

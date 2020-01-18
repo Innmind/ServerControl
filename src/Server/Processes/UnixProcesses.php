@@ -20,7 +20,7 @@ final class UnixProcesses implements Processes
     public function execute(Command $command): Process
     {
         $process = SfProcess::fromShellCommandline(
-            (string) $command.($command->toBeRunInBackground() ? ' &' : ''),
+            $command->toString().($command->toBeRunInBackground() ? ' &' : ''),
             $command->hasWorkingDirectory() ?
                 $command->workingDirectory() : null,
             $command
@@ -52,8 +52,8 @@ final class UnixProcesses implements Processes
         $this
             ->execute(
                 (new Command('kill'))
-                    ->withShortOption((string) $signal)
-                    ->withArgument((string) $pid)
+                    ->withShortOption($signal->toString())
+                    ->withArgument($pid->toString())
             )
             ->wait();
 

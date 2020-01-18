@@ -40,7 +40,7 @@ class LoggerTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function(Command $command): bool {
-                return (string) $command === 'ls';
+                return $command->toString() === 'ls';
             }));
 
         $logger = new Logger(
