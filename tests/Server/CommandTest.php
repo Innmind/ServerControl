@@ -3,7 +3,11 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server;
 
-use Innmind\Server\Control\Server\Command;
+use Innmind\Server\Control\{
+    Server\Command,
+    Exception\EmptyExecutableNotAllowed,
+    Exception\EmptyOptionNotAllowed,
+};
 use Innmind\Stream\Readable;
 use Innmind\Immutable\MapInterface;
 use PHPUnit\Framework\TestCase;
@@ -34,11 +38,10 @@ class CommandTest extends TestCase
         $this->assertFalse($command->toBeRunInBackground());
     }
 
-    /**
-     * @expectedException Innmind\Server\Control\Exception\EmptyExecutableNotAllowed
-     */
     public function testThrowWhenEmptyForegroundExecutable()
     {
+        $this->expectException(EmptyExecutableNotAllowed::class);
+
         new Command('');
     }
 
@@ -68,11 +71,10 @@ class CommandTest extends TestCase
         $this->assertSame("bin/console '--env=prod'", (string) $command);
     }
 
-    /**
-     * @expectedException Innmind\Server\Control\Exception\EmptyOptionNotAllowed
-     */
     public function testThrowWhenEmptyOption()
     {
+        $this->expectException(EmptyOptionNotAllowed::class);
+
         (new Command('bin/console'))->withOption('');
     }
 
@@ -85,11 +87,10 @@ class CommandTest extends TestCase
         $this->assertSame("bin/console '-e' 'prod'", (string) $command);
     }
 
-    /**
-     * @expectedException Innmind\Server\Control\Exception\EmptyOptionNotAllowed
-     */
     public function testThrowWhenEmptyShortOption()
     {
+        $this->expectException(EmptyOptionNotAllowed::class);
+
         (new Command('bin/console'))->withShortOption('');
     }
 

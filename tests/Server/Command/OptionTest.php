@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Command;
 
-use Innmind\Server\Control\Server\Command\Option;
+use Innmind\Server\Control\{
+    Server\Command\Option,
+    Exception\EmptyOptionNotAllowed,
+};
 use PHPUnit\Framework\TestCase;
 
 class OptionTest extends TestCase
@@ -34,19 +37,17 @@ class OptionTest extends TestCase
         $this->assertSame("'--env=dev'", (string) $option);
     }
 
-    /**
-     * @expectedException Innmind\Server\Control\Exception\EmptyOptionNotAllowed
-     */
     public function testThrowWhenEmptyShortOptionKey()
     {
+        $this->expectException(EmptyOptionNotAllowed::class);
+
         Option::short('');
     }
 
-    /**
-     * @expectedException Innmind\Server\Control\Exception\EmptyOptionNotAllowed
-     */
     public function testThrowWhenEmptyLongOptionKey()
     {
+        $this->expectException(EmptyOptionNotAllowed::class);
+
         Option::long('');
     }
 }

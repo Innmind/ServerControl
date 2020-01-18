@@ -3,10 +3,11 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Process\Output;
 
-use Innmind\Server\Control\Server\Process\{
-    Output\StaticOutput,
-    Output\Type,
-    Output
+use Innmind\Server\Control\{
+    Server\Process\Output\StaticOutput,
+    Server\Process\Output\Type,
+    Server\Process\Output,
+    Exception\InvalidOutputMap,
 };
 use Innmind\Immutable\{
     Map,
@@ -25,19 +26,17 @@ class StaticOutputTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException Innmind\Server\Control\Exception\InvalidOutputMap
-     */
     public function testThrowWhenInvalidMapKey()
     {
+        $this->expectException(InvalidOutputMap::class);
+
         new StaticOutput(new Map('string', Type::class));
     }
 
-    /**
-     * @expectedException Innmind\Server\Control\Exception\InvalidOutputMap
-     */
     public function testThrowWhenInvalidMapValue()
     {
+        $this->expectException(InvalidOutputMap::class);
+
         new StaticOutput(new Map(Str::class, 'int'));
     }
 

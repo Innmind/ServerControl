@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\Server\Process\Pid;
+use Innmind\Server\Control\{
+    Server\Process\Pid,
+    Exception\LowestPidPossibleIsTwo,
+};
 use PHPUnit\Framework\TestCase;
 
 class PidTest extends TestCase
@@ -16,11 +19,10 @@ class PidTest extends TestCase
         $this->assertSame('2', (string) $pid);
     }
 
-    /**
-     * @expectedException Innmind\Server\Control\Exception\LowestPidPossibleIsTwo
-     */
     public function testThrowWhenUsingInvalidPid()
     {
+        $this->expectException(LowestPidPossibleIsTwo::class);
+
         new Pid(1);
     }
 }

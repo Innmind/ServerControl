@@ -10,7 +10,8 @@ use Innmind\Server\Control\{
     Server\Process\ExitCode,
     Server\Process\Output\StaticOutput,
     Server\Process\Output\Type,
-    Exception\ProcessStillRunning
+    Exception\ProcessStillRunning,
+    Exception\BackgroundProcessInformationNotAvailable,
 };
 use Innmind\Immutable\Str;
 use Symfony\Component\Process\Process as SfProcess;
@@ -29,14 +30,13 @@ class BackgroundProcessTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException Innmind\Server\Control\Exception\BackgroundProcessInformationNotAvailable
-     */
     public function testPid()
     {
         $ps = SfProcess::fromShellCommandline('ps &');
         $ps->start();
         $process = new BackgroundProcess($ps);
+
+        $this->expectException(BackgroundProcessInformationNotAvailable::class);
 
         $process->pid();
     }
@@ -53,14 +53,13 @@ class BackgroundProcessTest extends TestCase
         $this->assertTrue((time() - $start) < 1);
     }
 
-     /**
-     * @expectedException Innmind\Server\Control\Exception\BackgroundProcessInformationNotAvailable
-     */
     public function testExitCode()
     {
         $slow = SfProcess::fromShellCommandline('php fixtures/slow.php &');
         $slow->start();
         $process = new BackgroundProcess($slow);
+
+        $this->expectException(BackgroundProcessInformationNotAvailable::class);
 
         $process->exitCode();
     }
@@ -74,14 +73,13 @@ class BackgroundProcessTest extends TestCase
         $this->assertSame($process, $process->wait());
     }
 
-     /**
-     * @expectedException Innmind\Server\Control\Exception\BackgroundProcessInformationNotAvailable
-     */
     public function testIsRunning()
     {
         $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
         $slow->start();
         $process = new BackgroundProcess($slow);
+
+        $this->expectException(BackgroundProcessInformationNotAvailable::class);
 
         $process->isRunning();
     }
