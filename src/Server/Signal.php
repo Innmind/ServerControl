@@ -5,13 +5,13 @@ namespace Innmind\Server\Control\Server;
 
 final class Signal
 {
-    public const HANG_UP = \SIGHUP;
-    public const INTERRUPT = \SIGINT;
-    public const QUIT = \SIGQUIT;
-    public const ABORT = \SIGABRT;
-    public const KILL = \SIGKILL;
-    public const ALARM = \SIGALRM;
-    public const TERMINATE = \SIGTERM;
+    private const HANG_UP = \SIGHUP;
+    private const INTERRUPT = \SIGINT;
+    private const QUIT = \SIGQUIT;
+    private const ABORT = \SIGABRT;
+    private const KILL = \SIGKILL;
+    private const ALARM = \SIGALRM;
+    private const TERMINATE = \SIGTERM;
 
     private int $value;
 
