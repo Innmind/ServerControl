@@ -19,7 +19,7 @@ final class UnixProcesses implements Processes
 {
     public function execute(Command $command): Process
     {
-        $process = new SfProcess(
+        $process = SfProcess::fromShellCommandline(
             (string) $command.($command->toBeRunInBackground() ? ' &' : ''),
             $command->hasWorkingDirectory() ?
                 $command->workingDirectory() : null,
@@ -37,7 +37,6 @@ final class UnixProcesses implements Processes
                 new Bridge($command->input()) : null
         );
         $process
-            ->inheritEnvironmentVariables()
             ->setTimeout(0)
             ->start();
 

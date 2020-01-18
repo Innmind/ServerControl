@@ -20,7 +20,7 @@ class BackgroundProcessTest extends TestCase
 {
     public function testInterface()
     {
-        $process = new SfProcess('ps &');
+        $process = SfProcess::fromShellCommandline('ps &');
         $process->start();
 
         $this->assertInstanceOf(
@@ -34,7 +34,7 @@ class BackgroundProcessTest extends TestCase
      */
     public function testPid()
     {
-        $ps = new SfProcess('ps &');
+        $ps = SfProcess::fromShellCommandline('ps &');
         $ps->start();
         $process = new BackgroundProcess($ps);
 
@@ -43,7 +43,7 @@ class BackgroundProcessTest extends TestCase
 
     public function testOutput()
     {
-        $slow = new SfProcess('php fixtures/slow.php &');
+        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php &');
         $slow->start();
         $process = new BackgroundProcess($slow);
 
@@ -58,7 +58,7 @@ class BackgroundProcessTest extends TestCase
      */
     public function testExitCode()
     {
-        $slow = new SfProcess('php fixtures/slow.php &');
+        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php &');
         $slow->start();
         $process = new BackgroundProcess($slow);
 
@@ -67,7 +67,7 @@ class BackgroundProcessTest extends TestCase
 
     public function testWait()
     {
-        $slow = new SfProcess('php fixtures/slow.php');
+        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
         $slow->start();
         $process = new BackgroundProcess($slow);
 
@@ -79,7 +79,7 @@ class BackgroundProcessTest extends TestCase
      */
     public function testIsRunning()
     {
-        $slow = new SfProcess('php fixtures/slow.php');
+        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
         $slow->start();
         $process = new BackgroundProcess($slow);
 
