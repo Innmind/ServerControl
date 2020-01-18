@@ -5,7 +5,7 @@ namespace Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\{
     Server\Process as ProcessInterface,
-    Server\Process\Output\StaticOutput,
+    Server\Process\Output,
     Server\Process\Output\Type,
     Exception\BackgroundProcessInformationNotAvailable,
 };
@@ -14,13 +14,13 @@ use Symfony\Component\Process\Process;
 
 final class BackgroundProcess implements ProcessInterface
 {
-    private StaticOutput $output;
+    private Output $output;
 
     public function __construct(Process $process)
     {
         //read process pipes once otherwise the process will be killed
         $process->getIterator()->next();
-        $this->output = new StaticOutput(Sequence::of('array'));
+        $this->output = new Output\Output(Sequence::of('array'));
     }
 
     public function pid(): Pid

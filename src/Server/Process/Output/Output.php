@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process\Output;
 
-use Innmind\Server\Control\Server\Process\Output;
+use Innmind\Server\Control\Server\Process\Output as OutputInterface;
 use Innmind\Immutable\{
     Map,
     Sequence,
@@ -14,7 +14,7 @@ use function Innmind\Immutable\{
     assertSequence,
 };
 
-final class StaticOutput implements Output
+final class Output implements OutputInterface
 {
     /** @var Sequence<array{0: Str, 1: Type}> */
     private Sequence $output;
@@ -29,7 +29,7 @@ final class StaticOutput implements Output
         $this->output = $output;
     }
 
-    public function foreach(callable $function): Output
+    public function foreach(callable $function): OutputInterface
     {
         $this->output->foreach(static function(array $output) use ($function): void {
             $function($output[0], $output[1]);
@@ -51,7 +51,7 @@ final class StaticOutput implements Output
         );
     }
 
-    public function filter(callable $predicate): Output
+    public function filter(callable $predicate): OutputInterface
     {
         return new self($this->output->filter(
             static function(array $output) use ($predicate): bool {
@@ -71,7 +71,7 @@ final class StaticOutput implements Output
 
         return $groups->toMapOf(
             $groups->keyType(),
-            Output::class,
+            OutputInterface::class,
             static function($key, Sequence $discriminated): \Generator {
                 yield $key => new self($discriminated);
             },
@@ -89,7 +89,7 @@ final class StaticOutput implements Output
 
         return $partitions->toMapOf(
             'bool',
-            Output::class,
+            OutputInterface::class,
             static function(bool $bool, Sequence $output): \Generator {
                 yield $bool => new self($output);
             },

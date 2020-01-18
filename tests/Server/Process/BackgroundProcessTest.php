@@ -8,7 +8,7 @@ use Innmind\Server\Control\{
     Server\Process as ProcessInterface,
     Server\Process\Pid,
     Server\Process\ExitCode,
-    Server\Process\Output\StaticOutput,
+    Server\Process\Output\Output,
     Server\Process\Output\Type,
     Exception\ProcessStillRunning,
     Exception\BackgroundProcessInformationNotAvailable,
@@ -47,7 +47,7 @@ class BackgroundProcessTest extends TestCase
         $slow->start();
         $process = new BackgroundProcess($slow);
 
-        $this->assertInstanceOf(StaticOutput::class, $process->output());
+        $this->assertInstanceOf(Output::class, $process->output());
         $start = time();
         $this->assertSame('', $process->output()->toString());
         $this->assertTrue((time() - $start) < 1);
