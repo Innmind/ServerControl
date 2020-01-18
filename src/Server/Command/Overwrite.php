@@ -5,7 +5,7 @@ namespace Innmind\Server\Control\Server\Command;
 
 use Innmind\Url\Path;
 
-final class Overwrite
+final class Overwrite implements Parameter
 {
     private string $value;
 

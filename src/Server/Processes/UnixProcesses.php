@@ -22,7 +22,7 @@ final class UnixProcesses implements Processes
         $process = SfProcess::fromShellCommandline(
             $command->toString().($command->toBeRunInBackground() ? ' &' : ''),
             $command->hasWorkingDirectory() ?
-                $command->workingDirectory() : null,
+                $command->workingDirectory()->toString() : null,
             $command
                 ->environment()
                 ->reduce(

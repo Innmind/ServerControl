@@ -5,11 +5,12 @@ namespace Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\{
     Server\Process as ProcessInterface,
-    Server\Process\Output,
-    Server\Process\Output\Type,
     Exception\BackgroundProcessInformationNotAvailable,
 };
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    Str,
+};
 use Symfony\Component\Process\Process;
 
 final class BackgroundProcess implements ProcessInterface
@@ -20,7 +21,9 @@ final class BackgroundProcess implements ProcessInterface
     {
         //read process pipes once otherwise the process will be killed
         $process->getIterator()->next();
-        $this->output = new Output\Output(Sequence::of('array'));
+        /** @var Sequence<array{0: Str, 1: Output\Type}> */
+        $output = Sequence::of('array');
+        $this->output = new Output\Output($output);
     }
 
     public function pid(): Pid

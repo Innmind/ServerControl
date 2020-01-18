@@ -5,7 +5,7 @@ namespace Innmind\Server\Control\Server\Command;
 
 use Innmind\Url\Path;
 
-final class Append
+final class Append implements Parameter
 {
     private string $value;
 

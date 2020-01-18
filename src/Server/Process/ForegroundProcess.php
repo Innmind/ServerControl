@@ -16,16 +16,21 @@ use Symfony\Component\Process\Process;
 final class ForegroundProcess implements ProcessInterface
 {
     private Process $process;
-    private ?Pid $pid;
-    private ?Output $output;
-    private ?ExitCode $exitCode;
+    private ?Pid $pid = null;
+    private Output $output;
+    private ?ExitCode $exitCode = null;
 
     public function __construct(Process $process)
     {
         $this->process = $process;
-        $this->output = new Output\Output(Sequence::defer(
+        /** @var Sequence<array{0: Str, 1: Output\Type}> */
+        $output = Sequence::defer(
             'array',
-            (static function(Process $process) {
+            (static function(Process $process): \Generator {
+                /**
+                 * @var string $key
+                 * @var string $value
+                 */
                 foreach ($process->getIterator() as $key => $value) {
                     $type = $key === Process::OUT ? Output\Type::output() : Output\Type::error();
 
@@ -40,11 +45,13 @@ final class ForegroundProcess implements ProcessInterface
                 // we run too many processes but never wait them to finish.
                 $process->wait();
             })($process),
-        ));
+        );
+        $this->output = new Output\Output($output);
     }
 
     public function pid(): Pid
     {
+        /** @psalm-suppress PossiblyNullArgument */
         return $this->pid ??= new Pid($this->process->getPid());
     }
 
@@ -62,6 +69,7 @@ final class ForegroundProcess implements ProcessInterface
             throw new ProcessStillRunning;
         }
 
+        /** @psalm-suppress PossiblyNullArgument */
         return $this->exitCode ??= new ExitCode(
             $this->process->getExitCode(),
         );

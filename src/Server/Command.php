@@ -24,6 +24,7 @@ use function Innmind\Immutable\join;
 final class Command
 {
     private string $executable;
+    /** @var Sequence<Command\Parameter> */
     private Sequence $parameters;
     private Map $environment;
     private ?Path $workingDirectory = null;
@@ -40,7 +41,8 @@ final class Command
 
         $this->executable = $executable;
         $this->background = $background;
-        $this->parameters = Sequence::objects();
+        /** @var Sequence<Command\Parameter> */
+        $this->parameters = Sequence::of(Command\Parameter::class);
         $this->environment = Map::of('string', 'string');
     }
 
@@ -162,8 +164,10 @@ final class Command
         return $this->workingDirectory instanceof Path;
     }
 
+    /** @psalm-suppress InvalidNullableReturnType */
     public function workingDirectory(): Path
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->workingDirectory;
     }
 
@@ -172,8 +176,10 @@ final class Command
         return $this->input instanceof Readable;
     }
 
+    /** @psalm-suppress InvalidNullableReturnType */
     public function input(): Readable
     {
+        /** @psalm-suppress NullableReturnStatement */
         return $this->input;
     }
 

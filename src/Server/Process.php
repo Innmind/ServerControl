@@ -3,10 +3,11 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server;
 
-use Innmind\Server\Control\Server\Process\{
-    Pid,
-    Output,
-    ExitCode,
+use Innmind\Server\Control\{
+    Server\Process\Pid,
+    Server\Process\Output,
+    Server\Process\ExitCode,
+    Exception\ProcessStillRunning,
 };
 
 interface Process

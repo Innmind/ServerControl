@@ -29,6 +29,9 @@ final class Output implements OutputInterface
         $this->output = $output;
     }
 
+    /**
+     * @param callable(Str, Type): void $function
+     */
     public function foreach(callable $function): void
     {
         $this->output->foreach(static function(array $output) use ($function): void {
@@ -37,10 +40,19 @@ final class Output implements OutputInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @template C
+     *
+     * @param C $carry
+     * @param callable(C, Str, Type): C $reducer
+     *
+     * @return C
      */
     public function reduce($carry, callable $reducer)
     {
+        /**
+         * @psalm-suppress MissingClosureParamType
+         * @psalm-suppress MixedArgument
+         */
         return $this->output->reduce(
             $carry,
             static function($carry, array $output) use ($reducer) {
@@ -49,6 +61,9 @@ final class Output implements OutputInterface
         );
     }
 
+    /**
+     * @param callable(Str, Type): bool $predicate
+     */
     public function filter(callable $predicate): OutputInterface
     {
         return new self($this->output->filter(
@@ -59,7 +74,11 @@ final class Output implements OutputInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @template G
+     *
+     * @param callable(Str, Type): G $discriminator
+     *
+     * @return Map<G, OutputInterface>
      */
     public function groupBy(callable $discriminator): Map
     {
@@ -67,6 +86,7 @@ final class Output implements OutputInterface
             return $discriminator($output[0], $output[1]);
         });
 
+        /** @var Map<G, OutputInterface> */
         return $groups->toMapOf(
             $groups->keyType(),
             OutputInterface::class,
@@ -77,7 +97,9 @@ final class Output implements OutputInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param callable(Str, Type): bool $predicate
+     *
+     * @return Map<bool, OutputInterface>
      */
     public function partition(callable $predicate): Map
     {
@@ -85,6 +107,7 @@ final class Output implements OutputInterface
             return $predicate($output[0], $output[1]);
         });
 
+        /** @var Map<bool, OutputInterface> */
         return $partitions->toMapOf(
             'bool',
             OutputInterface::class,
