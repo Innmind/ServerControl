@@ -53,7 +53,7 @@ class RemoteProcessesTest extends TestCase
         $this->assertSame(
             $process,
             $remote->execute(
-                (new Command('ls'))->withShortOption('l')
+                Command::foreground('ls')->withShortOption('l')
             )
         );
     }
@@ -77,7 +77,7 @@ class RemoteProcessesTest extends TestCase
         $this->assertSame(
             $process,
             $remote->execute(
-                (new Command('ls'))->withShortOption('l')
+                Command::foreground('ls')->withShortOption('l')
             )
         );
     }
@@ -100,7 +100,7 @@ class RemoteProcessesTest extends TestCase
         $this->assertSame(
             $process,
             $remote->execute(
-                (new Command('ls'))
+                Command::foreground('ls')
                     ->withShortOption('l')
                     ->withWorkingDirectory('/tmp/foo')
             )

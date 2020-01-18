@@ -54,7 +54,7 @@ class LoggerProcessesTest extends TestCase
         $this->assertSame(
             $process,
             $logger->execute(
-                (new Command('ls'))->withShortOption('l')
+                Command::foreground('ls')->withShortOption('l')
             )
         );
     }
@@ -86,7 +86,7 @@ class LoggerProcessesTest extends TestCase
         $this->assertSame(
             $process,
             $logger->execute(
-                (new Command('ls'))
+                Command::foreground('ls')
                     ->withShortOption('l')
                     ->withWorkingDirectory('/tmp/foo')
             )

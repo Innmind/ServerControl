@@ -51,7 +51,7 @@ final class UnixProcesses implements Processes
     {
         $this
             ->execute(
-                (new Command('kill'))
+                Command::foreground('kill')
                     ->withShortOption($signal->toString())
                     ->withArgument($pid->toString())
             )

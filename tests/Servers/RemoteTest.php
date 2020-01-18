@@ -57,7 +57,7 @@ class RemoteTest extends TestCase
             RemoteProcesses::class,
             $remote->processes()
         );
-        $remote->processes()->execute(new Command('ls'));
+        $remote->processes()->execute(Command::foreground('ls'));
     }
 
     public function testProcessesViaSpecificPort()
@@ -85,6 +85,6 @@ class RemoteTest extends TestCase
             RemoteProcesses::class,
             $remote->processes()
         );
-        $remote->processes()->execute(new Command('ls'));
+        $remote->processes()->execute(Command::foreground('ls'));
     }
 }

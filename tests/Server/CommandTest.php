@@ -16,7 +16,7 @@ class CommandTest extends TestCase
 {
     public function testInterface()
     {
-        $command = new Command('ps');
+        $command = Command::foreground('ps');
 
         $this->assertFalse($command->hasWorkingDirectory());
         $this->assertFalse($command->hasInput());
@@ -42,12 +42,12 @@ class CommandTest extends TestCase
     {
         $this->expectException(EmptyExecutableNotAllowed::class);
 
-        new Command('');
+        Command::foreground('');
     }
 
     public function testWithArgument()
     {
-        $command = (new Command('echo'))
+        $command = Command::foreground('echo')
             ->withArgument('foo');
 
         $this->assertInstanceOf(Command::class, $command);
@@ -58,13 +58,13 @@ class CommandTest extends TestCase
     {
         $this->assertSame(
             "echo ''",
-            (new Command('echo'))->withArgument('')->toString()
+            Command::foreground('echo')->withArgument('')->toString()
         );
     }
 
     public function testWithOption()
     {
-        $command = (new Command('bin/console'))
+        $command = Command::foreground('bin/console')
             ->withOption('env', 'prod');
 
         $this->assertInstanceOf(Command::class, $command);
@@ -75,12 +75,12 @@ class CommandTest extends TestCase
     {
         $this->expectException(EmptyOptionNotAllowed::class);
 
-        (new Command('bin/console'))->withOption('');
+        Command::foreground('bin/console')->withOption('');
     }
 
     public function testWithShortOption()
     {
-        $command = (new Command('bin/console'))
+        $command = Command::foreground('bin/console')
             ->withShortOption('e', 'prod');
 
         $this->assertInstanceOf(Command::class, $command);
@@ -91,12 +91,12 @@ class CommandTest extends TestCase
     {
         $this->expectException(EmptyOptionNotAllowed::class);
 
-        (new Command('bin/console'))->withShortOption('');
+        Command::foreground('bin/console')->withShortOption('');
     }
 
     public function testWithEnvironment()
     {
-        $command = (new Command('bin/console'))
+        $command = Command::foreground('bin/console')
             ->withEnvironment('SYMFONY_ENV', 'prod');
 
         $this->assertInstanceOf(Command::class, $command);
@@ -110,7 +110,7 @@ class CommandTest extends TestCase
 
     public function testWithWorkingDirectory()
     {
-        $command = (new Command('bin/console'))
+        $command = Command::foreground('bin/console')
             ->withWorkingDirectory('/var/www/app');
 
         $this->assertInstanceOf(Command::class, $command);
@@ -121,7 +121,7 @@ class CommandTest extends TestCase
 
     public function testWithInput()
     {
-        $command = (new Command('bin/console'))
+        $command = Command::foreground('bin/console')
             ->withInput(
                 $input = $this->createMock(Readable::class)
             );

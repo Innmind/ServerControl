@@ -28,7 +28,7 @@ final class RemoteProcesses implements Processes
         PortInterface $port = null
     ) {
         $this->processes = $processes;
-        $command = new Command('ssh');
+        $command = Command::foreground('ssh');
 
         if ($port instanceof PortInterface) {
             $command = $command->withShortOption('p', (string) $port);
@@ -62,7 +62,7 @@ final class RemoteProcesses implements Processes
     {
         $this
             ->execute(
-                (new Command('kill'))
+                Command::foreground('kill')
                     ->withShortOption($signal->toString())
                     ->withArgument($pid->toString())
             )

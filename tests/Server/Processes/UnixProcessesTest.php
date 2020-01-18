@@ -26,7 +26,7 @@ class UnixProcessesTest extends TestCase
         $processes = new UnixProcesses;
         $start = time();
         $process = $processes->execute(
-            (new Command('php'))->withArgument('fixtures/slow.php')
+            Command::foreground('php')->withArgument('fixtures/slow.php')
         );
 
         $this->assertTrue($process->isRunning());
@@ -51,7 +51,7 @@ class UnixProcessesTest extends TestCase
     {
         $processes = new UnixProcesses;
         $process = $processes->execute(
-            (new Command('cat'))->withInput(new Stream(fopen('fixtures/symfony.log', 'r')))
+            Command::foreground('cat')->withInput(new Stream(fopen('fixtures/symfony.log', 'r')))
         );
         $process->wait();
 
@@ -66,7 +66,7 @@ class UnixProcessesTest extends TestCase
         $processes = new UnixProcesses;
         $start = time();
         $process = $processes->execute(
-            (new Command('php'))->withArgument('fixtures/slow.php')
+            Command::foreground('php')->withArgument('fixtures/slow.php')
         );
 
         $this->assertSame(

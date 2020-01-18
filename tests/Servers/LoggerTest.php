@@ -52,6 +52,6 @@ class LoggerTest extends TestCase
             LoggerProcesses::class,
             $logger->processes()
         );
-        $logger->processes()->execute(new Command('ls'));
+        $logger->processes()->execute(Command::foreground('ls'));
     }
 }

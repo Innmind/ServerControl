@@ -31,13 +31,14 @@ final class Command
     private ?object $redirection = null;
     private bool $background = false;
 
-    public function __construct(string $executable)
+    private function __construct(bool $background, string $executable)
     {
         if (empty($executable)) {
             throw new EmptyExecutableNotAllowed;
         }
 
         $this->executable = $executable;
+        $this->background = $background;
         $this->parameters = new Stream('object');
         $this->environment = new Map('string', 'string');
     }
@@ -51,10 +52,7 @@ final class Command
      */
     public static function background(string $executable): self
     {
-        $self = new self($executable);
-        $self->background = true;
-
-        return $self;
+        return new self(true, $executable);
     }
 
     /**
@@ -63,7 +61,7 @@ final class Command
      */
     public static function foreground(string $executable): self
     {
-        return new self($executable);
+        return new self(false, $executable);
     }
 
     public function withArgument(string $value): self
