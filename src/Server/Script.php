@@ -35,9 +35,8 @@ final class Script
             $processes,
             static function(Processes $processes, Command $command): Processes {
                 $process = $processes->execute($command);
-                $exitCode = $process
-                    ->wait()
-                    ->exitCode();
+                $process->wait();
+                $exitCode = $process->exitCode();
 
                 if (!$exitCode->isSuccessful()) {
                     throw new ScriptFailed($command, $process);

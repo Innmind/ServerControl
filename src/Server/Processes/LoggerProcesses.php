@@ -35,14 +35,12 @@ final class LoggerProcesses implements Processes
         return $this->processes->execute($command);
     }
 
-    public function kill(Pid $pid, Signal $signal): Processes
+    public function kill(Pid $pid, Signal $signal): void
     {
         $this->logger->info('About to kill a process', [
             'pid' => $pid->toInt(),
             'signal' => $signal->toInt(),
         ]);
         $this->processes->kill($pid, $signal);
-
-        return $this;
     }
 }

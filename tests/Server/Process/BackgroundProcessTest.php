@@ -70,7 +70,7 @@ class BackgroundProcessTest extends TestCase
         $slow->start();
         $process = new BackgroundProcess($slow);
 
-        $this->assertSame($process, $process->wait());
+        $this->assertNull($process->wait());
     }
 
     public function testIsRunning()

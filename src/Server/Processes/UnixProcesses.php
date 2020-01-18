@@ -47,7 +47,7 @@ final class UnixProcesses implements Processes
         return new ForegroundProcess($process);
     }
 
-    public function kill(Pid $pid, Signal $signal): Processes
+    public function kill(Pid $pid, Signal $signal): void
     {
         $this
             ->execute(
@@ -56,7 +56,5 @@ final class UnixProcesses implements Processes
                     ->withArgument($pid->toString())
             )
             ->wait();
-
-        return $this;
     }
 }

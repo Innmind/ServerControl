@@ -44,8 +44,7 @@ class OutputTest extends TestCase
         );
         $count = 0;
 
-        $this->assertSame(
-            $output,
+        $this->assertNull(
             $output->foreach(function(Str $data, Type $type) use (&$count) {
                 $this->assertSame((string) $count, $data->toString());
                 ++$count;

@@ -18,6 +18,6 @@ interface Process
      * @throws ProcessStillRunning
      */
     public function exitCode(): ExitCode;
-    public function wait(): self;
+    public function wait(): void;
     public function isRunning(): bool;
 }

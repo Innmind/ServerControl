@@ -119,10 +119,7 @@ class RemoteProcessesTest extends TestCase
                 return $command->toString() === "ssh 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''";
             }));
 
-        $this->assertSame(
-            $remote,
-            $remote->kill(new Pid(42), Signal::kill())
-        );
+        $this->assertNull($remote->kill(new Pid(42), Signal::kill()));
     }
 
     public function testKillViaSpecificPort()
@@ -140,9 +137,6 @@ class RemoteProcessesTest extends TestCase
                 return $command->toString() === "ssh '-p' '24' 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''";
             }));
 
-        $this->assertSame(
-            $remote,
-            $remote->kill(new Pid(42), Signal::kill())
-        );
+        $this->assertNull($remote->kill(new Pid(42), Signal::kill()));
     }
 }

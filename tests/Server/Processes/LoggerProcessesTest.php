@@ -115,9 +115,6 @@ class LoggerProcessesTest extends TestCase
                 ]
             );
 
-        $this->assertSame(
-            $logger,
-            $logger->kill(new Pid(42), Signal::kill())
-        );
+        $this->assertNull($logger->kill(new Pid(42), Signal::kill()));
     }
 }

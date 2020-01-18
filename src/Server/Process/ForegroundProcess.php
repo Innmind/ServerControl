@@ -67,11 +67,9 @@ final class ForegroundProcess implements ProcessInterface
         );
     }
 
-    public function wait(): ProcessInterface
+    public function wait(): void
     {
         $this->process->wait();
-
-        return $this;
     }
 
     public function isRunning(): bool

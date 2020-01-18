@@ -7,7 +7,7 @@ use Innmind\Immutable\Map;
 
 interface Output
 {
-    public function foreach(callable $function): self;
+    public function foreach(callable $function): void;
 
     /**
      * @param mixed $carry

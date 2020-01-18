@@ -41,9 +41,9 @@ final class BackgroundProcess implements ProcessInterface
         throw new BackgroundProcessInformationNotAvailable;
     }
 
-    public function wait(): ProcessInterface
+    public function wait(): void
     {
-        return $this;
+        // nothing to do
     }
 
     public function isRunning(): bool

@@ -96,7 +96,7 @@ class ForegroundProcessTest extends TestCase
         $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
         $slow->start();
         $process = new ForegroundProcess($slow);
-        $this->assertSame($process, $process->wait());
+        $this->assertNull($process->wait());
 
         $this->assertFalse($process->isRunning());
     }

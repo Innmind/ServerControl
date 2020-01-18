@@ -58,7 +58,7 @@ final class RemoteProcesses implements Processes
             );
     }
 
-    public function kill(Pid $pid, Signal $signal): Processes
+    public function kill(Pid $pid, Signal $signal): void
     {
         $this
             ->execute(
@@ -67,7 +67,5 @@ final class RemoteProcesses implements Processes
                     ->withArgument($pid->toString())
             )
             ->wait();
-
-        return $this;
     }
 }

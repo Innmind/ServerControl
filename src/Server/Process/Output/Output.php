@@ -29,13 +29,11 @@ final class Output implements OutputInterface
         $this->output = $output;
     }
 
-    public function foreach(callable $function): OutputInterface
+    public function foreach(callable $function): void
     {
         $this->output->foreach(static function(array $output) use ($function): void {
             $function($output[0], $output[1]);
         });
-
-        return $this;
     }
 
     /**
