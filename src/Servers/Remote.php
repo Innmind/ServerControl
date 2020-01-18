@@ -6,34 +6,52 @@ namespace Innmind\Server\Control\Servers;
 use Innmind\Server\Control\{
     Server,
     Server\Processes,
-    Server\Processes\RemoteProcesses
+    Server\Processes\RemoteProcesses,
+    Server\Volumes,
 };
 use Innmind\Url\Authority\{
-    HostInterface,
-    PortInterface,
-    UserInformation\UserInterface
+    Host,
+    Port,
+    UserInformation\User,
 };
 
 final class Remote implements Server
 {
-    private $processes;
+    private Processes $processes;
+    private Volumes $volumes;
 
     public function __construct(
         Server $server,
-        UserInterface $user,
-        HostInterface $host,
-        PortInterface $port = null
+        User $user,
+        Host $host,
+        Port $port = null
     ) {
         $this->processes = new RemoteProcesses(
             $server->processes(),
             $user,
             $host,
-            $port
+            $port,
         );
+        $this->volumes = new Volumes\Unix($this->processes);
     }
 
     public function processes(): Processes
     {
         return $this->processes;
+    }
+
+    public function volumes(): Volumes
+    {
+        return $this->volumes;
+    }
+
+    public function reboot(): void
+    {
+        Server\Script::of('sudo shutdown -r now')($this);
+    }
+
+    public function shutdown(): void
+    {
+        Server\Script::of('sudo shutdown -h now')($this);
     }
 }

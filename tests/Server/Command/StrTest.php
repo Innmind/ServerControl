@@ -13,7 +13,7 @@ class StrTest extends TestCase
      */
     public function testInterface(string $str, string $expected)
     {
-        $this->assertSame($expected, (string) new Str($str));
+        $this->assertSame($expected, (new Str($str))->toString());
     }
 
     public function cases(): array

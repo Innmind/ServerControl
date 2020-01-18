@@ -5,15 +5,15 @@ namespace Innmind\Server\Control\Server;
 
 final class Signal
 {
-    public const HANG_UP = \SIGHUP;
-    public const INTERRUPT = \SIGINT;
-    public const QUIT = \SIGQUIT;
-    public const ABORT = \SIGABRT;
-    public const KILL = \SIGKILL;
-    public const ALARM = \SIGALRM;
-    public const TERMINATE = \SIGTERM;
+    private const HANG_UP = \SIGHUP;
+    private const INTERRUPT = \SIGINT;
+    private const QUIT = \SIGQUIT;
+    private const ABORT = \SIGABRT;
+    private const KILL = \SIGKILL;
+    private const ALARM = \SIGALRM;
+    private const TERMINATE = \SIGTERM;
 
-    private $value;
+    private int $value;
 
     private function __construct(int $value)
     {
@@ -60,7 +60,7 @@ final class Signal
         return $this->value;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return (string) $this->value;
     }

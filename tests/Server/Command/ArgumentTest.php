@@ -12,11 +12,11 @@ class ArgumentTest extends TestCase
     {
         $argument = new Argument('some value');
 
-        $this->assertSame("'some value'", (string) $argument);
+        $this->assertSame("'some value'", $argument->toString());
     }
 
     public function testDoesntThrowWhenEmptyArgument()
     {
-        $this->assertSame("''", (string) new Argument(''));
+        $this->assertSame("''", (new Argument(''))->toString());
     }
 }

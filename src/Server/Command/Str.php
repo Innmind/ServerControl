@@ -7,14 +7,14 @@ use Innmind\Immutable\Str as S;
 
 final class Str
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $string)
     {
-        $this->value = (string) $this->escape(new S($string));
+        $this->value = $this->escape(S::of($string))->toString();
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }
@@ -32,7 +32,7 @@ final class Str
         }
 
         if ($string->length() === 0) {
-            return new S('""');
+            return S::of('""');
         }
 
         if ($string->contains("\0")) {

@@ -11,7 +11,7 @@ use Innmind\Server\Control\Server\{
     Process\ForegroundProcess,
     Process\BackgroundProcess,
     Signal,
-    Process\Input\Bridge
+    Process\Input\Bridge,
 };
 use Symfony\Component\Process\Process as SfProcess;
 
@@ -19,10 +19,10 @@ final class UnixProcesses implements Processes
 {
     public function execute(Command $command): Process
     {
-        $process = new SfProcess(
-            (string) $command.($command->toBeRunInBackground() ? ' &' : ''),
+        $process = SfProcess::fromShellCommandline(
+            $command->toString().($command->toBeRunInBackground() ? ' &' : ''),
             $command->hasWorkingDirectory() ?
-                $command->workingDirectory() : null,
+                $command->workingDirectory()->toString() : null,
             $command
                 ->environment()
                 ->reduce(
@@ -31,13 +31,12 @@ final class UnixProcesses implements Processes
                         $env[$key] = $value;
 
                         return $env;
-                    }
+                    },
                 ),
             $command->hasInput() ?
-                new Bridge($command->input()) : null
+                new Bridge($command->input()) : null,
         );
         $process
-            ->inheritEnvironmentVariables()
             ->setTimeout(0)
             ->start();
 
@@ -48,16 +47,14 @@ final class UnixProcesses implements Processes
         return new ForegroundProcess($process);
     }
 
-    public function kill(Pid $pid, Signal $signal): Processes
+    public function kill(Pid $pid, Signal $signal): void
     {
         $this
             ->execute(
-                (new Command('kill'))
-                    ->withShortOption((string) $signal)
-                    ->withArgument((string) $pid)
+                Command::foreground('kill')
+                    ->withShortOption($signal->toString())
+                    ->withArgument($pid->toString()),
             )
             ->wait();
-
-        return $this;
     }
 }

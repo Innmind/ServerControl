@@ -4,17 +4,17 @@ declare(strict_types = 1);
 namespace Innmind\Server\Control\Server\Command;
 
 use Innmind\Server\Control\Exception\EmptyOptionNotAllowed;
+use Innmind\Immutable\Str as S;
 
-final class Option
+final class Option implements Parameter
 {
-    private $long;
-    private $key;
-    private $value;
+    private bool $long;
+    private string $key;
+    private ?string $value;
 
     private function __construct(bool $long, string $key, string $value = null)
     {
-
-        if ($key === '') {
+        if (S::of($key)->empty()) {
             throw new EmptyOptionNotAllowed;
         }
 
@@ -33,7 +33,7 @@ final class Option
         return new self(false, $key, $value);
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         if ($this->long) {
             return $this->longString();
@@ -46,21 +46,21 @@ final class Option
     {
         $string = '--'.$this->key;
 
-        if (is_string($this->value)) {
+        if (\is_string($this->value)) {
             $string .= '='.$this->value;
         }
 
-        return (string) new Str($string);
+        return (new Str($string))->toString();
     }
 
     private function shortString(): string
     {
-        $string = new Str('-'.$this->key);
+        $string = (new Str('-'.$this->key))->toString();
 
-        if (is_string($this->value)) {
-            $string .= ' '.new Str($this->value);
+        if (\is_string($this->value)) {
+            $string .= ' '.(new Str($this->value))->toString();
         }
 
-        return (string) $string;
+        return $string;
     }
 }

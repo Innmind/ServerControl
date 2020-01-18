@@ -8,13 +8,14 @@ use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Processes\RemoteProcesses,
-    Server\Command
+    Server\Process,
+    Server\Process\ExitCode,
+    Server\Command,
+    Server\Volumes,
 };
 use Innmind\Url\Authority\{
-    HostInterface,
     Host,
     Port,
-    UserInformation\UserInterface,
     UserInformation\User
 };
 use PHPUnit\Framework\TestCase;
@@ -27,9 +28,9 @@ class RemoteTest extends TestCase
             Server::class,
             new Remote(
                 $this->createMock(Server::class),
-                $this->createMock(UserInterface::class),
-                $this->createMock(HostInterface::class)
-            )
+                User::none(),
+                Host::none(),
+            ),
         );
     }
 
@@ -44,20 +45,20 @@ class RemoteTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function(Command $command): bool {
-                return (string) $command === "ssh 'foo@example.com' 'ls'";
+                return $command->toString() === "ssh 'foo@example.com' 'ls'";
             }));
 
         $remote = new Remote(
             $server,
-            new User('foo'),
-            new Host('example.com')
+            User::of('foo'),
+            Host::of('example.com'),
         );
 
         $this->assertInstanceOf(
             RemoteProcesses::class,
             $remote->processes()
         );
-        $remote->processes()->execute(new Command('ls'));
+        $remote->processes()->execute(Command::foreground('ls'));
     }
 
     public function testProcessesViaSpecificPort()
@@ -71,20 +72,119 @@ class RemoteTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function(Command $command): bool {
-                return (string) $command === "ssh '-p' '42' 'foo@example.com' 'ls'";
+                return $command->toString() === "ssh '-p' '42' 'foo@example.com' 'ls'";
             }));
 
         $remote = new Remote(
             $server,
-            new User('foo'),
-            new Host('example.com'),
-            new Port(42)
+            User::of('foo'),
+            Host::of('example.com'),
+            Port::of(42),
         );
 
         $this->assertInstanceOf(
             RemoteProcesses::class,
             $remote->processes()
         );
-        $remote->processes()->execute(new Command('ls'));
+        $remote->processes()->execute(Command::foreground('ls'));
+    }
+
+    public function testVolumes()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->at(0))
+            ->method('execute')
+            ->with($this->callback(function(Command $command): bool {
+                return $command->toString() === "ssh 'foo@example.com' 'which diskutil'";
+            }))
+            ->willReturn($which = $this->createMock(Process::class));
+        $which
+            ->expects($this->once())
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+        $processes
+            ->expects($this->at(1))
+            ->method('execute')
+            ->with($this->callback(function(Command $command): bool {
+                return $command->toString() === "ssh 'foo@example.com' 'diskutil '\''unmount'\'' '\''/dev'\'''";
+            }))
+            ->willReturn($which = $this->createMock(Process::class));
+        $which
+            ->expects($this->once())
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $remote = new Remote(
+            $server,
+            User::of('foo'),
+            Host::of('example.com'),
+        );
+
+        $this->assertInstanceOf(
+            Volumes::class,
+            $remote->volumes()
+        );
+        $remote->volumes()->unmount(new Volumes\Name('/dev'));
+    }
+
+    public function testReboot()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function(Command $command): bool {
+                return $command->toString() === "ssh 'foo@example.com' 'sudo shutdown -r now'";
+            }))
+            ->willReturn($shutdown = $this->createMock(Process::class));
+        $shutdown
+            ->expects($this->once())
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $remote = new Remote(
+            $server,
+            User::of('foo'),
+            Host::of('example.com'),
+        );
+
+        $this->assertNull($remote->reboot());
+    }
+
+    public function testShutdown()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function(Command $command): bool {
+                return $command->toString() === "ssh 'foo@example.com' 'sudo shutdown -h now'";
+            }))
+            ->willReturn($shutdown = $this->createMock(Process::class));
+        $shutdown
+            ->expects($this->once())
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $remote = new Remote(
+            $server,
+            User::of('foo'),
+            Host::of('example.com'),
+        );
+
+        $this->assertNull($remote->shutdown());
     }
 }

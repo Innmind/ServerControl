@@ -8,14 +8,14 @@ use Innmind\Server\Control\Server\{
     Command,
     Signal,
     Process,
-    Process\Pid
+    Process\Pid,
 };
 use Psr\Log\LoggerInterface;
 
 final class LoggerProcesses implements Processes
 {
-    private $processes;
-    private $logger;
+    private Processes $processes;
+    private LoggerInterface $logger;
 
     public function __construct(
         Processes $processes,
@@ -28,21 +28,19 @@ final class LoggerProcesses implements Processes
     public function execute(Command $command): Process
     {
         $this->logger->info('About to execute a command', [
-            'command' => $command,
-            'workingDirectory' => $command->hasWorkingDirectory() ? $command->workingDirectory() : null
+            'command' => $command->toString(),
+            'workingDirectory' => $command->hasWorkingDirectory() ? $command->workingDirectory()->toString() : null,
         ]);
 
         return $this->processes->execute($command);
     }
 
-    public function kill(Pid $pid, Signal $signal): Processes
+    public function kill(Pid $pid, Signal $signal): void
     {
         $this->logger->info('About to kill a process', [
             'pid' => $pid->toInt(),
             'signal' => $signal->toInt(),
         ]);
         $this->processes->kill($pid, $signal);
-
-        return $this;
     }
 }

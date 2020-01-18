@@ -23,14 +23,14 @@ class ForegroundProcessTest extends TestCase
         $this->assertInstanceOf(
             ProcessInterface::class,
             new ForegroundProcess(
-                new SfProcess('ps')
+                SfProcess::fromShellCommandline('ps')
             )
         );
     }
 
     public function testPid()
     {
-        $ps = new SfProcess('ps');
+        $ps = SfProcess::fromShellCommandline('ps');
         $ps->start();
         $process = new ForegroundProcess($ps);
 
@@ -40,7 +40,7 @@ class ForegroundProcessTest extends TestCase
 
     public function testOutput()
     {
-        $slow = new SfProcess('php fixtures/slow.php');
+        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
         $slow->start();
         $process = new ForegroundProcess($slow);
 
@@ -50,9 +50,9 @@ class ForegroundProcessTest extends TestCase
         $process
             ->output()
             ->foreach(function(Str $data, Type $type) use ($start, &$count) {
-                $this->assertSame($count."\n", (string) $data);
+                $this->assertSame($count."\n", $data->toString());
                 $this->assertEquals(
-                    (int) (string) $data % 2 === 0 ? Type::output() : Type::error(),
+                    (int) $data->toString() % 2 === 0 ? Type::output() : Type::error(),
                     $type
                 );
                 $this->assertTrue((time() - $start) >= (1 + $count));
@@ -63,7 +63,7 @@ class ForegroundProcessTest extends TestCase
 
     public function testExitCode()
     {
-        $slow = new SfProcess('php fixtures/slow.php');
+        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
         $slow->start();
         $process = new ForegroundProcess($slow);
 
@@ -82,7 +82,7 @@ class ForegroundProcessTest extends TestCase
 
     public function testExitCodeForFailingProcess()
     {
-        $slow = new SfProcess('php fixtures/fails.php');
+        $slow = SfProcess::fromShellCommandline('php fixtures/fails.php');
         $slow->start();
         $process = new ForegroundProcess($slow);
 
@@ -93,17 +93,17 @@ class ForegroundProcessTest extends TestCase
 
     public function testWait()
     {
-        $slow = new SfProcess('php fixtures/slow.php');
+        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
         $slow->start();
         $process = new ForegroundProcess($slow);
-        $this->assertSame($process, $process->wait());
+        $this->assertNull($process->wait());
 
         $this->assertFalse($process->isRunning());
     }
 
     public function testIsRunning()
     {
-        $slow = new SfProcess('php fixtures/slow.php');
+        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
         $slow->start();
         $process = new ForegroundProcess($slow);
 

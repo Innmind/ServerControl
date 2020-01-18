@@ -5,17 +5,17 @@ namespace Innmind\Server\Control\Exception;
 
 use Innmind\Server\Control\Server\{
     Command,
-    Process
+    Process,
 };
 
 final class ScriptFailed extends RuntimeException
 {
-    private $command;
-    private $process;
+    private Command $command;
+    private Process $process;
 
     public function __construct(Command $command, Process $process)
     {
-        parent::__construct((string) $command, $process->exitCode()->toInt());
+        parent::__construct($command->toString(), $process->exitCode()->toInt());
         $this->command = $command;
         $this->process = $process;
     }

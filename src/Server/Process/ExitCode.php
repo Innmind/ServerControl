@@ -7,12 +7,12 @@ use Innmind\Server\Control\Exception\OutOfRangeExitCode;
 
 final class ExitCode
 {
-    private $value;
+    private int $value;
 
     public function __construct(int $value)
     {
         if ($value < 0 || $value > 255) {
-            throw new OutOfRangeExitCode;
+            throw new OutOfRangeExitCode((string) $value);
         }
 
         $this->value = $value;
@@ -28,7 +28,7 @@ final class ExitCode
         return $this->value;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return (string) $this->value;
     }

@@ -1,10 +1,9 @@
 # ServerControl
 
-| `master` | `develop` |
-|----------|-----------|
-| [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/ServerControl/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Innmind/ServerControl/?branch=master) | [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/ServerControl/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/ServerControl/?branch=develop) |
-| [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/ServerControl/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/Innmind/ServerControl/?branch=master) | [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/ServerControl/badges/coverage.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/ServerControl/?branch=develop) |
-| [![Build Status](https://scrutinizer-ci.com/g/Innmind/ServerControl/badges/build.png?b=master)](https://scrutinizer-ci.com/g/Innmind/ServerControl/build-status/master) | [![Build Status](https://scrutinizer-ci.com/g/Innmind/ServerControl/badges/build.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/ServerControl/build-status/develop) |
+| `develop` |
+|-----------|
+| [![codecov](https://codecov.io/gh/Innmind/ServerControl/branch/develop/graph/badge.svg)](https://codecov.io/gh/Innmind/ServerControl) |
+| [![Build Status](https://github.com/Innmind/ServerControl/workflows/CI/badge.svg)](https://github.com/Innmind/ServerControl/actions?query=workflow%3ACI) |
 
 Give access to giev instructions to the server.
 
@@ -22,22 +21,24 @@ use Innmind\Server\Control\{
     Server\Command,
     Server\Process\Output\Type,
     Server\Process\Pid,
-    Server\Signal
+    Server\Signal,
+    Server\Volumes\Name,
 };
+use Innmind\Url\Path;
 use Innmind\Immutable\Str;
 
-$server = (new ServerFactory)->make();
+$server = ServerFactory::build();
 $server
     ->processes()
     ->execute(
-        (new Command('bin/console'))
+        Command::foreground('bin/console')
             ->withArgument('debug:router')
     )
     ->output()
     ->foreach(static function(Str $data, Type $type): void {
         $type = $type === Type::error() ? 'ERR : ' : 'OUT : ';
 
-        echo $type.$data;
+        echo $type.$data->toString();
     });
 $server
     ->processes()
@@ -45,6 +46,10 @@ $server
         new Pid(42),
         Signal::kill()
     );
+$server->volumes()->mount(new Name('/dev/disk2s1'), Path::of('/somewhere')); // the path is only interpreted for linux
+$server->volumes()->unmount(new Name('/dev/disk2s1'));
+$server->reboot();
+$server->shutdown();
 ```
 
 ### Scripts
@@ -56,7 +61,7 @@ use Innmind\Server\Control\Server\Script;
 
 $script = Script::of(
     'apt-get install php-fpm -y',
-    'service nginx start'
+    'service nginx start',
 );
 $script($server);
 ```
@@ -70,18 +75,18 @@ use Innmind\Server\Control\Servers\Remote;
 use Innmind\Url\Authority\{
     Host,
     Port,
-    UserInformation\User
+    UserInformation\User,
 };
 
 $server = new Remote(
     $server,
     new User('john'),
     new Host('example.com'),
-    new Port(42)
+    new Port(42),
 );
 $server->processes()->execute(new Command('ls'));
 ```
 
 This will run `ssh -p 42 john@example.com ls`.
 
-**Important**: specifying environment variables, a working directory or an input stream will not be taken into account on the remote server.
+**Important**: specifying environment variables or an input stream will not be taken into account on the remote server.

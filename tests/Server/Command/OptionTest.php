@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Command;
 
-use Innmind\Server\Control\Server\Command\Option;
+use Innmind\Server\Control\{
+    Server\Command\Option,
+    Exception\EmptyOptionNotAllowed,
+};
 use PHPUnit\Framework\TestCase;
 
 class OptionTest extends TestCase
@@ -13,12 +16,12 @@ class OptionTest extends TestCase
         $option = Option::short('e');
 
         $this->assertInstanceOf(Option::class, $option);
-        $this->assertSame("'-e'", (string) $option);
+        $this->assertSame("'-e'", $option->toString());
 
         $option = Option::short('e', 'dev');
 
         $this->assertInstanceOf(Option::class, $option);
-        $this->assertSame("'-e' 'dev'", (string) $option);
+        $this->assertSame("'-e' 'dev'", $option->toString());
     }
 
     public function testLong()
@@ -26,27 +29,25 @@ class OptionTest extends TestCase
         $option = Option::long('env');
 
         $this->assertInstanceOf(Option::class, $option);
-        $this->assertSame("'--env'", (string) $option);
+        $this->assertSame("'--env'", $option->toString());
 
         $option = Option::long('env', 'dev');
 
         $this->assertInstanceOf(Option::class, $option);
-        $this->assertSame("'--env=dev'", (string) $option);
+        $this->assertSame("'--env=dev'", $option->toString());
     }
 
-    /**
-     * @expectedException Innmind\Server\Control\Exception\EmptyOptionNotAllowed
-     */
     public function testThrowWhenEmptyShortOptionKey()
     {
+        $this->expectException(EmptyOptionNotAllowed::class);
+
         Option::short('');
     }
 
-    /**
-     * @expectedException Innmind\Server\Control\Exception\EmptyOptionNotAllowed
-     */
     public function testThrowWhenEmptyLongOptionKey()
     {
+        $this->expectException(EmptyOptionNotAllowed::class);
+
         Option::long('');
     }
 }

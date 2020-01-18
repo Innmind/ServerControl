@@ -9,7 +9,7 @@ final class Bridge implements \Iterator
 {
     private const CHUNK = 8192;
 
-    private $stream;
+    private Readable $stream;
 
     public function __construct(Readable $stream)
     {
@@ -22,7 +22,7 @@ final class Bridge implements \Iterator
         $text = $this->stream->read(self::CHUNK);
         $this->stream->seek($position);
 
-        return (string) $text;
+        return $text->toString();
     }
 
     public function key(): int

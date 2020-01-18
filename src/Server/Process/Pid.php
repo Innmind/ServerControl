@@ -7,12 +7,12 @@ use Innmind\Server\Control\Exception\LowestPidPossibleIsTwo;
 
 final class Pid
 {
-    private $value;
+    private int $value;
 
     public function __construct(int $value)
     {
         if ($value < 2) {
-            throw new LowestPidPossibleIsTwo; //1 is reserved by the system
+            throw new LowestPidPossibleIsTwo((string) $value); // 1 is reserved by the system
         }
 
         $this->value = $value;
@@ -23,7 +23,7 @@ final class Pid
         return $this->value;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return (string) $this->value;
     }

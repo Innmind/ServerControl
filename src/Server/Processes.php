@@ -8,5 +8,5 @@ use Innmind\Server\Control\Server\Process\Pid;
 interface Processes
 {
     public function execute(Command $command): Process;
-    public function kill(Pid $pid, Signal $signal): self;
+    public function kill(Pid $pid, Signal $signal): void;
 }

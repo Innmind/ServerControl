@@ -3,10 +3,9 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Command;
 
-
-final class Pipe
+final class Pipe implements Parameter
 {
-    public function __toString(): string
+    public function toString(): string
     {
         return '|';
     }

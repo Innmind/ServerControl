@@ -3,28 +3,48 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process;
 
-use Innmind\Immutable\MapInterface;
+use Innmind\Server\Control\Server\Process\Output\Type;
+use Innmind\Immutable\{
+    Map,
+    Str,
+};
 
 interface Output
 {
-    public function foreach(callable $function): self;
+    /**
+     * @param callable(Str, Type): void $function
+     */
+    public function foreach(callable $function): void;
 
     /**
-     * @param mixed $carry
+     * @template C
      *
-     * @return mixed
+     * @param C $carry
+     * @param callable(C, Str, Type): C $reducer
+     *
+     * @return C
      */
     public function reduce($carry, callable $reducer);
+
+    /**
+     * @param callable(Str, Type): bool $predicate
+     */
     public function filter(callable $predicate): self;
 
     /**
-     * @return MapInterface<mixed, self>
+     * @template G
+     *
+     * @param callable(Str, Type): G $discriminator
+     *
+     * @return Map<G, self>
      */
-    public function groupBy(callable $discriminator): MapInterface;
+    public function groupBy(callable $discriminator): Map;
 
     /**
-     * @return MapInterface<bool, self>
+     * @param callable(Str, Type): bool $predicate
+     *
+     * @return Map<bool, self>
      */
-    public function partition(callable $predicate): MapInterface;
-    public function __toString(): string;
+    public function partition(callable $predicate): Map;
+    public function toString(): string;
 }

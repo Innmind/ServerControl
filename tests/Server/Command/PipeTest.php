@@ -10,6 +10,6 @@ class PipeTest extends TestCase
 {
     public function testInterface()
     {
-        $this->assertSame('|', (string) new Pipe);
+        $this->assertSame('|', (new Pipe)->toString());
     }
 }

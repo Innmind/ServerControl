@@ -8,66 +8,64 @@ use Innmind\Server\Control\Server\{
     Command,
     Signal,
     Process,
-    Process\Pid
+    Process\Pid,
 };
 use Innmind\Url\Authority\{
-    HostInterface,
-    PortInterface,
-    UserInformation\UserInterface
+    Host,
+    Port,
+    UserInformation\User,
 };
 
 final class RemoteProcesses implements Processes
 {
-    private $processes;
-    private $command;
+    private Processes $processes;
+    private Command $command;
 
     public function __construct(
         Processes $processes,
-        UserInterface $user,
-        HostInterface $host,
-        PortInterface $port = null
+        User $user,
+        Host $host,
+        Port $port = null
     ) {
         $this->processes = $processes;
-        $command = new Command('ssh');
+        $command = Command::foreground('ssh');
 
-        if ($port instanceof PortInterface) {
-            $command = $command->withShortOption('p', (string) $port);
+        if ($port instanceof Port) {
+            $command = $command->withShortOption('p', $port->toString());
         }
 
-        $this->command = $command->withArgument(sprintf(
+        $this->command = $command->withArgument(\sprintf(
             '%s@%s',
-            $user,
-            $host
+            $user->toString(),
+            $host->toString(),
         ));
     }
 
     public function execute(Command $command): Process
     {
         if ($command->hasWorkingDirectory()) {
-            $command = Command::foreground(sprintf(
+            $command = Command::foreground(\sprintf(
                 'cd %s && %s',
-                $command->workingDirectory(),
-                $command
+                $command->workingDirectory()->toString(),
+                $command->toString(),
             ));
         }
 
         return $this
             ->processes
             ->execute(
-                $this->command->withArgument((string) $command)
+                $this->command->withArgument($command->toString()),
             );
     }
 
-    public function kill(Pid $pid, Signal $signal): Processes
+    public function kill(Pid $pid, Signal $signal): void
     {
         $this
             ->execute(
-                (new Command('kill'))
-                    ->withShortOption((string) $signal)
-                    ->withArgument((string) $pid)
+                Command::foreground('kill')
+                    ->withShortOption($signal->toString())
+                    ->withArgument($pid->toString()),
             )
             ->wait();
-
-        return $this;
     }
 }

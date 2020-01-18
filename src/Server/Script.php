@@ -5,26 +5,25 @@ namespace Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\{
     Server,
-    Exception\ScriptFailed
+    Exception\ScriptFailed,
 };
 use Innmind\Immutable\Sequence;
 
 final class Script
 {
-    private $commands;
+    private Sequence $commands;
 
     public function __construct(Command ...$commands)
     {
-        $this->commands = Sequence::of(...$commands);
+        $this->commands = Sequence::of(Command::class, ...$commands);
     }
 
     public static function of(string ...$commands): self
     {
-        foreach ($commands as &$command) {
-            $command = Command::foreground($command);
-        }
-
-        return new self(...$commands);
+        return new self(...\array_map(
+            static fn(string $command): Command => Command::foreground($command),
+            $commands,
+        ));
     }
 
     public function __invoke(Server $server): void
@@ -35,16 +34,15 @@ final class Script
             $processes,
             static function(Processes $processes, Command $command): Processes {
                 $process = $processes->execute($command);
-                $exitCode = $process
-                    ->wait()
-                    ->exitCode();
+                $process->wait();
+                $exitCode = $process->exitCode();
 
                 if (!$exitCode->isSuccessful()) {
                     throw new ScriptFailed($command, $process);
                 }
 
                 return $processes;
-            }
+            },
         );
     }
 }

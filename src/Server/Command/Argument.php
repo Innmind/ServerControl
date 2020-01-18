@@ -3,16 +3,16 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Command;
 
-final class Argument
+final class Argument implements Parameter
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $value)
     {
-        $this->value = (string) new Str($value);
+        $this->value = (new Str($value))->toString();
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

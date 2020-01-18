@@ -5,27 +5,25 @@ namespace Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\{
     Server\Process as ProcessInterface,
-    Server\Process\Output\StaticOutput,
-    Server\Process\Output\Type,
-    Exception\BackgroundProcessInformationNotAvailable
+    Exception\BackgroundProcessInformationNotAvailable,
 };
 use Innmind\Immutable\{
-    Map,
-    Str
+    Sequence,
+    Str,
 };
 use Symfony\Component\Process\Process;
 
 final class BackgroundProcess implements ProcessInterface
 {
-    private $output;
+    private Output $output;
 
     public function __construct(Process $process)
     {
         //read process pipes once otherwise the process will be killed
         $process->getIterator()->next();
-        $this->output = new StaticOutput(
-            new Map(Str::class, Type::class)
-        );
+        /** @var Sequence<array{0: Str, 1: Output\Type}> */
+        $output = Sequence::of('array');
+        $this->output = new Output\Output($output);
     }
 
     public function pid(): Pid
@@ -46,9 +44,9 @@ final class BackgroundProcess implements ProcessInterface
         throw new BackgroundProcessInformationNotAvailable;
     }
 
-    public function wait(): ProcessInterface
+    public function wait(): void
     {
-        return $this;
+        // nothing to do
     }
 
     public function isRunning(): bool

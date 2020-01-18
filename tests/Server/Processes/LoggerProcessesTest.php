@@ -11,6 +11,7 @@ use Innmind\Server\Control\Server\{
     Signal,
     Process\Pid
 };
+use Innmind\Url\Path;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -37,7 +38,7 @@ class LoggerProcessesTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function(Command $command): bool {
-                return (string) $command === "ls '-l'";
+                return $command->toString() === "ls '-l'";
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $log
@@ -54,7 +55,7 @@ class LoggerProcessesTest extends TestCase
         $this->assertSame(
             $process,
             $logger->execute(
-                (new Command('ls'))->withShortOption('l')
+                Command::foreground('ls')->withShortOption('l')
             )
         );
     }
@@ -69,7 +70,7 @@ class LoggerProcessesTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function(Command $command): bool {
-                return (string) $command === "ls '-l'";
+                return $command->toString() === "ls '-l'";
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $log
@@ -86,9 +87,9 @@ class LoggerProcessesTest extends TestCase
         $this->assertSame(
             $process,
             $logger->execute(
-                (new Command('ls'))
+                Command::foreground('ls')
                     ->withShortOption('l')
-                    ->withWorkingDirectory('/tmp/foo')
+                    ->withWorkingDirectory(Path::of('/tmp/foo')),
             )
         );
     }
@@ -114,9 +115,6 @@ class LoggerProcessesTest extends TestCase
                 ]
             );
 
-        $this->assertSame(
-            $logger,
-            $logger->kill(new Pid(42), Signal::kill())
-        );
+        $this->assertNull($logger->kill(new Pid(42), Signal::kill()));
     }
 }
