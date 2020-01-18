@@ -7,10 +7,10 @@ use Innmind\Server\Control\{
     Server\Process\Output\StaticOutput,
     Server\Process\Output\Type,
     Server\Process\Output,
-    Exception\InvalidOutputMap,
 };
 use Innmind\Immutable\{
     Map,
+    Sequence,
     Str,
 };
 use PHPUnit\Framework\TestCase;
@@ -21,31 +21,26 @@ class StaticOutputTest extends TestCase
     {
         $this->assertInstanceOf(
             Output::class,
-            new StaticOutput(Map::of(Str::class, Type::class))
+            new StaticOutput(Sequence::of('array'))
         );
     }
 
-    public function testThrowWhenInvalidMapKey()
+    public function testThrowWhenInvalidSequence()
     {
-        $this->expectException(InvalidOutputMap::class);
+        $this->expectException(\TypeError::class);
 
-        new StaticOutput(Map::of('string', Type::class));
-    }
-
-    public function testThrowWhenInvalidMapValue()
-    {
-        $this->expectException(InvalidOutputMap::class);
-
-        new StaticOutput(Map::of(Str::class, 'int'));
+        new StaticOutput(Sequence::of('string'));
     }
 
     public function testForeach()
     {
         $output = new StaticOutput(
-            Map::of(Str::class, Type::class)
-                ->put(Str::of('0'), Type::output())
-                ->put(Str::of('1'), Type::output())
-                ->put(Str::of('2'), Type::output())
+            Sequence::of(
+                'array',
+                [Str::of('0'), Type::output()],
+                [Str::of('1'), Type::output()],
+                [Str::of('2'), Type::output()],
+            ),
         );
         $count = 0;
 
@@ -62,10 +57,12 @@ class StaticOutputTest extends TestCase
     public function testReduce()
     {
         $output = new StaticOutput(
-            Map::of(Str::class, Type::class)
-                ->put(Str::of('0'), Type::output())
-                ->put(Str::of('1'), Type::output())
-                ->put(Str::of('2'), Type::output())
+            Sequence::of(
+                'array',
+                [Str::of('0'), Type::output()],
+                [Str::of('1'), Type::output()],
+                [Str::of('2'), Type::output()],
+            ),
         );
 
         $this->assertSame(
@@ -82,10 +79,12 @@ class StaticOutputTest extends TestCase
     public function testFilter()
     {
         $output = new StaticOutput(
-            Map::of(Str::class, Type::class)
-                ->put(Str::of('0'), Type::output())
-                ->put(Str::of('1'), Type::output())
-                ->put(Str::of('2'), Type::output())
+            Sequence::of(
+                'array',
+                [Str::of('0'), Type::output()],
+                [Str::of('1'), Type::output()],
+                [Str::of('2'), Type::output()],
+            ),
         );
         $output2 = $output->filter(function(Str $data, Type $type) {
             return (int) $data->toString() % 2 === 0;
@@ -100,10 +99,12 @@ class StaticOutputTest extends TestCase
     public function testGroupBy()
     {
         $output = new StaticOutput(
-            Map::of(Str::class, Type::class)
-                ->put(Str::of('0'), Type::output())
-                ->put(Str::of('1'), Type::output())
-                ->put(Str::of('2'), Type::output())
+            Sequence::of(
+                'array',
+                [Str::of('0'), Type::output()],
+                [Str::of('1'), Type::output()],
+                [Str::of('2'), Type::output()],
+            ),
         );
         $groups = $output->groupBy(function(Str $data, Type $type) {
             return (int) $data->toString() % 2;
@@ -120,10 +121,12 @@ class StaticOutputTest extends TestCase
     public function testPartition()
     {
         $output = new StaticOutput(
-            Map::of(Str::class, Type::class)
-                ->put(Str::of('0'), Type::output())
-                ->put(Str::of('1'), Type::output())
-                ->put(Str::of('2'), Type::output())
+            Sequence::of(
+                'array',
+                [Str::of('0'), Type::output()],
+                [Str::of('1'), Type::output()],
+                [Str::of('2'), Type::output()],
+            ),
         );
         $partitions = $output->partition(function(Str $data, Type $type) {
             return (int) $data->toString() % 2 === 0;
@@ -140,10 +143,12 @@ class StaticOutputTest extends TestCase
     public function testStringCast()
     {
         $output = new StaticOutput(
-            Map::of(Str::class, Type::class)
-                ->put(Str::of('0'), Type::output())
-                ->put(Str::of('1'), Type::output())
-                ->put(Str::of('2'), Type::output())
+            Sequence::of(
+                'array',
+                [Str::of('0'), Type::output()],
+                [Str::of('1'), Type::output()],
+                [Str::of('2'), Type::output()],
+            ),
         );
 
         $this->assertSame('012', $output->toString());

@@ -9,10 +9,7 @@ use Innmind\Server\Control\{
     Server\Process\Output\Type,
     Exception\BackgroundProcessInformationNotAvailable,
 };
-use Innmind\Immutable\{
-    Map,
-    Str,
-};
+use Innmind\Immutable\Sequence;
 use Symfony\Component\Process\Process;
 
 final class BackgroundProcess implements ProcessInterface
@@ -23,9 +20,7 @@ final class BackgroundProcess implements ProcessInterface
     {
         //read process pipes once otherwise the process will be killed
         $process->getIterator()->next();
-        $this->output = new StaticOutput(
-            Map::of(Str::class, Type::class)
-        );
+        $this->output = new StaticOutput(Sequence::of('array'));
     }
 
     public function pid(): Pid

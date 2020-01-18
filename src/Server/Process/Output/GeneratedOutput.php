@@ -9,6 +9,7 @@ use Innmind\Server\Control\{
 };
 use Innmind\Immutable\{
     Map,
+    Sequence,
     Type as TypeDeterminator,
     Str,
 };
@@ -18,29 +19,30 @@ use Symfony\Component\Process\Process;
 final class GeneratedOutput implements Output
 {
     private \Generator $generator;
-    private Map $output;
+    /** @var Sequence<array{0: Str, 1: Type}> */
+    private Sequence $output;
 
     public function __construct(\Generator $generator)
     {
         $this->generator = $generator;
-        $this->output = Map::of(Str::class, Type::class);
+        $this->output = Sequence::defer(
+            'array',
+            (static function(\Generator $generator) {
+                foreach ($generator as $key => $value) {
+                    yield [
+                        Str::of((string) $value),
+                        $key === Process::OUT ? Type::output() : Type::error(),
+                    ];
+                }
+            })($generator),
+        );
     }
 
     public function foreach(callable $function): Output
     {
-        if ($this->loaded()) {
-            $this->output->foreach($function);
-
-            return $this;
-        }
-
-        while ($this->generator->valid()) {
-            [$type, $data] = $this->read();
-            $this->output = $this->output->put($data, $type);
-            $function($data, $type);
-
-            $this->generator->next();
-        }
+        $this->output->foreach(static function(array $output) use ($function): void {
+            $function($output[0], $output[1]);
+        });
 
         return $this;
     }
@@ -50,41 +52,19 @@ final class GeneratedOutput implements Output
      */
     public function reduce($carry, callable $reducer)
     {
-        if ($this->loaded()) {
-            return $this->output->reduce($carry, $reducer);
-        }
-
-        while ($this->generator->valid()) {
-            [$type, $data] = $this->read();
-            $this->output = $this->output->put($data, $type);
-            $carry = $reducer($carry, $data, $type);
-
-            $this->generator->next();
-        }
-
-        return $carry;
+        return $this->output->reduce(
+            $carry,
+            static function($carry, array $output) use ($reducer)  {
+                return $reducer($carry, $output[0], $output[1]);
+            },
+        );
     }
 
     public function filter(callable $predicate): Output
     {
-        if ($this->loaded()) {
-            return new StaticOutput(
-                $this->output->filter($predicate)
-            );
-        }
-
-        $output = $this->output->clear();
-
-        while ($this->generator->valid()) {
-            [$type, $data] = $this->read();
-            $this->output = $this->output->put($data, $type);
-
-            if ($predicate($data, $type) === true) {
-                $output = $output->put($data, $type);
-            }
-
-            $this->generator->next();
-        }
+        $output = $this->output->filter(static function(array $output) use ($predicate): bool {
+            return $predicate($output[0], $output[1]);
+        });
 
         return new StaticOutput($output);
     }
@@ -94,61 +74,16 @@ final class GeneratedOutput implements Output
      */
     public function groupBy(callable $discriminator): Map
     {
-        if ($this->loaded()) {
-            $groups = $this->output->groupBy($discriminator);
+        $groups = $this->output->groupBy(static function(array $output) use ($discriminator) {
+            return $discriminator($output[0], $output[1]);
+        });
 
-            return $groups->reduce(
-                Map::of($groups->keyType(), Output::class),
-                function(Map $groups, $discriminent, Map $discriminated): Map {
-                    return $groups->put(
-                        $discriminent,
-                        new StaticOutput($discriminated)
-                    );
-                }
-            );
-        }
-
-        $output = null;
-
-        while ($this->generator->valid()) {
-            [$type, $data] = $this->read();
-            $this->output = $this->output->put($data, $type);
-            $discriminent = $discriminator($data, $type);
-
-            if (is_null($output)) {
-                $output = Map::of(
-                    TypeDeterminator::determine($discriminent),
-                    Map::class
-                );
-            }
-
-            if (!$output->contains($discriminent)) {
-                $output = $output->put(
-                    $discriminent,
-                    $this->output->clear()
-                );
-            }
-
-            $output = $output->put(
-                $discriminent,
-                $output->get($discriminent)->put($data, $type)
-            );
-
-            $this->generator->next();
-        }
-
-        if (is_null($output)) {
-            throw new CannotGroupEmptyOutput;
-        }
-
-        return $output->reduce(
-            Map::of($output->keyType(), Output::class),
-            function(Map $groups, $discriminent, Map $discriminated): Map {
-                return $groups->put(
-                    $discriminent,
-                    new StaticOutput($discriminated)
-                );
-            }
+        return $groups->toMapOf(
+            $groups->keyType(),
+            Output::class,
+            static function($key, Sequence $output): \Generator {
+                yield $key => new StaticOutput($output);
+            },
         );
     }
 
@@ -157,78 +92,27 @@ final class GeneratedOutput implements Output
      */
     public function partition(callable $predicate): Map
     {
-        if ($this->loaded()) {
-            return $this
-                ->output
-                ->partition($predicate)
-                ->reduce(
-                    Map::of('bool', Output::class),
-                    function(Map $partitions, bool $bool, Map $output): Map {
-                        return $partitions->put(
-                            $bool,
-                            new StaticOutput($output)
-                        );
-                    }
-                );
-        }
-
-        $output = Map::of('bool', Map::class)
-            ->put(true, $this->output->clear())
-            ->put(false, $this->output->clear());
-
-        while ($this->generator->valid()) {
-            [$type, $data] = $this->read();
-
-            $result = $predicate($data, $type);
-
-            $output = $output->put(
-                $result,
-                $output->get($result)->put($data, $type)
+        return $this
+            ->output
+            ->partition(static function(array $output) use ($predicate): bool {
+                return $predicate($output[0], $output[1]);
+            })
+            ->toMapOf(
+                'bool',
+                Output::class,
+                static function(bool $bool, Sequence $output): \Generator {
+                    yield $bool => new StaticOutput($output);
+                },
             );
-
-            $this->generator->next();
-        }
-
-        return $output->reduce(
-            Map::of('bool', Output::class),
-            function(Map $partitions, bool $bool, Map $output): Map {
-                return $partitions->put($bool, new StaticOutput($output));
-            }
-        );
     }
 
     public function toString(): string
     {
-        if (!$this->loaded()) {
-            $this->foreach(function(){}); //load the whole thing
-        }
-
-        $bits = $this->output->keys()->mapTo(
+        $output = $this->output->toSequenceOf(
             'string',
-            fn(Str $bit): string => $bit->toString(),
+            fn(array $output): \Generator => yield $output[0]->toString(),
         );
 
-        return join('', $bits)->toString();
-    }
-
-    private function loaded(): bool
-    {
-        return !$this->generator->valid();
-    }
-
-    private function type(string $type): Type
-    {
-        return $type === Process::OUT ? Type::output() : Type::error();
-    }
-
-    /**
-     * @return [Type, Str]
-     */
-    private function read(): array
-    {
-        return [
-            $this->type($this->generator->key()),
-            Str::of((string) $this->generator->current()),
-        ];
+        return join('', $output)->toString();
     }
 }
