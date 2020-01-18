@@ -11,10 +11,8 @@ use Innmind\Server\Control\{
     Server\Command
 };
 use Innmind\Url\Authority\{
-    HostInterface,
     Host,
     Port,
-    UserInformation\UserInterface,
     UserInformation\User
 };
 use PHPUnit\Framework\TestCase;
@@ -27,9 +25,9 @@ class RemoteTest extends TestCase
             Server::class,
             new Remote(
                 $this->createMock(Server::class),
-                $this->createMock(UserInterface::class),
-                $this->createMock(HostInterface::class)
-            )
+                User::none(),
+                Host::none(),
+            ),
         );
     }
 
@@ -49,8 +47,8 @@ class RemoteTest extends TestCase
 
         $remote = new Remote(
             $server,
-            new User('foo'),
-            new Host('example.com')
+            User::of('foo'),
+            Host::of('example.com'),
         );
 
         $this->assertInstanceOf(
@@ -76,9 +74,9 @@ class RemoteTest extends TestCase
 
         $remote = new Remote(
             $server,
-            new User('foo'),
-            new Host('example.com'),
-            new Port(42)
+            User::of('foo'),
+            Host::of('example.com'),
+            Port::of(42),
         );
 
         $this->assertInstanceOf(

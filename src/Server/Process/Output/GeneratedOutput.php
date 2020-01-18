@@ -8,11 +8,11 @@ use Innmind\Server\Control\{
     CannotGroupEmptyOutput,
 };
 use Innmind\Immutable\{
-    MapInterface,
     Map,
     Type as TypeDeterminator,
     Str,
 };
+use function Innmind\Immutable\join;
 use Symfony\Component\Process\Process;
 
 final class GeneratedOutput implements Output
@@ -23,7 +23,7 @@ final class GeneratedOutput implements Output
     public function __construct(\Generator $generator)
     {
         $this->generator = $generator;
-        $this->output = new Map(Str::class, Type::class);
+        $this->output = Map::of(Str::class, Type::class);
     }
 
     public function foreach(callable $function): Output
@@ -92,14 +92,14 @@ final class GeneratedOutput implements Output
     /**
      * {@inheritdoc}
      */
-    public function groupBy(callable $discriminator): MapInterface
+    public function groupBy(callable $discriminator): Map
     {
         if ($this->loaded()) {
             $groups = $this->output->groupBy($discriminator);
 
             return $groups->reduce(
-                new Map((string) $groups->keyType(), Output::class),
-                function(Map $groups, $discriminent, MapInterface $discriminated): Map {
+                Map::of($groups->keyType(), Output::class),
+                function(Map $groups, $discriminent, Map $discriminated): Map {
                     return $groups->put(
                         $discriminent,
                         new StaticOutput($discriminated)
@@ -116,9 +116,9 @@ final class GeneratedOutput implements Output
             $discriminent = $discriminator($data, $type);
 
             if (is_null($output)) {
-                $output = new Map(
+                $output = Map::of(
                     TypeDeterminator::determine($discriminent),
-                    MapInterface::class
+                    Map::class
                 );
             }
 
@@ -142,8 +142,8 @@ final class GeneratedOutput implements Output
         }
 
         return $output->reduce(
-            new Map((string) $output->keyType(), Output::class),
-            function(Map $groups, $discriminent, MapInterface $discriminated): Map {
+            Map::of($output->keyType(), Output::class),
+            function(Map $groups, $discriminent, Map $discriminated): Map {
                 return $groups->put(
                     $discriminent,
                     new StaticOutput($discriminated)
@@ -155,15 +155,15 @@ final class GeneratedOutput implements Output
     /**
      * {@inheritdoc}
      */
-    public function partition(callable $predicate): MapInterface
+    public function partition(callable $predicate): Map
     {
         if ($this->loaded()) {
             return $this
                 ->output
                 ->partition($predicate)
                 ->reduce(
-                    new Map('bool', Output::class),
-                    function(Map $partitions, bool $bool, MapInterface $output): Map {
+                    Map::of('bool', Output::class),
+                    function(Map $partitions, bool $bool, Map $output): Map {
                         return $partitions->put(
                             $bool,
                             new StaticOutput($output)
@@ -172,7 +172,7 @@ final class GeneratedOutput implements Output
                 );
         }
 
-        $output = (new Map('bool', MapInterface::class))
+        $output = Map::of('bool', Map::class)
             ->put(true, $this->output->clear())
             ->put(false, $this->output->clear());
 
@@ -190,8 +190,8 @@ final class GeneratedOutput implements Output
         }
 
         return $output->reduce(
-            new Map('bool', Output::class),
-            function(Map $partitions, bool $bool, MapInterface $output): Map {
+            Map::of('bool', Output::class),
+            function(Map $partitions, bool $bool, Map $output): Map {
                 return $partitions->put($bool, new StaticOutput($output));
             }
         );
@@ -203,7 +203,12 @@ final class GeneratedOutput implements Output
             $this->foreach(function(){}); //load the whole thing
         }
 
-        return (string) $this->output->keys()->join('');
+        $bits = $this->output->keys()->mapTo(
+            'string',
+            fn(Str $bit): string => $bit->toString(),
+        );
+
+        return join('', $bits)->toString();
     }
 
     private function loaded(): bool
@@ -223,7 +228,7 @@ final class GeneratedOutput implements Output
     {
         return [
             $this->type($this->generator->key()),
-            new Str((string) $this->generator->current()),
+            Str::of((string) $this->generator->current()),
         ];
     }
 }

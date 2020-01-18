@@ -9,9 +9,9 @@ use Innmind\Server\Control\{
     Server\Processes\RemoteProcesses,
 };
 use Innmind\Url\Authority\{
-    HostInterface,
-    PortInterface,
-    UserInformation\UserInterface,
+    Host,
+    Port,
+    UserInformation\User,
 };
 
 final class Remote implements Server
@@ -20,9 +20,9 @@ final class Remote implements Server
 
     public function __construct(
         Server $server,
-        UserInterface $user,
-        HostInterface $host,
-        PortInterface $port = null
+        User $user,
+        Host $host,
+        Port $port = null
     ) {
         $this->processes = new RemoteProcesses(
             $server->processes(),

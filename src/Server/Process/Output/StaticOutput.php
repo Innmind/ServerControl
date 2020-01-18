@@ -8,16 +8,16 @@ use Innmind\Server\Control\{
     Exception\InvalidOutputMap,
 };
 use Innmind\Immutable\{
-    MapInterface,
     Map,
     Str,
 };
+use function Innmind\Immutable\join;
 
 final class StaticOutput implements Output
 {
-    private MapInterface $output;
+    private Map $output;
 
-    public function __construct(MapInterface $output)
+    public function __construct(Map $output)
     {
         if (
             (string) $output->keyType() !== Str::class ||
@@ -54,13 +54,13 @@ final class StaticOutput implements Output
     /**
      * {@inheritdoc}
      */
-    public function groupBy(callable $discriminator): MapInterface
+    public function groupBy(callable $discriminator): Map
     {
         $groups = $this->output->groupBy($discriminator);
 
         return $groups->reduce(
-            new Map((string) $groups->keyType(), Output::class),
-            static function(Map $groups, $discriminent, MapInterface $discriminated): Map {
+            Map::of($groups->keyType(), Output::class),
+            static function(Map $groups, $discriminent, Map $discriminated): Map {
                 return $groups->put(
                     $discriminent,
                     new self($discriminated)
@@ -72,13 +72,13 @@ final class StaticOutput implements Output
     /**
      * {@inheritdoc}
      */
-    public function partition(callable $predicate): MapInterface
+    public function partition(callable $predicate): Map
     {
         $partitions = $this->output->partition($predicate);
 
         return $partitions->reduce(
-            new Map((string) $partitions->keyType(), Output::class),
-            static function(Map $partitions, bool $bool, MapInterface $discriminated): Map {
+            Map::of($partitions->keyType(), Output::class),
+            static function(Map $partitions, bool $bool, Map $discriminated): Map {
                 return $partitions->put(
                     $bool,
                     new self($discriminated)
@@ -89,6 +89,11 @@ final class StaticOutput implements Output
 
     public function toString(): string
     {
-        return (string) $this->output->keys()->join('');
+        $bits = $this->output->keys()->mapTo(
+            'string',
+            fn(Str $bit): string => $bit->toString(),
+        );
+
+        return join('', $bits)->toString();
     }
 }

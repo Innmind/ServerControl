@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process;
 
-use Innmind\Immutable\MapInterface;
+use Innmind\Immutable\Map;
 
 interface Output
 {
@@ -18,13 +18,13 @@ interface Output
     public function filter(callable $predicate): self;
 
     /**
-     * @return MapInterface<mixed, self>
+     * @return Map<mixed, self>
      */
-    public function groupBy(callable $discriminator): MapInterface;
+    public function groupBy(callable $discriminator): Map;
 
     /**
-     * @return MapInterface<bool, self>
+     * @return Map<bool, self>
      */
-    public function partition(callable $predicate): MapInterface;
+    public function partition(callable $predicate): Map;
     public function toString(): string;
 }

@@ -50,9 +50,9 @@ class ForegroundProcessTest extends TestCase
         $process
             ->output()
             ->foreach(function(Str $data, Type $type) use ($start, &$count) {
-                $this->assertSame($count."\n", (string) $data);
+                $this->assertSame($count."\n", $data->toString());
                 $this->assertEquals(
-                    (int) (string) $data % 2 === 0 ? Type::output() : Type::error(),
+                    (int) $data->toString() % 2 === 0 ? Type::output() : Type::error(),
                     $type
                 );
                 $this->assertTrue((time() - $start) >= (1 + $count));

@@ -9,7 +9,7 @@ use Innmind\Server\Control\{
     Exception\EmptyOptionNotAllowed,
 };
 use Innmind\Stream\Readable;
-use Innmind\Immutable\MapInterface;
+use Innmind\Immutable\Map;
 use PHPUnit\Framework\TestCase;
 
 class CommandTest extends TestCase
@@ -101,7 +101,7 @@ class CommandTest extends TestCase
 
         $this->assertInstanceOf(Command::class, $command);
         $this->assertSame('bin/console', $command->toString());
-        $this->assertInstanceOf(MapInterface::class, $command->environment());
+        $this->assertInstanceOf(Map::class, $command->environment());
         $this->assertSame('string', (string) $command->environment()->keyType());
         $this->assertSame('string', (string) $command->environment()->valueType());
         $this->assertCount(1, $command->environment());

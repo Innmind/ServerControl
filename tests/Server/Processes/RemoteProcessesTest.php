@@ -12,11 +12,8 @@ use Innmind\Server\Control\Server\{
     Process\Pid
 };
 use Innmind\Url\Authority\{
-    HostInterface,
-    PortInterface,
     Host,
     Port,
-    UserInformation\UserInterface,
     UserInformation\User
 };
 use PHPUnit\Framework\TestCase;
@@ -29,8 +26,8 @@ class RemoteProcessesTest extends TestCase
             Processes::class,
             new RemoteProcesses(
                 $this->createMock(Processes::class),
-                $this->createMock(UserInterface::class),
-                $this->createMock(HostInterface::class)
+                User::none(),
+                Host::of('example.com'),
             )
         );
     }
@@ -39,8 +36,8 @@ class RemoteProcessesTest extends TestCase
     {
         $remote = new RemoteProcesses(
             $processes = $this->createMock(Processes::class),
-            new User('foo'),
-            new Host('example.com')
+            User::of('foo'),
+            Host::of('example.com'),
         );
         $processes
             ->expects($this->once())
@@ -62,9 +59,9 @@ class RemoteProcessesTest extends TestCase
     {
         $remote = new RemoteProcesses(
             $processes = $this->createMock(Processes::class),
-            new User('foo'),
-            new Host('example.com'),
-            new Port(24)
+            User::of('foo'),
+            Host::of('example.com'),
+            Port::of(24),
         );
         $processes
             ->expects($this->once())
@@ -86,8 +83,8 @@ class RemoteProcessesTest extends TestCase
     {
         $remote = new RemoteProcesses(
             $processes = $this->createMock(Processes::class),
-            new User('foo'),
-            new Host('example.com')
+            User::of('foo'),
+            Host::of('example.com'),
         );
         $processes
             ->expects($this->once())
@@ -111,8 +108,8 @@ class RemoteProcessesTest extends TestCase
     {
         $remote = new RemoteProcesses(
             $processes = $this->createMock(Processes::class),
-            new User('foo'),
-            new Host('example.com')
+            User::of('foo'),
+            Host::of('example.com'),
         );
         $processes
             ->expects($this->once())
@@ -131,9 +128,9 @@ class RemoteProcessesTest extends TestCase
     {
         $remote = new RemoteProcesses(
             $processes = $this->createMock(Processes::class),
-            new User('foo'),
-            new Host('example.com'),
-            new Port(24)
+            User::of('foo'),
+            Host::of('example.com'),
+            Port::of(24),
         );
         $processes
             ->expects($this->once())

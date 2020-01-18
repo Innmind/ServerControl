@@ -15,7 +15,7 @@ final class Script
 
     public function __construct(Command ...$commands)
     {
-        $this->commands = Sequence::of(...$commands);
+        $this->commands = Sequence::of(Command::class, ...$commands);
     }
 
     public static function of(string ...$commands): self

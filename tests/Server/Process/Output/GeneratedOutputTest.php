@@ -10,7 +10,7 @@ use Innmind\Server\Control\Server\Process\{
 };
 use Innmind\Immutable\{
     Str,
-    MapInterface
+    Map,
 };
 use Symfony\Component\Process\Process as SfProcess;
 use PHPUnit\Framework\TestCase;
@@ -42,8 +42,8 @@ class GeneratedOutputTest extends TestCase
         $start = time();
         $count = 0;
         $result = $this->output->foreach(function(Str $data, Type $type) use (&$count, $start) {
-            $this->assertSame((string) $count, (string) $data);
-            $this->assertTrue((time() - $start) > (int) (string) $data);
+            $this->assertSame((string) $count, $data->toString());
+            $this->assertTrue((time() - $start) > (int) $data->toString());
             ++$count;
         });
 
@@ -62,9 +62,9 @@ class GeneratedOutputTest extends TestCase
         $result = $this->output->reduce(
             0,
             function(int $carry, Str $data, Type $type) use ($start) {
-                $this->assertTrue((time() - $start) > (int) (string) $data);
+                $this->assertTrue((time() - $start) > (int) $data->toString());
 
-                return $carry + (int) (string) $data;
+                return $carry + (int) $data->toString();
             }
         );
 
@@ -81,9 +81,9 @@ class GeneratedOutputTest extends TestCase
         $start = time();
         $result = $this->output->filter(
             function(Str $data, Type $type) use ($start) {
-                $this->assertTrue((time() - $start) > (int) (string) $data);
+                $this->assertTrue((time() - $start) > (int) $data->toString());
 
-                return (int) (string) $data % 2 === 0;
+                return (int) $data->toString() % 2 === 0;
             }
         );
 
@@ -102,13 +102,13 @@ class GeneratedOutputTest extends TestCase
         $start = time();
         $result = $this->output->groupBy(
             function(Str $data, Type $type) use ($start) {
-                $this->assertTrue((time() - $start) > (int) (string) $data);
+                $this->assertTrue((time() - $start) > (int) $data->toString());
 
-                return (int) (string) $data % 2;
+                return (int) $data->toString() % 2;
             }
         );
 
-        $this->assertInstanceOf(MapInterface::class, $result);
+        $this->assertInstanceOf(Map::class, $result);
         $this->assertSame('int', (string) $result->keyType());
         $this->assertSame(Output::class, (string) $result->valueType());
         $this->assertCount(2, $result);
@@ -118,7 +118,7 @@ class GeneratedOutputTest extends TestCase
 
         $start = time();
         $this->output->groupBy(function(Str $data){
-            return (int) (string) $data % 2;
+            return (int) $data->toString() % 2;
         });
         $this->assertTrue((time() - $start) < 2);
     }
@@ -128,13 +128,13 @@ class GeneratedOutputTest extends TestCase
         $start = time();
         $result = $this->output->partition(
             function(Str $data, Type $type) use ($start) {
-                $this->assertTrue((time() - $start) > (int) (string) $data);
+                $this->assertTrue((time() - $start) > (int) $data->toString());
 
-                return (int) (string) $data % 2 === 0;
+                return (int) $data->toString() % 2 === 0;
             }
         );
 
-        $this->assertInstanceOf(MapInterface::class, $result);
+        $this->assertInstanceOf(Map::class, $result);
         $this->assertSame('bool', (string) $result->keyType());
         $this->assertSame(Output::class, (string) $result->valueType());
         $this->assertCount(2, $result);
@@ -144,7 +144,7 @@ class GeneratedOutputTest extends TestCase
 
         $start = time();
         $this->output->partition(function(Str $data){
-            return (int) (string) $data % 2 === 0;
+            return (int) $data->toString() % 2 === 0;
         });
         $this->assertTrue((time() - $start) < 2);
     }

@@ -15,15 +15,15 @@ use Innmind\Server\Control\{
 };
 use Innmind\Stream\Readable;
 use Innmind\Immutable\{
-    Stream,
+    Sequence,
     Map,
-    MapInterface,
 };
+use function Innmind\Immutable\join;
 
 final class Command
 {
     private string $executable;
-    private Stream $parameters;
+    private Sequence $parameters;
     private Map $environment;
     private ?string $workingDirectory = null;
     private ?Readable $input = null;
@@ -39,8 +39,8 @@ final class Command
 
         $this->executable = $executable;
         $this->background = $background;
-        $this->parameters = new Stream('object');
-        $this->environment = new Map('string', 'string');
+        $this->parameters = Sequence::objects();
+        $this->environment = Map::of('string', 'string');
     }
 
     /**
@@ -167,7 +167,7 @@ final class Command
         return $self;
     }
 
-    public function environment(): MapInterface
+    public function environment(): Map
     {
         return $this->environment;
     }
@@ -202,12 +202,11 @@ final class Command
         $string = $this->executable;
 
         if ($this->parameters->size() > 0) {
-            $parameters = \iterator_to_array($this->parameters);
-            $parameters = \array_map(
+            $parameters = $this->parameters->mapTo(
+                'string',
                 fn($parameter): string => $parameter->toString(),
-                $parameters,
             );
-            $string .= ' '.\implode(' ', $parameters);
+            $string .= ' '.join(' ', $parameters)->toString();
         }
 
         if ($this->redirection) {

@@ -12,7 +12,6 @@ use Innmind\Server\Control\{
 use Innmind\Immutable\{
     Map,
     Str,
-    MapInterface
 };
 use PHPUnit\Framework\TestCase;
 
@@ -22,7 +21,7 @@ class StaticOutputTest extends TestCase
     {
         $this->assertInstanceOf(
             Output::class,
-            new StaticOutput(new Map(Str::class, Type::class))
+            new StaticOutput(Map::of(Str::class, Type::class))
         );
     }
 
@@ -30,30 +29,30 @@ class StaticOutputTest extends TestCase
     {
         $this->expectException(InvalidOutputMap::class);
 
-        new StaticOutput(new Map('string', Type::class));
+        new StaticOutput(Map::of('string', Type::class));
     }
 
     public function testThrowWhenInvalidMapValue()
     {
         $this->expectException(InvalidOutputMap::class);
 
-        new StaticOutput(new Map(Str::class, 'int'));
+        new StaticOutput(Map::of(Str::class, 'int'));
     }
 
     public function testForeach()
     {
         $output = new StaticOutput(
-            (new Map(Str::class, Type::class))
-                ->put(new Str('0'), Type::output())
-                ->put(new Str('1'), Type::output())
-                ->put(new Str('2'), Type::output())
+            Map::of(Str::class, Type::class)
+                ->put(Str::of('0'), Type::output())
+                ->put(Str::of('1'), Type::output())
+                ->put(Str::of('2'), Type::output())
         );
         $count = 0;
 
         $this->assertSame(
             $output,
             $output->foreach(function(Str $data, Type $type) use (&$count) {
-                $this->assertSame((string) $count, (string) $data);
+                $this->assertSame((string) $count, $data->toString());
                 ++$count;
             })
         );
@@ -63,10 +62,10 @@ class StaticOutputTest extends TestCase
     public function testReduce()
     {
         $output = new StaticOutput(
-            (new Map(Str::class, Type::class))
-                ->put(new Str('0'), Type::output())
-                ->put(new Str('1'), Type::output())
-                ->put(new Str('2'), Type::output())
+            Map::of(Str::class, Type::class)
+                ->put(Str::of('0'), Type::output())
+                ->put(Str::of('1'), Type::output())
+                ->put(Str::of('2'), Type::output())
         );
 
         $this->assertSame(
@@ -74,7 +73,7 @@ class StaticOutputTest extends TestCase
             $output->reduce(
                 0,
                 function(int $carry, Str $data, Type $type) {
-                    return $carry + (int) (string) $data;
+                    return $carry + (int) $data->toString();
                 }
             )
         );
@@ -83,13 +82,13 @@ class StaticOutputTest extends TestCase
     public function testFilter()
     {
         $output = new StaticOutput(
-            (new Map(Str::class, Type::class))
-                ->put(new Str('0'), Type::output())
-                ->put(new Str('1'), Type::output())
-                ->put(new Str('2'), Type::output())
+            Map::of(Str::class, Type::class)
+                ->put(Str::of('0'), Type::output())
+                ->put(Str::of('1'), Type::output())
+                ->put(Str::of('2'), Type::output())
         );
         $output2 = $output->filter(function(Str $data, Type $type) {
-            return (int) (string) $data % 2 === 0;
+            return (int) $data->toString() % 2 === 0;
         });
 
         $this->assertInstanceOf(Output::class, $output2);
@@ -101,16 +100,16 @@ class StaticOutputTest extends TestCase
     public function testGroupBy()
     {
         $output = new StaticOutput(
-            (new Map(Str::class, Type::class))
-                ->put(new Str('0'), Type::output())
-                ->put(new Str('1'), Type::output())
-                ->put(new Str('2'), Type::output())
+            Map::of(Str::class, Type::class)
+                ->put(Str::of('0'), Type::output())
+                ->put(Str::of('1'), Type::output())
+                ->put(Str::of('2'), Type::output())
         );
         $groups = $output->groupBy(function(Str $data, Type $type) {
-            return (int) (string) $data % 2;
+            return (int) $data->toString() % 2;
         });
 
-        $this->assertInstanceOf(MapInterface::class, $groups);
+        $this->assertInstanceOf(Map::class, $groups);
         $this->assertSame('int', (string) $groups->keyType());
         $this->assertSame(Output::class, (string) $groups->valueType());
         $this->assertCount(2, $groups);
@@ -121,16 +120,16 @@ class StaticOutputTest extends TestCase
     public function testPartition()
     {
         $output = new StaticOutput(
-            (new Map(Str::class, Type::class))
-                ->put(new Str('0'), Type::output())
-                ->put(new Str('1'), Type::output())
-                ->put(new Str('2'), Type::output())
+            Map::of(Str::class, Type::class)
+                ->put(Str::of('0'), Type::output())
+                ->put(Str::of('1'), Type::output())
+                ->put(Str::of('2'), Type::output())
         );
         $partitions = $output->partition(function(Str $data, Type $type) {
-            return (int) (string) $data % 2 === 0;
+            return (int) $data->toString() % 2 === 0;
         });
 
-        $this->assertInstanceOf(MapInterface::class, $partitions);
+        $this->assertInstanceOf(Map::class, $partitions);
         $this->assertSame('bool', (string) $partitions->keyType());
         $this->assertSame(Output::class, (string) $partitions->valueType());
         $this->assertCount(2, $partitions);
@@ -141,10 +140,10 @@ class StaticOutputTest extends TestCase
     public function testStringCast()
     {
         $output = new StaticOutput(
-            (new Map(Str::class, Type::class))
-                ->put(new Str('0'), Type::output())
-                ->put(new Str('1'), Type::output())
-                ->put(new Str('2'), Type::output())
+            Map::of(Str::class, Type::class)
+                ->put(Str::of('0'), Type::output())
+                ->put(Str::of('1'), Type::output())
+                ->put(Str::of('2'), Type::output())
         );
 
         $this->assertSame('012', $output->toString());

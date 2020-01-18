@@ -11,9 +11,9 @@ use Innmind\Server\Control\Server\{
     Process\Pid,
 };
 use Innmind\Url\Authority\{
-    HostInterface,
-    PortInterface,
-    UserInformation\UserInterface,
+    Host,
+    Port,
+    UserInformation\User,
 };
 
 final class RemoteProcesses implements Processes
@@ -23,21 +23,21 @@ final class RemoteProcesses implements Processes
 
     public function __construct(
         Processes $processes,
-        UserInterface $user,
-        HostInterface $host,
-        PortInterface $port = null
+        User $user,
+        Host $host,
+        Port $port = null
     ) {
         $this->processes = $processes;
         $command = Command::foreground('ssh');
 
-        if ($port instanceof PortInterface) {
-            $command = $command->withShortOption('p', (string) $port);
+        if ($port instanceof Port) {
+            $command = $command->withShortOption('p', $port->toString());
         }
 
         $this->command = $command->withArgument(sprintf(
             '%s@%s',
-            $user,
-            $host
+            $user->toString(),
+            $host->toString(),
         ));
     }
 
