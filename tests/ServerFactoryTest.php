@@ -18,7 +18,7 @@ class ServerFactoryTest extends TestCase
             return;
         }
 
-        $this->assertInstanceOf(Server::class, (new ServerFactory)->make());
+        $this->assertInstanceOf(Server::class, (new ServerFactory)());
         $this->assertInstanceOf(Server::class, ServerFactory::build());
     }
 
@@ -30,6 +30,6 @@ class ServerFactoryTest extends TestCase
 
         $this->expectException(UnsupportedOperatingSystem::class);
 
-        (new ServerFactory)->make();
+        (new ServerFactory)();
     }
 }

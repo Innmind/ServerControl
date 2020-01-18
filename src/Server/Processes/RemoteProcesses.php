@@ -34,7 +34,7 @@ final class RemoteProcesses implements Processes
             $command = $command->withShortOption('p', $port->toString());
         }
 
-        $this->command = $command->withArgument(sprintf(
+        $this->command = $command->withArgument(\sprintf(
             '%s@%s',
             $user->toString(),
             $host->toString(),
@@ -44,7 +44,7 @@ final class RemoteProcesses implements Processes
     public function execute(Command $command): Process
     {
         if ($command->hasWorkingDirectory()) {
-            $command = Command::foreground(sprintf(
+            $command = Command::foreground(\sprintf(
                 'cd %s && %s',
                 $command->workingDirectory()->toString(),
                 $command->toString(),
@@ -54,7 +54,7 @@ final class RemoteProcesses implements Processes
         return $this
             ->processes
             ->execute(
-                $this->command->withArgument($command->toString())
+                $this->command->withArgument($command->toString()),
             );
     }
 
@@ -64,7 +64,7 @@ final class RemoteProcesses implements Processes
             ->execute(
                 Command::foreground('kill')
                     ->withShortOption($signal->toString())
-                    ->withArgument($pid->toString())
+                    ->withArgument($pid->toString()),
             )
             ->wait();
     }

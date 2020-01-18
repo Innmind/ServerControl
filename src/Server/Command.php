@@ -18,6 +18,7 @@ use Innmind\Url\Path;
 use Innmind\Immutable\{
     Sequence,
     Map,
+    Str,
 };
 use function Innmind\Immutable\join;
 
@@ -34,7 +35,7 @@ final class Command
 
     private function __construct(bool $background, string $executable)
     {
-        if (empty($executable)) {
+        if (Str::of($executable)->empty()) {
             throw new EmptyExecutableNotAllowed;
         }
 
@@ -68,7 +69,7 @@ final class Command
     public function withArgument(string $value): self
     {
         $self = clone $this;
-        $self->parameters = $this->parameters->add(new Argument($value));
+        $self->parameters = ($this->parameters)(new Argument($value));
 
         return $self;
     }
@@ -76,7 +77,7 @@ final class Command
     public function withOption(string $key, string $value = null): self
     {
         $self = clone $this;
-        $self->parameters = $this->parameters->add(Option::long($key, $value));
+        $self->parameters = ($this->parameters)(Option::long($key, $value));
 
         return $self;
     }
@@ -84,19 +85,19 @@ final class Command
     public function withShortOption(string $key, string $value = null): self
     {
         $self = clone $this;
-        $self->parameters = $this->parameters->add(Option::short($key, $value));
+        $self->parameters = ($this->parameters)(Option::short($key, $value));
 
         return $self;
     }
 
     public function withEnvironment(string $key, string $value): self
     {
-        if (empty($key)) {
+        if (Str::of($key)->empty()) {
             throw new EmptyEnvironmentKeyNotAllowed;
         }
 
         $self = clone $this;
-        $self->environment = $this->environment->put($key, $value);
+        $self->environment = ($this->environment)($key, $value);
 
         return $self;
     }
@@ -150,7 +151,7 @@ final class Command
         $self = clone $this;
 
         if ($this->redirection) {
-            $self->parameters = $this->parameters->add($this->redirection);
+            $self->parameters = ($this->parameters)($this->redirection);
         }
 
         $self->parameters = $self
@@ -201,7 +202,7 @@ final class Command
         if ($this->parameters->size() > 0) {
             $parameters = $this->parameters->mapTo(
                 'string',
-                fn($parameter): string => $parameter->toString(),
+                static fn($parameter): string => $parameter->toString(),
             );
             $string .= ' '.join(' ', $parameters)->toString();
         }

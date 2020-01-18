@@ -98,7 +98,7 @@ final class Output implements OutputInterface
     {
         $bits = $this->output->mapTo(
             'string',
-            fn(array $output): string => $output[0]->toString(),
+            static fn(array $output): string => $output[0]->toString(),
         );
 
         return join('', $bits)->toString();

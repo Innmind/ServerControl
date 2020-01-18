@@ -20,7 +20,7 @@ final class Logger implements Server
     ) {
         $this->processes = new LoggerProcesses(
             $server->processes(),
-            $logger
+            $logger,
         );
     }
 

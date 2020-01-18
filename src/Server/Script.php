@@ -20,11 +20,10 @@ final class Script
 
     public static function of(string ...$commands): self
     {
-        foreach ($commands as &$command) {
-            $command = Command::foreground($command);
-        }
-
-        return new self(...$commands);
+        return new self(...\array_map(
+            static fn(string $command): Command => Command::foreground($command),
+            $commands,
+        ));
     }
 
     public function __invoke(Server $server): void
@@ -43,7 +42,7 @@ final class Script
                 }
 
                 return $processes;
-            }
+            },
         );
     }
 }

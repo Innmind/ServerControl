@@ -31,10 +31,10 @@ final class UnixProcesses implements Processes
                         $env[$key] = $value;
 
                         return $env;
-                    }
+                    },
                 ),
             $command->hasInput() ?
-                new Bridge($command->input()) : null
+                new Bridge($command->input()) : null,
         );
         $process
             ->setTimeout(0)
@@ -53,7 +53,7 @@ final class UnixProcesses implements Processes
             ->execute(
                 Command::foreground('kill')
                     ->withShortOption($signal->toString())
-                    ->withArgument($pid->toString())
+                    ->withArgument($pid->toString()),
             )
             ->wait();
     }

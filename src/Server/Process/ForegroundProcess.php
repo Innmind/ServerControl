@@ -25,7 +25,7 @@ final class ForegroundProcess implements ProcessInterface
         $this->process = $process;
         $this->output = new Output\Output(Sequence::defer(
             'array',
-            (function(Process $process) {
+            (static function(Process $process) {
                 foreach ($process->getIterator() as $key => $value) {
                     $type = $key === Process::OUT ? Output\Type::output() : Output\Type::error();
 
@@ -39,13 +39,13 @@ final class ForegroundProcess implements ProcessInterface
                 // opened (consequently preventing from running new processes) when
                 // we run too many processes but never wait them to finish.
                 $process->wait();
-            })($process)
+            })($process),
         ));
     }
 
     public function pid(): Pid
     {
-        return $this->pid ?? $this->pid = new Pid($this->process->getPid());
+        return $this->pid ??= new Pid($this->process->getPid());
     }
 
     public function output(): Output
@@ -62,8 +62,8 @@ final class ForegroundProcess implements ProcessInterface
             throw new ProcessStillRunning;
         }
 
-        return $this->exitCode ?? $this->exitCode = new ExitCode(
-            $this->process->getExitCode()
+        return $this->exitCode ??= new ExitCode(
+            $this->process->getExitCode(),
         );
     }
 

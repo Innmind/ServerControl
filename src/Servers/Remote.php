@@ -28,7 +28,7 @@ final class Remote implements Server
             $server->processes(),
             $user,
             $host,
-            $port
+            $port,
         );
     }
 

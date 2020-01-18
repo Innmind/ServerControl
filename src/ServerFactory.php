@@ -10,7 +10,7 @@ use Innmind\Server\Control\{
 
 final class ServerFactory
 {
-    public function make(): Server
+    public function __invoke(): Server
     {
         switch (PHP_OS) {
             case 'Darwin':
@@ -23,6 +23,6 @@ final class ServerFactory
 
     public static function build(): Server
     {
-        return (new self)->make();
+        return (new self)();
     }
 }
