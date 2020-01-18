@@ -6,13 +6,13 @@ namespace Innmind\Server\Control\Servers;
 use Innmind\Server\Control\{
     Server,
     Server\Processes,
-    Server\Processes\LoggerProcesses
+    Server\Processes\LoggerProcesses,
 };
 use Psr\Log\LoggerInterface;
 
 final class Logger implements Server
 {
-    private $processes;
+    private Processes $processes;
 
     public function __construct(
         Server $server,

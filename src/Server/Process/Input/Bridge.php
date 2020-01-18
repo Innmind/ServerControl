@@ -9,7 +9,7 @@ final class Bridge implements \Iterator
 {
     private const CHUNK = 8192;
 
-    private $stream;
+    private Readable $stream;
 
     public function __construct(Readable $stream)
     {

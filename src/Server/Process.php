@@ -6,7 +6,7 @@ namespace Innmind\Server\Control\Server;
 use Innmind\Server\Control\Server\Process\{
     Pid,
     Output,
-    ExitCode
+    ExitCode,
 };
 
 interface Process

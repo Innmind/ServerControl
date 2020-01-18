@@ -7,17 +7,17 @@ use Innmind\Server\Control\{
     Server\Process as ProcessInterface,
     Server\Process\Output\StaticOutput,
     Server\Process\Output\Type,
-    Exception\BackgroundProcessInformationNotAvailable
+    Exception\BackgroundProcessInformationNotAvailable,
 };
 use Innmind\Immutable\{
     Map,
-    Str
+    Str,
 };
 use Symfony\Component\Process\Process;
 
 final class BackgroundProcess implements ProcessInterface
 {
-    private $output;
+    private StaticOutput $output;
 
     public function __construct(Process $process)
     {

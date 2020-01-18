@@ -8,10 +8,10 @@ final class Type
     public const OUTPUT = 'stdout';
     public const ERROR = 'stderr';
 
-    private static $output;
-    private static $error;
+    private static ?self $output = null;
+    private static ?self $error = null;
 
-    private $value;
+    private string $value;
 
     private function __construct(string $type)
     {

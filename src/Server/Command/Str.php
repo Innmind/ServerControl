@@ -7,7 +7,7 @@ use Innmind\Immutable\Str as S;
 
 final class Str
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $string)
     {

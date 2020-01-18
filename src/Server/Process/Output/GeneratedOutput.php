@@ -5,20 +5,20 @@ namespace Innmind\Server\Control\Server\Process\Output;
 
 use Innmind\Server\Control\{
     Server\Process\Output,
-    CannotGroupEmptyOutput
+    CannotGroupEmptyOutput,
 };
 use Innmind\Immutable\{
     MapInterface,
     Map,
     Type as TypeDeterminator,
-    Str
+    Str,
 };
 use Symfony\Component\Process\Process;
 
 final class GeneratedOutput implements Output
 {
-    private $generator;
-    private $output;
+    private \Generator $generator;
+    private Map $output;
 
     public function __construct(\Generator $generator)
     {

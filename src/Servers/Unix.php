@@ -6,12 +6,12 @@ namespace Innmind\Server\Control\Servers;
 use Innmind\Server\Control\{
     Server,
     Server\Processes,
-    Server\Processes\UnixProcesses
+    Server\Processes\UnixProcesses,
 };
 
 final class Unix implements Server
 {
-    private $processes;
+    private Processes $processes;
 
     public function __construct()
     {

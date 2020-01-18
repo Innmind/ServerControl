@@ -5,17 +5,17 @@ namespace Innmind\Server\Control\Server\Process\Output;
 
 use Innmind\Server\Control\{
     Server\Process\Output,
-    Exception\InvalidOutputMap
+    Exception\InvalidOutputMap,
 };
 use Innmind\Immutable\{
     MapInterface,
     Map,
-    Str
+    Str,
 };
 
 final class StaticOutput implements Output
 {
-    private $output;
+    private MapInterface $output;
 
     public function __construct(MapInterface $output)
     {

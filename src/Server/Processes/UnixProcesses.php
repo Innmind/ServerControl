@@ -11,7 +11,7 @@ use Innmind\Server\Control\Server\{
     Process\ForegroundProcess,
     Process\BackgroundProcess,
     Signal,
-    Process\Input\Bridge
+    Process\Input\Bridge,
 };
 use Symfony\Component\Process\Process as SfProcess;
 

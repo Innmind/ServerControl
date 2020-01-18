@@ -8,18 +8,18 @@ use Innmind\Server\Control\Server\{
     Command,
     Signal,
     Process,
-    Process\Pid
+    Process\Pid,
 };
 use Innmind\Url\Authority\{
     HostInterface,
     PortInterface,
-    UserInformation\UserInterface
+    UserInformation\UserInterface,
 };
 
 final class RemoteProcesses implements Processes
 {
-    private $processes;
-    private $command;
+    private Processes $processes;
+    private Command $command;
 
     public function __construct(
         Processes $processes,

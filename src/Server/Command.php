@@ -11,24 +11,25 @@ use Innmind\Server\Control\{
     Server\Command\Pipe,
     Exception\LogicException,
     Exception\EmptyExecutableNotAllowed,
-    Exception\EmptyEnvironmentKeyNotAllowed
+    Exception\EmptyEnvironmentKeyNotAllowed,
 };
 use Innmind\Stream\Readable;
 use Innmind\Immutable\{
     Stream,
     Map,
-    MapInterface
+    MapInterface,
 };
 
 final class Command
 {
-    private $executable;
-    private $parameters;
-    private $environment;
-    private $workingDirectory;
-    private $input;
-    private $redirection;
-    private $background = false;
+    private string $executable;
+    private Stream $parameters;
+    private Map $environment;
+    private ?string $workingDirectory = null;
+    private ?Readable $input = null;
+    /** @var Append|Overwrite */
+    private ?object $redirection = null;
+    private bool $background = false;
 
     public function __construct(string $executable)
     {

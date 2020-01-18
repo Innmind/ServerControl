@@ -7,7 +7,7 @@ use Innmind\Server\Control\Exception\OutOfRangeExitCode;
 
 final class ExitCode
 {
-    private $value;
+    private int $value;
 
     public function __construct(int $value)
     {

@@ -7,7 +7,7 @@ use Innmind\Server\Control\Exception\LowestPidPossibleIsTwo;
 
 final class Pid
 {
-    private $value;
+    private int $value;
 
     public function __construct(int $value)
     {

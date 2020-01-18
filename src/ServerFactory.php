@@ -5,7 +5,7 @@ namespace Innmind\Server\Control;
 
 use Innmind\Server\Control\{
     Servers\Unix,
-    Exception\UnsupportedOperatingSystem
+    Exception\UnsupportedOperatingSystem,
 };
 
 final class ServerFactory

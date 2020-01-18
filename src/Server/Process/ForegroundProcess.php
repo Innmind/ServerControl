@@ -6,16 +6,16 @@ namespace Innmind\Server\Control\Server\Process;
 use Innmind\Server\Control\{
     Server\Process as ProcessInterface,
     Server\Process\Output\GeneratedOutput,
-    Exception\ProcessStillRunning
+    Exception\ProcessStillRunning,
 };
 use Symfony\Component\Process\Process;
 
 final class ForegroundProcess implements ProcessInterface
 {
-    private $process;
-    private $pid;
-    private $output;
-    private $exitCode;
+    private Process $process;
+    private ?Pid $pid;
+    private ?Output $output;
+    private ?ExitCode $exitCode;
 
     public function __construct(Process $process)
     {

@@ -13,7 +13,7 @@ final class Signal
     public const ALARM = \SIGALRM;
     public const TERMINATE = \SIGTERM;
 
-    private $value;
+    private int $value;
 
     private function __construct(int $value)
     {

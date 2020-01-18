@@ -5,13 +5,13 @@ namespace Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\{
     Server,
-    Exception\ScriptFailed
+    Exception\ScriptFailed,
 };
 use Innmind\Immutable\Sequence;
 
 final class Script
 {
-    private $commands;
+    private Sequence $commands;
 
     public function __construct(Command ...$commands)
     {

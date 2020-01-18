@@ -8,14 +8,14 @@ use Innmind\Server\Control\Server\{
     Command,
     Signal,
     Process,
-    Process\Pid
+    Process\Pid,
 };
 use Psr\Log\LoggerInterface;
 
 final class LoggerProcesses implements Processes
 {
-    private $processes;
-    private $logger;
+    private Processes $processes;
+    private LoggerInterface $logger;
 
     public function __construct(
         Processes $processes,

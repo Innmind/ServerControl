@@ -7,9 +7,9 @@ use Innmind\Server\Control\Exception\EmptyOptionNotAllowed;
 
 final class Option
 {
-    private $long;
-    private $key;
-    private $value;
+    private bool $long;
+    private string $key;
+    private ?string $value;
 
     private function __construct(bool $long, string $key, string $value = null)
     {

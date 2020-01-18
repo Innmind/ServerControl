@@ -5,7 +5,7 @@ namespace Innmind\Server\Control\Server\Command;
 
 final class Argument
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $value)
     {
