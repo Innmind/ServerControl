@@ -1,10 +1,9 @@
 # ServerControl
 
-| `master` | `develop` |
-|----------|-----------|
-| [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/ServerControl/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Innmind/ServerControl/?branch=master) | [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/ServerControl/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/ServerControl/?branch=develop) |
-| [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/ServerControl/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/Innmind/ServerControl/?branch=master) | [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/ServerControl/badges/coverage.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/ServerControl/?branch=develop) |
-| [![Build Status](https://scrutinizer-ci.com/g/Innmind/ServerControl/badges/build.png?b=master)](https://scrutinizer-ci.com/g/Innmind/ServerControl/build-status/master) | [![Build Status](https://scrutinizer-ci.com/g/Innmind/ServerControl/badges/build.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/ServerControl/build-status/develop) |
+| `develop` |
+|-----------|
+| [![codecov](https://codecov.io/gh/Innmind/ServerControl/branch/develop/graph/badge.svg)](https://codecov.io/gh/Innmind/ServerControl) |
+| [![Build Status](https://github.com/Innmind/ServerControl/workflows/CI/badge.svg)](https://github.com/Innmind/ServerControl/actions?query=workflow%3ACI) |
 
 Give access to giev instructions to the server.
 
