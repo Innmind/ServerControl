@@ -8,7 +8,10 @@ use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Processes\RemoteProcesses,
-    Server\Command
+    Server\Process,
+    Server\Process\ExitCode,
+    Server\Command,
+    Server\Volumes,
 };
 use Innmind\Url\Authority\{
     Host,
@@ -84,5 +87,48 @@ class RemoteTest extends TestCase
             $remote->processes()
         );
         $remote->processes()->execute(Command::foreground('ls'));
+    }
+
+    public function testVolumes()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->at(0))
+            ->method('execute')
+            ->with($this->callback(function(Command $command): bool {
+                return $command->toString() === "ssh 'foo@example.com' 'which diskutil'";
+            }))
+            ->willReturn($which = $this->createMock(Process::class));
+        $which
+            ->expects($this->once())
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+        $processes
+            ->expects($this->at(1))
+            ->method('execute')
+            ->with($this->callback(function(Command $command): bool {
+                return $command->toString() === "ssh 'foo@example.com' 'diskutil '\''unmount'\'' '\''/dev'\'''";
+            }))
+            ->willReturn($which = $this->createMock(Process::class));
+        $which
+            ->expects($this->once())
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $remote = new Remote(
+            $server,
+            User::of('foo'),
+            Host::of('example.com'),
+        );
+
+        $this->assertInstanceOf(
+            Volumes::class,
+            $remote->volumes()
+        );
+        $remote->volumes()->unmount(new Volumes\Name('/dev'));
     }
 }

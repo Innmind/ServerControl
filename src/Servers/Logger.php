@@ -7,12 +7,14 @@ use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Processes\LoggerProcesses,
+    Server\Volumes,
 };
 use Psr\Log\LoggerInterface;
 
 final class Logger implements Server
 {
     private Processes $processes;
+    private Volumes $volumes;
 
     public function __construct(
         Server $server,
@@ -22,10 +24,16 @@ final class Logger implements Server
             $server->processes(),
             $logger,
         );
+        $this->volumes = new Volumes\Unix($this->processes);
     }
 
     public function processes(): Processes
     {
         return $this->processes;
+    }
+
+    public function volumes(): Volumes
+    {
+        return $this->volumes;
     }
 }
