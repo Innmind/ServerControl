@@ -12,7 +12,7 @@ final class ExitCode
     public function __construct(int $value)
     {
         if ($value < 0 || $value > 255) {
-            throw new OutOfRangeExitCode;
+            throw new OutOfRangeExitCode((string) $value);
         }
 
         $this->value = $value;
