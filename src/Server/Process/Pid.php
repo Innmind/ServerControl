@@ -12,7 +12,7 @@ final class Pid
     public function __construct(int $value)
     {
         if ($value < 2) {
-            throw new LowestPidPossibleIsTwo((string) $value); //1 is reserved by the system
+            throw new LowestPidPossibleIsTwo((string) $value); // 1 is reserved by the system
         }
 
         $this->value = $value;
