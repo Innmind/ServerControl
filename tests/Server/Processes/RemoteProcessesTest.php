@@ -11,10 +11,11 @@ use Innmind\Server\Control\Server\{
     Signal,
     Process\Pid
 };
-use Innmind\Url\Authority\{
-    Host,
-    Port,
-    UserInformation\User
+use Innmind\Url\{
+    Path,
+    Authority\Host,
+    Authority\Port,
+    Authority\UserInformation\User
 };
 use PHPUnit\Framework\TestCase;
 
@@ -99,7 +100,7 @@ class RemoteProcessesTest extends TestCase
             $remote->execute(
                 Command::foreground('ls')
                     ->withShortOption('l')
-                    ->withWorkingDirectory('/tmp/foo')
+                    ->withWorkingDirectory(Path::of('/tmp/foo')),
             )
         );
     }

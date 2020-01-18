@@ -29,7 +29,7 @@ final class LoggerProcesses implements Processes
     {
         $this->logger->info('About to execute a command', [
             'command' => $command->toString(),
-            'workingDirectory' => $command->hasWorkingDirectory() ? $command->workingDirectory() : null
+            'workingDirectory' => $command->hasWorkingDirectory() ? $command->workingDirectory()->toString() : null
         ]);
 
         return $this->processes->execute($command);

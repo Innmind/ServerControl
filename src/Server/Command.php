@@ -14,6 +14,7 @@ use Innmind\Server\Control\{
     Exception\EmptyEnvironmentKeyNotAllowed,
 };
 use Innmind\Stream\Readable;
+use Innmind\Url\Path;
 use Innmind\Immutable\{
     Sequence,
     Map,
@@ -25,7 +26,7 @@ final class Command
     private string $executable;
     private Sequence $parameters;
     private Map $environment;
-    private ?string $workingDirectory = null;
+    private ?Path $workingDirectory = null;
     private ?Readable $input = null;
     /** @var Append|Overwrite */
     private ?object $redirection = null;
@@ -100,12 +101,8 @@ final class Command
         return $self;
     }
 
-    public function withWorkingDirectory(string $path): self
+    public function withWorkingDirectory(Path $path): self
     {
-        if (empty($path)) {
-            return $this;
-        }
-
         $self = clone $this;
         $self->workingDirectory = $path;
 
@@ -174,10 +171,10 @@ final class Command
 
     public function hasWorkingDirectory(): bool
     {
-        return is_string($this->workingDirectory);
+        return $this->workingDirectory instanceof Path;
     }
 
-    public function workingDirectory(): string
+    public function workingDirectory(): Path
     {
         return $this->workingDirectory;
     }

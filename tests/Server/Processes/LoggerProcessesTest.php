@@ -11,6 +11,7 @@ use Innmind\Server\Control\Server\{
     Signal,
     Process\Pid
 };
+use Innmind\Url\Path;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -88,7 +89,7 @@ class LoggerProcessesTest extends TestCase
             $logger->execute(
                 Command::foreground('ls')
                     ->withShortOption('l')
-                    ->withWorkingDirectory('/tmp/foo')
+                    ->withWorkingDirectory(Path::of('/tmp/foo')),
             )
         );
     }

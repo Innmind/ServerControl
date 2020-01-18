@@ -46,7 +46,7 @@ final class RemoteProcesses implements Processes
         if ($command->hasWorkingDirectory()) {
             $command = Command::foreground(sprintf(
                 'cd %s && %s',
-                $command->workingDirectory(),
+                $command->workingDirectory()->toString(),
                 $command->toString(),
             ));
         }

@@ -9,6 +9,7 @@ use Innmind\Server\Control\{
     Exception\EmptyOptionNotAllowed,
 };
 use Innmind\Stream\Readable;
+use Innmind\Url\Path;
 use Innmind\Immutable\Map;
 use PHPUnit\Framework\TestCase;
 
@@ -111,12 +112,12 @@ class CommandTest extends TestCase
     public function testWithWorkingDirectory()
     {
         $command = Command::foreground('bin/console')
-            ->withWorkingDirectory('/var/www/app');
+            ->withWorkingDirectory(Path::of('/var/www/app'));
 
         $this->assertInstanceOf(Command::class, $command);
         $this->assertTrue($command->hasWorkingDirectory());
         $this->assertSame('bin/console', $command->toString());
-        $this->assertSame('/var/www/app', $command->workingDirectory());
+        $this->assertSame('/var/www/app', $command->workingDirectory()->toString());
     }
 
     public function testWithInput()
