@@ -9,7 +9,6 @@ use Innmind\Server\Control\{
     Server\Command\Overwrite,
     Server\Command\Append,
     Server\Command\Pipe,
-    Exception\LogicException,
     Exception\EmptyExecutableNotAllowed,
     Exception\EmptyEnvironmentKeyNotAllowed,
 };
@@ -118,30 +117,18 @@ final class Command
         return $self;
     }
 
-    public function overwrite(string $path): self
+    public function overwrite(Path $path): self
     {
-        try {
-            $argument = new Overwrite($path);
-        } catch (LogicException $e) {
-            return $this;
-        }
-
         $self = clone $this;
-        $self->redirection = $argument;
+        $self->redirection = new Overwrite($path);
 
         return $self;
     }
 
-    public function append(string $path): self
+    public function append(Path $path): self
     {
-        try {
-            $argument = new Append($path);
-        } catch (LogicException $e) {
-            return $this;
-        }
-
         $self = clone $this;
-        $self->redirection = $argument;
+        $self->redirection = new Append($path);
 
         return $self;
     }

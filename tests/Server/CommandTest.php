@@ -136,47 +136,29 @@ class CommandTest extends TestCase
     {
         $command = Command::foreground('echo')
             ->withArgument('bar')
-            ->overwrite('foo.txt');
+            ->overwrite(Path::of('foo.txt'));
 
         $this->assertSame("echo 'bar' > 'foo.txt'", $command->toString());
-    }
-
-    public function testDoesntOverwriteWhenEmptyPath()
-    {
-        $command = Command::foreground('echo')
-            ->withArgument('bar')
-            ->overwrite('');
-
-        $this->assertSame("echo 'bar'", $command->toString());
     }
 
     public function testAppend()
     {
         $command = Command::foreground('echo')
             ->withArgument('bar')
-            ->append('foo.txt');
+            ->append(Path::of('foo.txt'));
 
         $this->assertSame("echo 'bar' >> 'foo.txt'", $command->toString());
-    }
-
-    public function testDoesntAppendWhenEmptyPath()
-    {
-        $command = Command::foreground('echo')
-            ->withArgument('bar')
-            ->append('');
-
-        $this->assertSame("echo 'bar'", $command->toString());
     }
 
     public function testPipe()
     {
         $commandA = Command::foreground('echo')
             ->withArgument('bar')
-            ->append('foo.txt');
+            ->append(Path::of('foo.txt'));
         $commandB = Command::foreground('cat')
             ->withArgument('foo.txt');
         $commandC = Command::foreground('wc')
-            ->overwrite('count.txt');
+            ->overwrite(Path::of('count.txt'));
 
         $command = $commandA->pipe($commandB)->pipe($commandC);
 
