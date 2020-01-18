@@ -20,7 +20,17 @@ final class ForegroundProcess implements ProcessInterface
     public function __construct(Process $process)
     {
         $this->process = $process;
-        $this->output = new GeneratedOutput($process->getIterator());
+        $this->output = new GeneratedOutput((function(Process $process) {
+            yield from $process->getIterator();
+
+            // we wait the process to finish after iterating over the output in
+            // order to correctly close the pipes to the process when the user
+            // only iterates over the output so he doesn't have to call the wait
+            // function automatically. It also fix a bug where too many pipes are
+            // opened (consequently preventing from running new processes) when
+            // we run too many processes but never wait them to finish.
+            $process->wait();
+        })($process));
     }
 
     public function pid(): Pid
