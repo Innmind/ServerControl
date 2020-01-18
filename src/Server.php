@@ -12,4 +12,6 @@ interface Server
 {
     public function processes(): Processes;
     public function volumes(): Volumes;
+    public function reboot(): void;
+    public function shutdown(): void;
 }

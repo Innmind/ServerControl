@@ -109,4 +109,78 @@ class LoggerTest extends TestCase
         );
         $logger->volumes()->unmount(new Volumes\Name('/dev'));
     }
+
+    public function testReboot()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function(Command $command): bool {
+                return $command->toString() === "sudo shutdown -r now";
+            }))
+            ->willReturn($shutdown = $this->createMock(Process::class));
+        $shutdown
+            ->expects($this->once())
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $logger = new Logger(
+            $server,
+            $log = $this->createMock(LoggerInterface::class),
+        );
+        $log
+            ->expects($this->at(0))
+            ->method('info')
+            ->with(
+                'About to execute a command',
+                [
+                    'command' => 'sudo shutdown -r now',
+                    'workingDirectory' => null,
+                ],
+            );
+
+        $this->assertNull($logger->reboot());
+    }
+
+    public function testShutdown()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function(Command $command): bool {
+                return $command->toString() === "sudo shutdown -h now";
+            }))
+            ->willReturn($shutdown = $this->createMock(Process::class));
+        $shutdown
+            ->expects($this->once())
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $logger = new Logger(
+            $server,
+            $log = $this->createMock(LoggerInterface::class),
+        );
+        $log
+            ->expects($this->at(0))
+            ->method('info')
+            ->with(
+                'About to execute a command',
+                [
+                    'command' => 'sudo shutdown -h now',
+                    'workingDirectory' => null,
+                ],
+            );
+
+        $this->assertNull($logger->shutdown());
+    }
 }

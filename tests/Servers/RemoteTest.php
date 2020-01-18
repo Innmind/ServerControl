@@ -131,4 +131,60 @@ class RemoteTest extends TestCase
         );
         $remote->volumes()->unmount(new Volumes\Name('/dev'));
     }
+
+    public function testReboot()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function(Command $command): bool {
+                return $command->toString() === "ssh 'foo@example.com' 'sudo shutdown -r now'";
+            }))
+            ->willReturn($shutdown = $this->createMock(Process::class));
+        $shutdown
+            ->expects($this->once())
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $remote = new Remote(
+            $server,
+            User::of('foo'),
+            Host::of('example.com'),
+        );
+
+        $this->assertNull($remote->reboot());
+    }
+
+    public function testShutdown()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function(Command $command): bool {
+                return $command->toString() === "ssh 'foo@example.com' 'sudo shutdown -h now'";
+            }))
+            ->willReturn($shutdown = $this->createMock(Process::class));
+        $shutdown
+            ->expects($this->once())
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $remote = new Remote(
+            $server,
+            User::of('foo'),
+            Host::of('example.com'),
+        );
+
+        $this->assertNull($remote->shutdown());
+    }
 }

@@ -30,4 +30,14 @@ final class Unix implements Server
     {
         return $this->volumes;
     }
+
+    public function reboot(): void
+    {
+        Server\Script::of('sudo shutdown -r now')($this);
+    }
+
+    public function shutdown(): void
+    {
+        Server\Script::of('sudo shutdown -h now')($this);
+    }
 }
