@@ -11,10 +11,12 @@ use Innmind\Immutable\Sequence;
 
 final class Script
 {
+    /** @var Sequence<Command> */
     private Sequence $commands;
 
     public function __construct(Command ...$commands)
     {
+        /** @var Sequence<Command> */
         $this->commands = Sequence::of(Command::class, ...$commands);
     }
 
