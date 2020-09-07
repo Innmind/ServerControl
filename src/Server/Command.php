@@ -26,6 +26,7 @@ final class Command
     private string $executable;
     /** @var Sequence<Command\Parameter> */
     private Sequence $parameters;
+    /** @var Map<string, string> */
     private Map $environment;
     private ?Path $workingDirectory = null;
     private ?Readable $input = null;
@@ -43,6 +44,7 @@ final class Command
         $this->background = $background;
         /** @var Sequence<Command\Parameter> */
         $this->parameters = Sequence::of(Command\Parameter::class);
+        /** @var Map<string, string> */
         $this->environment = Map::of('string', 'string');
     }
 
@@ -154,6 +156,9 @@ final class Command
         return $self;
     }
 
+    /**
+     * @return Map<string, string>
+     */
     public function environment(): Map
     {
         return $this->environment;
