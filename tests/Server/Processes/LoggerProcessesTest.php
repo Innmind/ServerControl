@@ -37,10 +37,10 @@ class LoggerProcessesTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function(Command $command): bool {
+            ->with($this->callback(static function(Command $command): bool {
                 return $command->toString() === "ls '-l'";
             }))
-            ->willReturn($process = $this->createMock(Process::class));
+            ->willReturn($this->createMock(Process::class));
         $log
             ->expects($this->once())
             ->method('info')
@@ -52,8 +52,8 @@ class LoggerProcessesTest extends TestCase
                 ]
             );
 
-        $this->assertSame(
-            $process,
+        $this->assertInstanceOf(
+            Process\LoggerProcess::class,
             $logger->execute(
                 Command::foreground('ls')->withShortOption('l')
             )
@@ -69,10 +69,10 @@ class LoggerProcessesTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function(Command $command): bool {
+            ->with($this->callback(static function(Command $command): bool {
                 return $command->toString() === "ls '-l'";
             }))
-            ->willReturn($process = $this->createMock(Process::class));
+            ->willReturn($this->createMock(Process::class));
         $log
             ->expects($this->once())
             ->method('info')
@@ -84,8 +84,8 @@ class LoggerProcessesTest extends TestCase
                 ]
             );
 
-        $this->assertSame(
-            $process,
+        $this->assertInstanceOf(
+            Process\LoggerProcess::class,
             $logger->execute(
                 Command::foreground('ls')
                     ->withShortOption('l')

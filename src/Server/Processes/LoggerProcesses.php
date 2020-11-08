@@ -32,7 +32,11 @@ final class LoggerProcesses implements Processes
             'workingDirectory' => $command->hasWorkingDirectory() ? $command->workingDirectory()->toString() : null,
         ]);
 
-        return $this->processes->execute($command);
+        return new Process\LoggerProcess(
+            $this->processes->execute($command),
+            $command,
+            $this->logger,
+        );
     }
 
     public function kill(Pid $pid, Signal $signal): void

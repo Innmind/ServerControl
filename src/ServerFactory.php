@@ -12,7 +12,7 @@ final class ServerFactory
 {
     public function __invoke(): Server
     {
-        switch (PHP_OS) {
+        switch (\PHP_OS) {
             case 'Darwin':
             case 'Linux':
                 return new Unix;

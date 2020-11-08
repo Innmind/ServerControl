@@ -90,3 +90,12 @@ $server->processes()->execute(new Command('ls'));
 This will run `ssh -p 42 john@example.com ls`.
 
 **Important**: specifying environment variables or an input stream will not be taken into account on the remote server.
+
+### Logging
+
+```php
+use Innmind\Server\Control\Servers\Logger;
+use Psr\Log\LoggerInterface;
+
+$server = new Logger($server, /** an instance of LoggerInterface */);
+```

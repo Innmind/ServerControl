@@ -36,9 +36,6 @@ final class BackgroundProcess implements ProcessInterface
         return $this->output;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function exitCode(): ExitCode
     {
         throw new BackgroundProcessInformationNotAvailable;

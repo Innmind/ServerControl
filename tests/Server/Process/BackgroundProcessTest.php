@@ -13,7 +13,6 @@ use Innmind\Server\Control\{
     Exception\ProcessStillRunning,
     Exception\BackgroundProcessInformationNotAvailable,
 };
-use Innmind\Immutable\Str;
 use Symfony\Component\Process\Process as SfProcess;
 use PHPUnit\Framework\TestCase;
 
@@ -48,9 +47,9 @@ class BackgroundProcessTest extends TestCase
         $process = new BackgroundProcess($slow);
 
         $this->assertInstanceOf(Output::class, $process->output());
-        $start = time();
+        $start = \time();
         $this->assertSame('', $process->output()->toString());
-        $this->assertTrue((time() - $start) < 1);
+        $this->assertTrue((\time() - $start) < 1);
     }
 
     public function testExitCode()

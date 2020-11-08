@@ -8,6 +8,7 @@ use Innmind\Server\Control\{
     Server\Process\Output,
     Server\Process\ExitCode,
     Exception\ProcessStillRunning,
+    Exception\ProcessTimedOut,
 };
 
 interface Process
@@ -19,6 +20,10 @@ interface Process
      * @throws ProcessStillRunning
      */
     public function exitCode(): ExitCode;
+
+    /**
+     * @throws ProcessTimedOut
+     */
     public function wait(): void;
     public function isRunning(): bool;
 }

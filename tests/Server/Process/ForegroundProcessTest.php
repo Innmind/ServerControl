@@ -45,7 +45,7 @@ class ForegroundProcessTest extends TestCase
         $process = new ForegroundProcess($slow);
 
         $this->assertInstanceOf(Output::class, $process->output());
-        $start = time();
+        $start = \time();
         $count = 0;
         $process
             ->output()
@@ -55,7 +55,7 @@ class ForegroundProcessTest extends TestCase
                     (int) $data->toString() % 2 === 0 ? Type::output() : Type::error(),
                     $type
                 );
-                $this->assertTrue((time() - $start) >= (1 + $count));
+                $this->assertTrue((\time() - $start) >= (1 + $count));
                 ++$count;
             });
         $this->assertSame(6, $count);
@@ -74,7 +74,7 @@ class ForegroundProcessTest extends TestCase
             //pass
         }
 
-        sleep(7);
+        \sleep(7);
 
         $this->assertInstanceOf(ExitCode::class, $process->exitCode());
         $this->assertSame(0, $process->exitCode()->toInt());
@@ -86,7 +86,7 @@ class ForegroundProcessTest extends TestCase
         $slow->start();
         $process = new ForegroundProcess($slow);
 
-        sleep(1);
+        \sleep(1);
 
         $this->assertSame(1, $process->exitCode()->toInt());
     }
@@ -108,7 +108,7 @@ class ForegroundProcessTest extends TestCase
         $process = new ForegroundProcess($slow);
 
         $this->assertTrue($process->isRunning());
-        sleep(7);
+        \sleep(7);
         $this->assertFalse($process->isRunning());
     }
 }

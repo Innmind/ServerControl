@@ -14,8 +14,8 @@ class ServerFactoryTest extends TestCase
 {
     public function testMakeUnix()
     {
-        if (!in_array(PHP_OS, ['Darwin', 'Linux'])) {
-            return;
+        if (!\in_array(\PHP_OS, ['Darwin', 'Linux'], true)) {
+            $this->markTestSkipped();
         }
 
         $this->assertInstanceOf(Server::class, (new ServerFactory)());
@@ -24,8 +24,8 @@ class ServerFactoryTest extends TestCase
 
     public function testThrowWhenUnsupportedOperatingSystem()
     {
-        if (in_array(PHP_OS, ['Darwin', 'Linux'])) {
-            return;
+        if (\in_array(\PHP_OS, ['Darwin', 'Linux'], true)) {
+            $this->markTestSkipped();
         }
 
         $this->expectException(UnsupportedOperatingSystem::class);

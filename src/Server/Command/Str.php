@@ -24,7 +24,7 @@ final class Str
      */
     private function escape(S $string): S
     {
-        if ('\\' !== DIRECTORY_SEPARATOR) {
+        if ('\\' !== \DIRECTORY_SEPARATOR) {
             return $string
                 ->replace("'", "'\\''")
                 ->prepend("'")
