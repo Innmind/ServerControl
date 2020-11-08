@@ -81,7 +81,7 @@ final class ForegroundProcess implements ProcessInterface
         try {
             $this->process->wait();
         } catch (ProcessTimedOutException $e) {
-            throw new ProcessTimedOut;
+            throw new ProcessTimedOut($e->getMessage(), (int) $e->getCode(), $e);
         }
     }
 
