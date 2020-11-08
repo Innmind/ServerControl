@@ -62,7 +62,7 @@ final class Unix implements Volumes
         $process = $this->processes->execute($command);
         $process->wait();
 
-        if (!$process->exitCode()->isSuccessful()) {
+        if (!$process->exitCode()->successful()) {
             throw new ScriptFailed($command, $process);
         }
     }
@@ -72,6 +72,6 @@ final class Unix implements Volumes
         $isOSX = $this->processes->execute(Command::foreground('which diskutil'));
         $isOSX->wait();
 
-        return $isOSX->exitCode()->isSuccessful();
+        return $isOSX->exitCode()->successful();
     }
 }

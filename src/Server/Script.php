@@ -31,7 +31,7 @@ final class Script
                 $process->wait();
                 $exitCode = $process->exitCode();
 
-                if (!$exitCode->isSuccessful()) {
+                if (!$exitCode->successful()) {
                     throw new ScriptFailed($command, $process);
                 }
 
