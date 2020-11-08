@@ -37,7 +37,7 @@ final class UnixProcesses implements Processes
                 new Bridge($command->input()) : null,
         );
         $process
-            ->setTimeout(0)
+            ->setTimeout($command->shouldTimeout() ? $command->timeout()->toInt() : 0)
             ->start();
 
         if ($command->toBeRunInBackground()) {

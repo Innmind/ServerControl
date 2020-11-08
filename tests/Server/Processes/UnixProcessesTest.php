@@ -3,13 +3,15 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Processes;
 
-use Innmind\Server\Control\Server\{
-    Processes\UnixProcesses,
-    Processes,
-    Command,
-    Process\ForegroundProcess,
-    Process\BackgroundProcess,
-    Signal
+use Innmind\Server\Control\{
+    Server\Processes\UnixProcesses,
+    Server\Processes,
+    Server\Command,
+    Server\Second,
+    Server\Process\ForegroundProcess,
+    Server\Process\BackgroundProcess,
+    Server\Signal,
+    Exception\ProcessTimedOut,
 };
 use Innmind\Stream\Readable\Stream;
 use PHPUnit\Framework\TestCase;
@@ -73,5 +75,26 @@ class UnixProcessesTest extends TestCase
         \sleep(1);
         $this->assertFalse($process->isRunning());
         $this->assertTrue((\time() - $start) < 2);
+    }
+
+    public function testTimeout()
+    {
+        $processes = new UnixProcesses;
+        $start = \time();
+        $process = $processes->execute(
+            Command::foreground('sleep')
+                ->withArgument('1000')
+                ->timeoutAfter(new Second(1)),
+        );
+
+        try {
+            $process->wait();
+            $this->fail('it should throw');
+        } catch (\Exception $e) {
+            $this->assertInstanceOf(ProcessTimedOut::class, $e);
+        }
+
+        $this->assertLessThan(3, $start - \time());
+        $this->assertFalse($process->exitCode()->successful());
     }
 }

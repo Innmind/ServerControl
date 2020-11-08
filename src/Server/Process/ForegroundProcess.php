@@ -6,12 +6,16 @@ namespace Innmind\Server\Control\Server\Process;
 use Innmind\Server\Control\{
     Server\Process as ProcessInterface,
     Exception\ProcessStillRunning,
+    Exception\ProcessTimedOut,
 };
 use Innmind\Immutable\{
     Sequence,
     Str,
 };
-use Symfony\Component\Process\Process;
+use Symfony\Component\Process\{
+    Process,
+    Exception\ProcessTimedOutException,
+};
 
 final class ForegroundProcess implements ProcessInterface
 {
@@ -74,7 +78,11 @@ final class ForegroundProcess implements ProcessInterface
 
     public function wait(): void
     {
-        $this->process->wait();
+        try {
+            $this->process->wait();
+        } catch (ProcessTimedOutException $e) {
+            throw new ProcessTimedOut;
+        }
     }
 
     public function isRunning(): bool

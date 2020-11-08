@@ -33,6 +33,7 @@ final class Command
     /** @var Append|Overwrite */
     private ?object $redirection = null;
     private bool $background = false;
+    private ?Second $timeout = null;
 
     private function __construct(bool $background, string $executable)
     {
@@ -156,6 +157,14 @@ final class Command
         return $self;
     }
 
+    public function timeoutAfter(Second $seconds): self
+    {
+        $self = clone $this;
+        $self->timeout = $seconds;
+
+        return $self;
+    }
+
     /**
      * @return Map<string, string>
      */
@@ -191,6 +200,18 @@ final class Command
     public function toBeRunInBackground(): bool
     {
         return $this->background;
+    }
+
+    public function shouldTimeout(): bool
+    {
+        return $this->timeout instanceof Second;
+    }
+
+    /** @psalm-suppress InvalidNullableReturnType */
+    public function timeout(): Second
+    {
+        /** @psalm-suppress NullableReturnStatement */
+        return $this->timeout;
     }
 
     public function toString(): string

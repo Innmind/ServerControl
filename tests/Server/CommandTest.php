@@ -5,6 +5,7 @@ namespace Tests\Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\{
     Server\Command,
+    Server\Second,
     Exception\EmptyExecutableNotAllowed,
     Exception\EmptyOptionNotAllowed,
 };
@@ -170,5 +171,15 @@ class CommandTest extends TestCase
             "echo 'bar' >> 'foo.txt' | 'cat' 'foo.txt' | 'wc' > 'count.txt'",
             $command->toString()
         );
+    }
+
+    public function testTimeout()
+    {
+        $commandA = Command::foreground('echo');
+        $commandB = $commandA->timeoutAfter($timeout = new Second(1));
+
+        $this->assertFalse($commandA->shouldTimeout());
+        $this->assertTrue($commandB->shouldTimeout());
+        $this->assertSame($timeout, $commandB->timeout());
     }
 }
