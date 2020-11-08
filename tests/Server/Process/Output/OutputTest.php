@@ -68,7 +68,7 @@ class OutputTest extends TestCase
             3,
             $output->reduce(
                 0,
-                function(int $carry, Str $data, Type $type) {
+                static function(int $carry, Str $data, Type $type) {
                     return $carry + (int) $data->toString();
                 }
             )
@@ -85,7 +85,7 @@ class OutputTest extends TestCase
                 [Str::of('2'), Type::output()],
             ),
         );
-        $output2 = $output->filter(function(Str $data, Type $type) {
+        $output2 = $output->filter(static function(Str $data, Type $type) {
             return (int) $data->toString() % 2 === 0;
         });
 
@@ -105,7 +105,7 @@ class OutputTest extends TestCase
                 [Str::of('2'), Type::output()],
             ),
         );
-        $groups = $output->groupBy(function(Str $data, Type $type) {
+        $groups = $output->groupBy(static function(Str $data, Type $type) {
             return (int) $data->toString() % 2;
         });
 
@@ -127,7 +127,7 @@ class OutputTest extends TestCase
                 [Str::of('2'), Type::output()],
             ),
         );
-        $partitions = $output->partition(function(Str $data, Type $type) {
+        $partitions = $output->partition(static function(Str $data, Type $type) {
             return (int) $data->toString() % 2 === 0;
         });
 

@@ -42,7 +42,7 @@ class LoggerTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function(Command $command): bool {
+            ->with($this->callback(static function(Command $command): bool {
                 return $command->toString() === 'ls';
             }));
 
@@ -68,8 +68,8 @@ class LoggerTest extends TestCase
         $processes
             ->expects($this->at(0))
             ->method('execute')
-            ->with($this->callback(function(Command $command): bool {
-                return $command->toString() === "which diskutil";
+            ->with($this->callback(static function(Command $command): bool {
+                return $command->toString() === 'which diskutil';
             }))
             ->willReturn($which = $this->createMock(Process::class));
         $which
@@ -79,7 +79,7 @@ class LoggerTest extends TestCase
         $processes
             ->expects($this->at(1))
             ->method('execute')
-            ->with($this->callback(function(Command $command): bool {
+            ->with($this->callback(static function(Command $command): bool {
                 return $command->toString() === "diskutil 'unmount' '/dev'";
             }))
             ->willReturn($which = $this->createMock(Process::class));
@@ -120,8 +120,8 @@ class LoggerTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function(Command $command): bool {
-                return $command->toString() === "sudo shutdown -r now";
+            ->with($this->callback(static function(Command $command): bool {
+                return $command->toString() === 'sudo shutdown -r now';
             }))
             ->willReturn($shutdown = $this->createMock(Process::class));
         $shutdown
@@ -157,8 +157,8 @@ class LoggerTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function(Command $command): bool {
-                return $command->toString() === "sudo shutdown -h now";
+            ->with($this->callback(static function(Command $command): bool {
+                return $command->toString() === 'sudo shutdown -h now';
             }))
             ->willReturn($shutdown = $this->createMock(Process::class));
         $shutdown

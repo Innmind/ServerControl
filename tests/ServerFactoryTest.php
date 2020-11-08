@@ -14,7 +14,7 @@ class ServerFactoryTest extends TestCase
 {
     public function testMakeUnix()
     {
-        if (!in_array(PHP_OS, ['Darwin', 'Linux'])) {
+        if (!\in_array(\PHP_OS, ['Darwin', 'Linux'], true)) {
             return;
         }
 
@@ -24,7 +24,7 @@ class ServerFactoryTest extends TestCase
 
     public function testThrowWhenUnsupportedOperatingSystem()
     {
-        if (in_array(PHP_OS, ['Darwin', 'Linux'])) {
+        if (\in_array(\PHP_OS, ['Darwin', 'Linux'], true)) {
             return;
         }
 

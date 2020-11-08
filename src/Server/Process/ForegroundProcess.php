@@ -60,9 +60,6 @@ final class ForegroundProcess implements ProcessInterface
         return $this->output;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function exitCode(): ExitCode
     {
         if ($this->isRunning()) {

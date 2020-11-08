@@ -20,14 +20,6 @@ final class Script
         $this->commands = Sequence::of(Command::class, ...$commands);
     }
 
-    public static function of(string ...$commands): self
-    {
-        return new self(...\array_map(
-            static fn(string $command): Command => Command::foreground($command),
-            $commands,
-        ));
-    }
-
     public function __invoke(Server $server): void
     {
         $processes = $server->processes();
@@ -46,5 +38,13 @@ final class Script
                 return $processes;
             },
         );
+    }
+
+    public static function of(string ...$commands): self
+    {
+        return new self(...\array_map(
+            static fn(string $command): Command => Command::foreground($command),
+            $commands,
+        ));
     }
 }

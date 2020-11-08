@@ -44,7 +44,7 @@ class RemoteTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function(Command $command): bool {
+            ->with($this->callback(static function(Command $command): bool {
                 return $command->toString() === "ssh 'foo@example.com' 'ls'";
             }));
 
@@ -71,7 +71,7 @@ class RemoteTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function(Command $command): bool {
+            ->with($this->callback(static function(Command $command): bool {
                 return $command->toString() === "ssh '-p' '42' 'foo@example.com' 'ls'";
             }));
 
@@ -99,7 +99,7 @@ class RemoteTest extends TestCase
         $processes
             ->expects($this->at(0))
             ->method('execute')
-            ->with($this->callback(function(Command $command): bool {
+            ->with($this->callback(static function(Command $command): bool {
                 return $command->toString() === "ssh 'foo@example.com' 'which diskutil'";
             }))
             ->willReturn($which = $this->createMock(Process::class));
@@ -110,7 +110,7 @@ class RemoteTest extends TestCase
         $processes
             ->expects($this->at(1))
             ->method('execute')
-            ->with($this->callback(function(Command $command): bool {
+            ->with($this->callback(static function(Command $command): bool {
                 return $command->toString() === "ssh 'foo@example.com' 'diskutil '\''unmount'\'' '\''/dev'\'''";
             }))
             ->willReturn($which = $this->createMock(Process::class));
@@ -142,7 +142,7 @@ class RemoteTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function(Command $command): bool {
+            ->with($this->callback(static function(Command $command): bool {
                 return $command->toString() === "ssh 'foo@example.com' 'sudo shutdown -r now'";
             }))
             ->willReturn($shutdown = $this->createMock(Process::class));
@@ -170,7 +170,7 @@ class RemoteTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function(Command $command): bool {
+            ->with($this->callback(static function(Command $command): bool {
                 return $command->toString() === "ssh 'foo@example.com' 'sudo shutdown -h now'";
             }))
             ->willReturn($shutdown = $this->createMock(Process::class));

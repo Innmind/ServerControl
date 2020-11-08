@@ -37,7 +37,7 @@ class LoggerProcessesTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function(Command $command): bool {
+            ->with($this->callback(static function(Command $command): bool {
                 return $command->toString() === "ls '-l'";
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -69,7 +69,7 @@ class LoggerProcessesTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function(Command $command): bool {
+            ->with($this->callback(static function(Command $command): bool {
                 return $command->toString() === "ls '-l'";
             }))
             ->willReturn($process = $this->createMock(Process::class));

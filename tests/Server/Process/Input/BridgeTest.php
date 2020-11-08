@@ -11,15 +11,15 @@ class BridgeTest extends TestCase
 {
     public function testInterface()
     {
-        $log = new Stream(fopen('fixtures/symfony.log', 'r'));
+        $log = new Stream(\fopen('fixtures/symfony.log', 'r'));
         $bridge = new Bridge($log);
 
         $this->assertInstanceOf(\Iterator::class, $bridge);
-        $this->assertSame(8192, strlen($first = $bridge->current()));
+        $this->assertSame(8192, \strlen($first = $bridge->current()));
         $this->assertSame(0, $bridge->key());
         $this->assertTrue($bridge->valid());
         $this->assertNull($bridge->next());
-        $this->assertSame(8192, strlen($second = $bridge->current()));
+        $this->assertSame(8192, \strlen($second = $bridge->current()));
         $this->assertSame(8192, $bridge->key());
         $this->assertTrue($bridge->valid());
         $this->assertNotSame($first, $second);

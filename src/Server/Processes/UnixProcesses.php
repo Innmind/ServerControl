@@ -27,7 +27,7 @@ final class UnixProcesses implements Processes
                 ->environment()
                 ->reduce(
                     [],
-                    function(array $env, string $key, string $value): array {
+                    static function(array $env, string $key, string $value): array {
                         $env[$key] = $value;
 
                         return $env;
