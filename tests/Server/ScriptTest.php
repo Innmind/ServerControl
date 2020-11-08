@@ -10,7 +10,8 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Process,
     Server\Process\ExitCode,
-    Exception\ScriptFailed
+    Exception\ScriptFailed,
+    Exception\ProcessTimedOut,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -131,5 +132,39 @@ class ScriptTest extends TestCase
             ->willReturn($process);
 
         $this->assertNull($script($server));
+    }
+
+    public function testFailDueToTimeout()
+    {
+        $script = new Script(
+            $command = Command::foreground('ls'),
+        );
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->with($command)
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->throwException($expected = new ProcessTimedOut));
+        $process
+            ->expects($this->once())
+            ->method('exitCode')
+            ->willReturn(new ExitCode(143));
+
+        try {
+            $script($server);
+            $this->fail('it should throw');
+        } catch (ScriptFailed $e) {
+            $this->assertSame($process, $e->process());
+            $this->assertSame($command, $e->command());
+            $this->assertSame($expected, $e->getPrevious());
+        }
     }
 }

@@ -6,6 +6,7 @@ namespace Innmind\Server\Control\Server;
 use Innmind\Server\Control\{
     Server,
     Exception\ScriptFailed,
+    Exception\ProcessTimedOut,
 };
 use Innmind\Immutable\Sequence;
 
@@ -28,7 +29,13 @@ final class Script
             $processes,
             static function(Processes $processes, Command $command): Processes {
                 $process = $processes->execute($command);
-                $process->wait();
+
+                try {
+                    $process->wait();
+                } catch (ProcessTimedOut $e) {
+                    throw new ScriptFailed($command, $process, $e);
+                }
+
                 $exitCode = $process->exitCode();
 
                 if (!$exitCode->successful()) {
