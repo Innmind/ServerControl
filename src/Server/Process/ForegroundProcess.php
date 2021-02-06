@@ -38,6 +38,7 @@ final class ForegroundProcess implements ProcessInterface
                 foreach ($process->getIterator() as $key => $value) {
                     $type = $key === Process::OUT ? Output\Type::output() : Output\Type::error();
 
+                    /** @psalm-suppress RedundantCastGivenDocblockType Don't trust the symfony process */
                     yield [Str::of((string) $value), $type];
                 }
 

@@ -65,43 +65,43 @@ class LoggerTest extends TestCase
             ->expects($this->once())
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->at(0))
-            ->method('execute')
-            ->with($this->callback(static function(Command $command): bool {
-                return $command->toString() === 'which diskutil';
-            }))
-            ->willReturn($which = $this->createMock(Process::class));
-        $which
+        $which1 = $this->createMock(Process::class);
+        $which1
+            ->expects($this->once())
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+        $which2 = $this->createMock(Process::class);
+        $which2
             ->expects($this->once())
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
         $processes
-            ->expects($this->at(1))
+            ->expects($this->exactly(2))
             ->method('execute')
-            ->with($this->callback(static function(Command $command): bool {
-                return $command->toString() === "diskutil 'unmount' '/dev'";
-            }))
-            ->willReturn($which = $this->createMock(Process::class));
-        $which
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->withConsecutive(
+                [$this->callback(static function(Command $command): bool {
+                    return $command->toString() === 'which diskutil';
+                })],
+                [$this->callback(static function(Command $command): bool {
+                    return $command->toString() === "diskutil 'unmount' '/dev'";
+                })],
+            )
+            ->will($this->onConsecutiveCalls($which1, $which2));
 
         $logger = new Logger(
             $server,
             $log = $this->createMock(LoggerInterface::class),
         );
         $log
-            ->expects($this->at(0))
+            ->expects($this->atLeast(1))
             ->method('info')
-            ->with(
+            ->withConsecutive([
                 'About to execute a command',
                 [
                     'command' => 'which diskutil',
                     'workingDirectory' => null,
                 ],
-            );
+            ]);
 
         $this->assertInstanceOf(
             Volumes::class,
@@ -134,7 +134,7 @@ class LoggerTest extends TestCase
             $log = $this->createMock(LoggerInterface::class),
         );
         $log
-            ->expects($this->at(0))
+            ->expects($this->once())
             ->method('info')
             ->with(
                 'About to execute a command',
@@ -171,7 +171,7 @@ class LoggerTest extends TestCase
             $log = $this->createMock(LoggerInterface::class),
         );
         $log
-            ->expects($this->at(0))
+            ->expects($this->once())
             ->method('info')
             ->with(
                 'About to execute a command',
