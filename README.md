@@ -1,9 +1,8 @@
 # ServerControl
 
-| `develop` |
-|-----------|
-| [![codecov](https://codecov.io/gh/Innmind/ServerControl/branch/develop/graph/badge.svg)](https://codecov.io/gh/Innmind/ServerControl) |
-| [![Build Status](https://github.com/Innmind/ServerControl/workflows/CI/badge.svg)](https://github.com/Innmind/ServerControl/actions?query=workflow%3ACI) |
+[![Build Status](https://github.com/innmind/servercontrol/workflows/CI/badge.svg?branch=master)](https://github.com/innmind/servercontrol/actions?query=workflow%3ACI)
+[![codecov](https://codecov.io/gh/innmind/servercontrol/branch/develop/graph/badge.svg)](https://codecov.io/gh/innmind/servercontrol)
+[![Type Coverage](https://shepherd.dev/github/innmind/servercontrol/coverage.svg)](https://shepherd.dev/github/innmind/servercontrol)
 
 Give access to giev instructions to the server.
 
