@@ -28,11 +28,15 @@ class ScriptTest extends TestCase
             ->expects($this->once())
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
+        $process = $this->createMock(Process::class);
         $processes
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('execute')
-            ->with($command1)
-            ->willReturn($process = $this->createMock(Process::class));
+            ->withConsecutive(
+                [$command1],
+                [$command2],
+            )
+            ->willReturn($process);
         $process
             ->expects($this->any())
             ->method('wait')
@@ -41,11 +45,6 @@ class ScriptTest extends TestCase
             ->expects($this->any())
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-        $processes
-            ->expects($this->at(1))
-            ->method('execute')
-            ->with($command2)
-            ->willReturn($process);
 
         $this->assertNull($script($server));
     }
@@ -62,41 +61,38 @@ class ScriptTest extends TestCase
             ->expects($this->once())
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->at(0))
-            ->method('execute')
-            ->with($command1)
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+        $process1 = $this->createMock(Process::class);
+        $process1
             ->expects($this->any())
             ->method('wait')
             ->will($this->returnSelf());
-        $process
+        $process1
             ->expects($this->any())
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-        $processes
-            ->expects($this->at(1))
-            ->method('execute')
-            ->with($command2)
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+        $process2 = $this->createMock(Process::class);
+        $process2
             ->expects($this->any())
             ->method('wait')
             ->will($this->returnSelf());
-        $process
+        $process2
             ->expects($this->any())
             ->method('exitCode')
             ->willReturn(new ExitCode(1));
         $processes
             ->expects($this->exactly(2))
-            ->method('execute');
+            ->method('execute')
+            ->withConsecutive(
+                [$command1],
+                [$command2],
+            )
+            ->will($this->onConsecutiveCalls($process1, $process2));
 
         try {
             $script($server);
             $this->fail('it should throw');
         } catch (ScriptFailed $e) {
-            $this->assertSame($process, $e->process());
+            $this->assertSame($process2, $e->process());
             $this->assertSame($command2, $e->command());
         }
     }
@@ -112,11 +108,7 @@ class ScriptTest extends TestCase
             ->expects($this->once())
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->at(0))
-            ->method('execute')
-            ->with(Command::foreground('ls'))
-            ->willReturn($process = $this->createMock(Process::class));
+        $process = $this->createMock(Process::class);
         $process
             ->expects($this->any())
             ->method('wait')
@@ -126,7 +118,7 @@ class ScriptTest extends TestCase
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
         $processes
-            ->expects($this->at(1))
+            ->expects($this->exactly(2))
             ->method('execute')
             ->with(Command::foreground('ls'))
             ->willReturn($process);

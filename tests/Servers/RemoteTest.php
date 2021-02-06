@@ -96,28 +96,28 @@ class RemoteTest extends TestCase
             ->expects($this->once())
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->at(0))
-            ->method('execute')
-            ->with($this->callback(static function(Command $command): bool {
-                return $command->toString() === "ssh 'foo@example.com' 'which diskutil'";
-            }))
-            ->willReturn($which = $this->createMock(Process::class));
-        $which
+        $which1 = $this->createMock(Process::class);
+        $which1
+            ->expects($this->once())
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+        $which2 = $this->createMock(Process::class);
+        $which2
             ->expects($this->once())
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
         $processes
-            ->expects($this->at(1))
+            ->expects($this->exactly(2))
             ->method('execute')
-            ->with($this->callback(static function(Command $command): bool {
-                return $command->toString() === "ssh 'foo@example.com' 'diskutil '\''unmount'\'' '\''/dev'\'''";
-            }))
-            ->willReturn($which = $this->createMock(Process::class));
-        $which
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->withConsecutive(
+                [$this->callback(static function(Command $command): bool {
+                    return $command->toString() === "ssh 'foo@example.com' 'which diskutil'";
+                })],
+                [$this->callback(static function(Command $command): bool {
+                    return $command->toString() === "ssh 'foo@example.com' 'diskutil '\''unmount'\'' '\''/dev'\'''";
+                })],
+            )
+            ->will($this->onConsecutiveCalls($which1, $which2));
 
         $remote = new Remote(
             $server,
