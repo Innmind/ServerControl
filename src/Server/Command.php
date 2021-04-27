@@ -34,6 +34,7 @@ final class Command
     private ?object $redirection = null;
     private bool $background = false;
     private ?Second $timeout = null;
+    private bool $streamOutput = false;
 
     private function __construct(bool $background, string $executable)
     {
@@ -166,6 +167,24 @@ final class Command
     }
 
     /**
+     * By default the process output is kept in memory so you can iterate
+     * multiple times over it (behaviour is always the same)
+     *
+     * By calling this method the output will be streamed once meaning if you
+     * iterate over the output twice the second time it will do nothing.
+     *
+     * This is useful in the case you need to access the output but can't fit it
+     * in memory like streaming large files.
+     */
+    public function streamOutput(): self
+    {
+        $self = clone $this;
+        $self->streamOutput = true;
+
+        return $self;
+    }
+
+    /**
      * @return Map<string, string>
      */
     public function environment(): Map
@@ -212,6 +231,11 @@ final class Command
     {
         /** @psalm-suppress NullableReturnStatement */
         return $this->timeout;
+    }
+
+    public function outputToBeStreamed(): bool
+    {
+        return $this->streamOutput;
     }
 
     public function toString(): string

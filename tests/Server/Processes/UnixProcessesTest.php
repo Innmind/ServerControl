@@ -97,4 +97,61 @@ class UnixProcessesTest extends TestCase
         $this->assertLessThan(3, $start - \time());
         $this->assertFalse($process->exitCode()->successful());
     }
+
+    public function testStreamOutput()
+    {
+        $called = false;
+        $processes = new UnixProcesses;
+        $processes
+            ->execute(
+                Command::foreground('cat')
+                    ->withArgument('fixtures/symfony.log')
+                    ->streamOutput(),
+            )
+            ->output()
+            ->foreach(static function() use (&$called) {
+                $called = true;
+            });
+
+        $this->assertTrue($called);
+    }
+
+    public function testSecondCallToStreamedOutputDoesNothing()
+    {
+        $called = false;
+        $processes = new UnixProcesses;
+        $process = $processes
+            ->execute(
+                Command::foreground('cat')
+                    ->withArgument('fixtures/symfony.log')
+                    ->streamOutput(),
+            );
+        $process->output()->foreach(static fn() => null);
+        $process
+            ->output()
+            ->foreach(static function() use (&$called) {
+                $called = true;
+            });
+
+        $this->assertFalse($called);
+    }
+
+    public function testOutputIsNotLostByDefault()
+    {
+        $called = false;
+        $processes = new UnixProcesses;
+        $process = $processes
+            ->execute(
+                Command::foreground('cat')
+                    ->withArgument('fixtures/symfony.log')
+            );
+        $process->output()->foreach(static fn() => null);
+        $process
+            ->output()
+            ->foreach(static function() use (&$called) {
+                $called = true;
+            });
+
+        $this->assertTrue($called);
+    }
 }
