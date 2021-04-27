@@ -17,7 +17,6 @@ final class Script
 
     public function __construct(Command ...$commands)
     {
-        /** @var Sequence<Command> */
         $this->commands = Sequence::of(Command::class, ...$commands);
     }
 
