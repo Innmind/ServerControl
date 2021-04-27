@@ -24,33 +24,39 @@ final class ForegroundProcess implements ProcessInterface
     private Output $output;
     private ?ExitCode $exitCode = null;
 
-    public function __construct(Process $process)
+    public function __construct(Process $process, bool $streamOutput = false)
     {
+        $generator = static function() use ($process): \Generator {
+            /**
+             * @var string $key
+             * @var string $value
+             */
+            foreach ($process->getIterator() as $key => $value) {
+                $type = $key === Process::OUT ? Output\Type::output() : Output\Type::error();
+
+                /** @psalm-suppress RedundantCastGivenDocblockType Don't trust the symfony process */
+                yield [Str::of((string) $value), $type];
+            }
+
+            // we wait the process to finish after iterating over the output in
+            // order to correctly close the pipes to the process when the user
+            // only iterates over the output so he doesn't have to call the wait
+            // function automatically. It also fix a bug where too many pipes are
+            // opened (consequently preventing from running new processes) when
+            // we run too many processes but never wait them to finish.
+            $process->wait();
+        };
+
         $this->process = $process;
-        /** @var Sequence<array{0: Str, 1: Output\Type}> */
-        $output = Sequence::defer(
-            'array',
-            (static function(Process $process): \Generator {
-                /**
-                 * @var string $key
-                 * @var string $value
-                 */
-                foreach ($process->getIterator() as $key => $value) {
-                    $type = $key === Process::OUT ? Output\Type::output() : Output\Type::error();
 
-                    /** @psalm-suppress RedundantCastGivenDocblockType Don't trust the symfony process */
-                    yield [Str::of((string) $value), $type];
-                }
+        if ($streamOutput) {
+            /** @var Sequence<array{0: Str, 1: Output\Type}> */
+            $output = Sequence::lazy('array', $generator);
+        } else {
+            /** @var Sequence<array{0: Str, 1: Output\Type}> */
+            $output = Sequence::defer('array', ($generator)());
+        }
 
-                // we wait the process to finish after iterating over the output in
-                // order to correctly close the pipes to the process when the user
-                // only iterates over the output so he doesn't have to call the wait
-                // function automatically. It also fix a bug where too many pipes are
-                // opened (consequently preventing from running new processes) when
-                // we run too many processes but never wait them to finish.
-                $process->wait();
-            })($process),
-        );
         $this->output = new Output\Output($output);
     }
 

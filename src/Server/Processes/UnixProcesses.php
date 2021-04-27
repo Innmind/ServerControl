@@ -44,7 +44,7 @@ final class UnixProcesses implements Processes
             return new BackgroundProcess($process);
         }
 
-        return new ForegroundProcess($process);
+        return new ForegroundProcess($process, $command->outputToBeStreamed());
     }
 
     public function kill(Pid $pid, Signal $signal): void
