@@ -9,13 +9,18 @@ use Innmind\Server\Control\Server\{
     Process,
     Command,
     Signal,
-    Process\Pid
+    Process\Pid,
+    Process\ExitCode,
 };
 use Innmind\Url\{
     Path,
     Authority\Host,
     Authority\Port,
     Authority\UserInformation\User
+};
+use Innmind\Immutable\{
+    Maybe,
+    Either,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -117,7 +122,12 @@ class RemoteProcessesTest extends TestCase
             ->method('execute')
             ->with($this->callback(static function(Command $command): bool {
                 return $command->toString() === "ssh 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''";
-            }));
+            }))
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
 
         $this->assertNull($remote->kill(new Pid(42), Signal::kill()));
     }
@@ -135,7 +145,12 @@ class RemoteProcessesTest extends TestCase
             ->method('execute')
             ->with($this->callback(static function(Command $command): bool {
                 return $command->toString() === "ssh '-p' '24' 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''";
-            }));
+            }))
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
 
         $this->assertNull($remote->kill(new Pid(42), Signal::kill()));
     }

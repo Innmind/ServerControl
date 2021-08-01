@@ -5,13 +5,13 @@ namespace Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\{
     Server\Process as ProcessInterface,
-    Exception\ProcessStillRunning,
     Exception\ProcessTimedOut,
 };
 use Innmind\Immutable\{
     Sequence,
     Str,
     Maybe,
+    Either,
 };
 use Symfony\Component\Process\{
     Process,
@@ -70,24 +70,21 @@ final class ForegroundProcess implements ProcessInterface
         return $this->output;
     }
 
-    public function exitCode(): ExitCode
-    {
-        if ($this->isRunning()) {
-            throw new ProcessStillRunning;
-        }
-
-        /** @psalm-suppress PossiblyNullArgument */
-        return $this->exitCode ??= new ExitCode(
-            $this->process->getExitCode(),
-        );
-    }
-
-    public function wait(): void
+    public function wait(): Either
     {
         try {
             $this->process->wait();
+
+            return Either::right(
+                Maybe::of($this->process->getExitCode())
+                    ->map(static fn($code) => new ExitCode($code)),
+            );
         } catch (ProcessTimedOutException $e) {
-            throw new ProcessTimedOut($e->getMessage(), (int) $e->getCode(), $e);
+            return Either::left(new ProcessTimedOut(
+                $e->getMessage(),
+                (int) $e->getCode(),
+                $e,
+            ));
         }
     }
 

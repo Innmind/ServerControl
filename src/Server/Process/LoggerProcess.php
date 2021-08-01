@@ -3,12 +3,14 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\{
-    Server\Process,
-    Server\Command,
-    Exception\ProcessTimedOut,
+use Innmind\Server\Control\Server\{
+    Process,
+    Command,
 };
-use Innmind\Immutable\Maybe;
+use Innmind\Immutable\{
+    Maybe,
+    Either,
+};
 use Psr\Log\LoggerInterface;
 
 final class LoggerProcess implements Process
@@ -51,28 +53,26 @@ final class LoggerProcess implements Process
         );
     }
 
-    public function exitCode(): ExitCode
+    public function wait(): Either
     {
-        $exitCode = $this->process->exitCode();
-        $this->logger->debug('Command {command} terminated with {exitCode}', [
-            'command' => $this->command->toString(),
-            'exitCode' => $exitCode->toInt(),
-        ]);
+        return $this
+            ->process
+            ->wait()
+            ->leftMap(function($e) {
+                $this->logger->warning('Command {command} timed out', [
+                    'command' => $this->command->toString(),
+                ]);
 
-        return $exitCode;
-    }
+                return $e;
+            })
+            ->map(fn($exit) => $exit->map(function($exit) {
+                $this->logger->debug('Command {command} terminated with {exitCode}', [
+                    'command' => $this->command->toString(),
+                    'exitCode' => $exit->toInt(),
+                ]);
 
-    public function wait(): void
-    {
-        try {
-            $this->process->wait();
-        } catch (ProcessTimedOut $e) {
-            $this->logger->warning('Command {command} timed out', [
-                'command' => $this->command->toString(),
-            ]);
-
-            throw $e;
-        }
+                return $exit;
+            }));
     }
 
     public function isRunning(): bool

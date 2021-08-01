@@ -18,6 +18,10 @@ use Innmind\Url\Authority\{
     Port,
     UserInformation\User
 };
+use Innmind\Immutable\{
+    Maybe,
+    Either,
+};
 use PHPUnit\Framework\TestCase;
 
 class RemoteTest extends TestCase
@@ -99,13 +103,13 @@ class RemoteTest extends TestCase
         $which1 = $this->createMock(Process::class);
         $which1
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
         $which2 = $this->createMock(Process::class);
         $which2
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -148,8 +152,8 @@ class RemoteTest extends TestCase
             ->willReturn($shutdown = $this->createMock(Process::class));
         $shutdown
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
 
         $remote = new Remote(
             $server,
@@ -176,8 +180,8 @@ class RemoteTest extends TestCase
             ->willReturn($shutdown = $this->createMock(Process::class));
         $shutdown
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
 
         $remote = new Remote(
             $server,

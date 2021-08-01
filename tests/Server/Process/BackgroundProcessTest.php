@@ -10,7 +10,6 @@ use Innmind\Server\Control\{
     Server\Process\ExitCode,
     Server\Process\Output\Output,
     Server\Process\Output\Type,
-    Exception\ProcessStillRunning,
     Exception\BackgroundProcessInformationNotAvailable,
 };
 use Symfony\Component\Process\Process as SfProcess;
@@ -53,24 +52,24 @@ class BackgroundProcessTest extends TestCase
         $this->assertTrue((\time() - $start) < 1);
     }
 
-    public function testExitCode()
-    {
-        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php &');
-        $slow->start();
-        $process = new BackgroundProcess($slow);
-
-        $this->expectException(BackgroundProcessInformationNotAvailable::class);
-
-        $process->exitCode();
-    }
-
     public function testWait()
     {
         $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
         $slow->start();
         $process = new BackgroundProcess($slow);
 
-        $this->assertNull($process->wait());
+        $this->assertNull(
+            $process
+                ->wait()
+                ->map(static fn($exit) => $exit->match(
+                    static fn($exit) => $exit,
+                    static fn() => null,
+                ))
+                ->match(
+                    static fn($e) => $e,
+                    static fn($exit) => $exit,
+                ),
+        );
     }
 
     public function testIsRunning()

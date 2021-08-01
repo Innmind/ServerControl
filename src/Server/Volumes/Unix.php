@@ -10,6 +10,7 @@ use Innmind\Server\Control\{
     Exception\ScriptFailed,
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\Either;
 
 final class Unix implements Volumes
 {
@@ -60,18 +61,39 @@ final class Unix implements Volumes
     private function run(Command $command): void
     {
         $process = $this->processes->execute($command);
-        $process->wait();
-
-        if (!$process->exitCode()->successful()) {
-            throw new ScriptFailed($command, $process);
-        }
+        $throwOnError = $process
+            ->wait()
+            ->flatMap(
+                static fn($exit) => $exit
+                    ->map(static fn($exit) => $exit->successful())
+                    ->match(
+                        static fn($successful) => $successful ? Either::right(null) : Either::left(new ScriptFailed(
+                            $command,
+                            $process,
+                        )),
+                        static fn() => Either::right(null),
+                    ),
+            )
+            ->match(
+                static fn($e) => static fn() => throw $e,
+                static fn() => static fn() => null,
+            );
+        $throwOnError();
     }
 
     private function isOSX(): bool
     {
-        $isOSX = $this->processes->execute(Command::foreground('which diskutil'));
-        $isOSX->wait();
-
-        return $isOSX->exitCode()->successful();
+        return $this
+            ->processes
+            ->execute(Command::foreground('which diskutil'))
+            ->wait()
+            ->map(static fn($exit) => $exit->match(
+                static fn($exit) => $exit->successful(),
+                static fn() => false,
+            ))
+            ->match(
+                static fn() => false,
+                static fn($isOSX) => $isOSX,
+            );
     }
 }

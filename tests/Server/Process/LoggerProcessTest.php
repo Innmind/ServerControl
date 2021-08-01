@@ -12,7 +12,10 @@ use Innmind\Server\Control\{
     Server\Command,
     Exception\ProcessTimedOut,
 };
-use Innmind\Immutable\Maybe;
+use Innmind\Immutable\{
+    Maybe,
+    Either,
+};
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -60,10 +63,10 @@ class LoggerProcessTest extends TestCase
             ->method('debug');
         $inner
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn($exitCode = new ExitCode(0));
+            ->method('wait')
+            ->willReturn($expected = Either::right(Maybe::just(new ExitCode(0))));
 
-        $this->assertSame($exitCode, $process->exitCode());
+        $this->assertEquals($expected, $process->wait());
     }
 
     public function testIsRunning()
@@ -96,9 +99,10 @@ class LoggerProcessTest extends TestCase
             ->method('warning');
         $inner
             ->expects($this->once())
-            ->method('wait');
+            ->method('wait')
+            ->willReturn($expected = Either::right(Maybe::nothing()));
 
-        $this->assertNull($process->wait());
+        $this->assertEquals($expected, $process->wait());
     }
 
     public function testWarnTimeouts()
@@ -114,14 +118,9 @@ class LoggerProcessTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('wait')
-            ->will($this->throwException($expected = new ProcessTimedOut));
+            ->willReturn($expected = Either::left(new ProcessTimedOut));
 
-        try {
-            $process->wait();
-            $this->fail('it should throw');
-        } catch (\Exception $e) {
-            $this->assertSame($expected, $e);
-        }
+        $this->assertEquals($expected, $process->wait());
     }
 
     public function testOutput()

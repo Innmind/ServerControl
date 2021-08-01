@@ -11,6 +11,7 @@ use Innmind\Immutable\{
     Sequence,
     Str,
     Maybe,
+    Either,
 };
 use Symfony\Component\Process\Process;
 
@@ -38,14 +39,12 @@ final class BackgroundProcess implements ProcessInterface
         return $this->output;
     }
 
-    public function exitCode(): ExitCode
+    public function wait(): Either
     {
-        throw new BackgroundProcessInformationNotAvailable;
-    }
+        /** @var Maybe<ExitCode> */
+        $exit = Maybe::nothing();
 
-    public function wait(): void
-    {
-        // nothing to do
+        return Either::right($exit);
     }
 
     public function isRunning(): bool

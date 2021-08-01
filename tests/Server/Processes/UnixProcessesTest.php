@@ -93,15 +93,15 @@ class UnixProcessesTest extends TestCase
                 ->timeoutAfter(new Second(1)),
         );
 
-        try {
-            $process->wait();
-            $this->fail('it should throw');
-        } catch (\Exception $e) {
-            $this->assertInstanceOf(ProcessTimedOut::class, $e);
-        }
+        $this->assertInstanceOf(
+            ProcessTimedOut::class,
+            $process->wait()->match(
+                static fn($e) => $e,
+                static fn() => null,
+            ),
+        );
 
         $this->assertLessThan(3, $start - \time());
-        $this->assertFalse($process->exitCode()->successful());
     }
 
     public function testStreamOutput()

@@ -7,10 +7,12 @@ use Innmind\Server\Control\{
     Server\Process\Pid,
     Server\Process\Output,
     Server\Process\ExitCode,
-    Exception\ProcessStillRunning,
     Exception\ProcessTimedOut,
 };
-use Innmind\Immutable\Maybe;
+use Innmind\Immutable\{
+    Maybe,
+    Either,
+};
 
 interface Process
 {
@@ -26,13 +28,8 @@ interface Process
     public function output(): Output;
 
     /**
-     * @throws ProcessStillRunning
+     * @return Either<ProcessTimedOut, Maybe<ExitCode>>
      */
-    public function exitCode(): ExitCode;
-
-    /**
-     * @throws ProcessTimedOut
-     */
-    public function wait(): void;
+    public function wait(): Either;
     public function isRunning(): bool;
 }

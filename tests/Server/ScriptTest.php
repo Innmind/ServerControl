@@ -13,6 +13,10 @@ use Innmind\Server\Control\{
     Exception\ScriptFailed,
     Exception\ProcessTimedOut,
 };
+use Innmind\Immutable\{
+    Either,
+    Maybe,
+};
 use PHPUnit\Framework\TestCase;
 
 class ScriptTest extends TestCase
@@ -40,11 +44,7 @@ class ScriptTest extends TestCase
         $process
             ->expects($this->any())
             ->method('wait')
-            ->will($this->returnSelf());
-        $process
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
 
         $this->assertNull($script($server));
     }
@@ -65,20 +65,12 @@ class ScriptTest extends TestCase
         $process1
             ->expects($this->any())
             ->method('wait')
-            ->will($this->returnSelf());
-        $process1
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
         $process2 = $this->createMock(Process::class);
         $process2
             ->expects($this->any())
             ->method('wait')
-            ->will($this->returnSelf());
-        $process2
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->willReturn(Either::right(Maybe::just(new ExitCode(1))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -112,11 +104,7 @@ class ScriptTest extends TestCase
         $process
             ->expects($this->any())
             ->method('wait')
-            ->will($this->returnSelf());
-        $process
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -144,11 +132,7 @@ class ScriptTest extends TestCase
         $process
             ->expects($this->once())
             ->method('wait')
-            ->will($this->throwException($expected = new ProcessTimedOut));
-        $process
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(143));
+            ->willReturn(Either::left($expected = new ProcessTimedOut));
 
         try {
             $script($server);

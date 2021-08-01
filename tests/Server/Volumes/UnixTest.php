@@ -13,6 +13,10 @@ use Innmind\Server\Control\{
     Exception\ScriptFailed,
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\{
+    Either,
+    Maybe,
+};
 use PHPUnit\Framework\TestCase;
 
 class UnixTest extends TestCase
@@ -35,16 +39,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -72,16 +73,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(1))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -111,16 +109,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -147,16 +142,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(1))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -185,16 +177,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(1))));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -222,16 +211,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(1))));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(1))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -261,16 +247,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(1))));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -297,16 +280,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(1))));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(1))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')

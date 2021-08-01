@@ -13,6 +13,10 @@ use Innmind\Server\Control\{
     Server\Command,
     Server\Volumes,
 };
+use Innmind\Immutable\{
+    Maybe,
+    Either,
+};
 use Psr\Log\{
     LoggerInterface,
     NullLogger,
@@ -68,13 +72,13 @@ class LoggerTest extends TestCase
         $which1 = $this->createMock(Process::class);
         $which1
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
         $which2 = $this->createMock(Process::class);
         $which2
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -126,8 +130,8 @@ class LoggerTest extends TestCase
             ->willReturn($shutdown = $this->createMock(Process::class));
         $shutdown
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
 
         $logger = new Logger(
             $server,
@@ -163,8 +167,8 @@ class LoggerTest extends TestCase
             ->willReturn($shutdown = $this->createMock(Process::class));
         $shutdown
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
 
         $logger = new Logger(
             $server,

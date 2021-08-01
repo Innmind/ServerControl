@@ -3,14 +3,13 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\{
-    Server\Process\ForegroundProcess,
-    Server\Process as ProcessInterface,
-    Server\Process\Pid,
-    Server\Process\ExitCode,
-    Server\Process\Output,
-    Server\Process\Output\Type,
-    Exception\ProcessStillRunning
+use Innmind\Server\Control\Server\{
+    Process\ForegroundProcess,
+    Process as ProcessInterface,
+    Process\Pid,
+    Process\ExitCode,
+    Process\Output,
+    Process\Output\Type,
 };
 use Innmind\Immutable\Str;
 use Symfony\Component\Process\Process as SfProcess;
@@ -72,17 +71,18 @@ class ForegroundProcessTest extends TestCase
         $slow->start();
         $process = new ForegroundProcess($slow);
 
-        try {
-            $process->exitCode();
-            $this->fail('it should throw an exception');
-        } catch (ProcessStillRunning $e) {
-            //pass
-        }
-
         \sleep(7);
 
-        $this->assertInstanceOf(ExitCode::class, $process->exitCode());
-        $this->assertSame(0, $process->exitCode()->toInt());
+        $this->assertSame(
+            0,
+            $process->wait()->match(
+                static fn($e) => $e,
+                static fn($exit) => $exit->match(
+                    static fn($exit) => $exit->toInt(),
+                    static fn() => null,
+                ),
+            ),
+        );
     }
 
     public function testExitCodeForFailingProcess()
@@ -93,7 +93,16 @@ class ForegroundProcessTest extends TestCase
 
         \sleep(1);
 
-        $this->assertSame(1, $process->exitCode()->toInt());
+        $this->assertSame(
+            1,
+            $process->wait()->match(
+                static fn($e) => $e,
+                static fn($exit) => $exit->match(
+                    static fn($exit) => $exit->toInt(),
+                    static fn() => null,
+                ),
+            ),
+        );
     }
 
     public function testWait()
@@ -101,9 +110,18 @@ class ForegroundProcessTest extends TestCase
         $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
         $slow->start();
         $process = new ForegroundProcess($slow);
-        $this->assertNull($process->wait());
-
-        $this->assertFalse($process->isRunning());
+        $this->assertIsInt(
+            $process
+                ->wait()
+                ->map(static fn($exit) => $exit->match(
+                    static fn($exit) => $exit->toInt(),
+                    static fn() => null,
+                ))
+                ->match(
+                    static fn($e) => $e,
+                    static fn($exit) => $exit,
+                ),
+        );
     }
 
     public function testIsRunning()
