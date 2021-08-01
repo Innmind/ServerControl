@@ -29,7 +29,10 @@ final class LoggerProcesses implements Processes
     {
         $this->logger->info('About to execute a command', [
             'command' => $command->toString(),
-            'workingDirectory' => $command->hasWorkingDirectory() ? $command->workingDirectory()->toString() : null,
+            'workingDirectory' => $command->workingDirectory()->match(
+                static fn($path) => $path->toString(),
+                static fn() => null,
+            ),
         ]);
 
         return new Process\LoggerProcess(

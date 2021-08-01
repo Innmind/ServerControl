@@ -18,6 +18,7 @@ use Innmind\Immutable\{
     Sequence,
     Map,
     Str,
+    Maybe,
 };
 use function Innmind\Immutable\join;
 
@@ -28,12 +29,15 @@ final class Command
     private Sequence $parameters;
     /** @var Map<string, string> */
     private Map $environment;
-    private ?Path $workingDirectory = null;
-    private ?Readable $input = null;
-    /** @var Append|Overwrite */
-    private ?object $redirection = null;
+    /** @var Maybe<Path> */
+    private Maybe $workingDirectory;
+    /** @var Maybe<Readable> */
+    private Maybe $input;
+    /** @var Maybe<Append>|Maybe<Overwrite> */
+    private Maybe $redirection;
     private bool $background = false;
-    private ?Second $timeout = null;
+    /** @var Maybe<Second> */
+    private Maybe $timeout;
     private bool $streamOutput = false;
 
     private function __construct(bool $background, string $executable)
@@ -48,6 +52,14 @@ final class Command
         $this->parameters = Sequence::of();
         /** @var Map<string, string> */
         $this->environment = Map::of();
+        /** @var Maybe<Path> */
+        $this->workingDirectory = Maybe::nothing();
+        /** @var Maybe<Readable> */
+        $this->input = Maybe::nothing();
+        /** @var Maybe<Append>|Maybe<Overwrite> */
+        $this->redirection = Maybe::nothing();
+        /** @var Maybe<Second> */
+        $this->timeout = Maybe::nothing();
     }
 
     /**
@@ -110,7 +122,7 @@ final class Command
     public function withWorkingDirectory(Path $path): self
     {
         $self = clone $this;
-        $self->workingDirectory = $path;
+        $self->workingDirectory = Maybe::just($path);
 
         return $self;
     }
@@ -118,7 +130,7 @@ final class Command
     public function withInput(Readable $input): self
     {
         $self = clone $this;
-        $self->input = $input;
+        $self->input = Maybe::just($input);
 
         return $self;
     }
@@ -126,7 +138,7 @@ final class Command
     public function overwrite(Path $path): self
     {
         $self = clone $this;
-        $self->redirection = new Overwrite($path);
+        $self->redirection = Maybe::just(new Overwrite($path));
 
         return $self;
     }
@@ -134,7 +146,7 @@ final class Command
     public function append(Path $path): self
     {
         $self = clone $this;
-        $self->redirection = new Append($path);
+        $self->redirection = Maybe::just(new Append($path));
 
         return $self;
     }
@@ -143,9 +155,10 @@ final class Command
     {
         $self = clone $this;
 
-        if ($this->redirection) {
-            $self->parameters = ($this->parameters)($this->redirection);
-        }
+        $self->parameters = $this->redirection->match(
+            fn($redirection) => ($this->parameters)($redirection),
+            fn() => $this->parameters,
+        );
 
         $self->parameters = $self
             ->parameters
@@ -161,7 +174,7 @@ final class Command
     public function timeoutAfter(Second $seconds): self
     {
         $self = clone $this;
-        $self->timeout = $seconds;
+        $self->timeout = Maybe::just($seconds);
 
         return $self;
     }
@@ -192,27 +205,19 @@ final class Command
         return $this->environment;
     }
 
-    public function hasWorkingDirectory(): bool
+    /**
+     * @return Maybe<Path>
+     */
+    public function workingDirectory(): Maybe
     {
-        return $this->workingDirectory instanceof Path;
-    }
-
-    /** @psalm-suppress InvalidNullableReturnType */
-    public function workingDirectory(): Path
-    {
-        /** @psalm-suppress NullableReturnStatement */
         return $this->workingDirectory;
     }
 
-    public function hasInput(): bool
+    /**
+     * @return Maybe<Readable>
+     */
+    public function input(): Maybe
     {
-        return $this->input instanceof Readable;
-    }
-
-    /** @psalm-suppress InvalidNullableReturnType */
-    public function input(): Readable
-    {
-        /** @psalm-suppress NullableReturnStatement */
         return $this->input;
     }
 
@@ -221,15 +226,11 @@ final class Command
         return $this->background;
     }
 
-    public function shouldTimeout(): bool
+    /**
+     * @return Maybe<Second>
+     */
+    public function timeout(): Maybe
     {
-        return $this->timeout instanceof Second;
-    }
-
-    /** @psalm-suppress InvalidNullableReturnType */
-    public function timeout(): Second
-    {
-        /** @psalm-suppress NullableReturnStatement */
         return $this->timeout;
     }
 
@@ -249,10 +250,14 @@ final class Command
             $string .= ' '.join(' ', $parameters)->toString();
         }
 
-        if ($this->redirection) {
-            $string .= ' '.$this->redirection->toString();
-        }
-
-        return $string;
+        return $this
+            ->redirection
+            ->map(static fn($redirection) => $redirection->toString())
+            ->map(static fn($redirection) => ' '.$redirection)
+            ->map(static fn($redirection) => $string.$redirection)
+            ->match(
+                static fn($string) => $string,
+                static fn() => $string,
+            );
     }
 }

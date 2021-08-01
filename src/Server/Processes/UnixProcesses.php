@@ -21,8 +21,10 @@ final class UnixProcesses implements Processes
     {
         $process = SfProcess::fromShellCommandline(
             $command->toString().($command->toBeRunInBackground() ? ' &' : ''),
-            $command->hasWorkingDirectory() ?
-                $command->workingDirectory()->toString() : null,
+            $command->workingDirectory()->match(
+                static fn($path) => $path->toString(),
+                static fn() => null,
+            ),
             $command
                 ->environment()
                 ->reduce(
@@ -33,11 +35,19 @@ final class UnixProcesses implements Processes
                         return $env;
                     },
                 ),
-            $command->hasInput() ?
-                new Bridge($command->input()) : null,
+            $command
+                ->input()
+                ->map(static fn($input) => new Bridge($input))
+                ->match(
+                    static fn($input) => $input,
+                    static fn() => null,
+                ),
         );
         $process
-            ->setTimeout($command->shouldTimeout() ? $command->timeout()->toInt() : 0)
+            ->setTimeout($command->timeout()->match(
+                static fn($second) => $second->toInt(),
+                static fn() => 0,
+            ))
             ->start();
 
         if ($command->toBeRunInBackground()) {

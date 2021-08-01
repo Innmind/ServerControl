@@ -20,8 +20,14 @@ class CommandTest extends TestCase
     {
         $command = Command::foreground('ps');
 
-        $this->assertFalse($command->hasWorkingDirectory());
-        $this->assertFalse($command->hasInput());
+        $this->assertFalse($command->workingDirectory()->match(
+            static fn() => true,
+            static fn() => false,
+        ));
+        $this->assertFalse($command->input()->match(
+            static fn() => true,
+            static fn() => false,
+        ));
         $this->assertFalse($command->toBeRunInBackground());
         $this->assertSame('ps', $command->toString());
     }
@@ -117,9 +123,11 @@ class CommandTest extends TestCase
             ->withWorkingDirectory(Path::of('/var/www/app'));
 
         $this->assertInstanceOf(Command::class, $command);
-        $this->assertTrue($command->hasWorkingDirectory());
         $this->assertSame('bin/console', $command->toString());
-        $this->assertSame('/var/www/app', $command->workingDirectory()->toString());
+        $this->assertSame('/var/www/app', $command->workingDirectory()->match(
+            static fn($path) => $path->toString(),
+            static fn() => null,
+        ));
     }
 
     public function testWithInput()
@@ -130,8 +138,10 @@ class CommandTest extends TestCase
             );
 
         $this->assertInstanceOf(Command::class, $command);
-        $this->assertTrue($command->hasInput());
-        $this->assertSame($input, $command->input());
+        $this->assertSame($input, $command->input()->match(
+            static fn($input) => $input,
+            static fn() => null,
+        ));
     }
 
     public function testOverwrite()
@@ -179,8 +189,13 @@ class CommandTest extends TestCase
         $commandA = Command::foreground('echo');
         $commandB = $commandA->timeoutAfter($timeout = new Second(1));
 
-        $this->assertFalse($commandA->shouldTimeout());
-        $this->assertTrue($commandB->shouldTimeout());
-        $this->assertSame($timeout, $commandB->timeout());
+        $this->assertFalse($commandA->timeout()->match(
+            static fn() => true,
+            static fn() => false,
+        ));
+        $this->assertSame($timeout, $commandB->timeout()->match(
+            static fn($timeout) => $timeout,
+            static fn() => null,
+        ));
     }
 }

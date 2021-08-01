@@ -43,13 +43,17 @@ final class RemoteProcesses implements Processes
 
     public function execute(Command $command): Process
     {
-        if ($command->hasWorkingDirectory()) {
-            $command = Command::foreground(\sprintf(
+        $command = $command
+            ->workingDirectory()
+            ->map(static fn($path) => \sprintf(
                 'cd %s && %s',
-                $command->workingDirectory()->toString(),
+                $path->toString(),
                 $command->toString(),
-            ));
-        }
+            ))
+            ->match(
+                static fn($bash) => Command::foreground($bash),
+                static fn() => $command,
+            );
 
         return $this
             ->processes
