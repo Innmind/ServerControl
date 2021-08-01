@@ -23,15 +23,6 @@ final class ExitCode
         return $this->value === 0;
     }
 
-    /**
-     * @deprecated
-     * @see self::successful
-     */
-    public function isSuccessful(): bool
-    {
-        return $this->successful();
-    }
-
     public function toInt(): int
     {
         return $this->value;
