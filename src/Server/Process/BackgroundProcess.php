@@ -10,6 +10,7 @@ use Innmind\Server\Control\{
 use Innmind\Immutable\{
     Sequence,
     Str,
+    Maybe,
 };
 use Symfony\Component\Process\Process;
 
@@ -26,9 +27,10 @@ final class BackgroundProcess implements ProcessInterface
         $this->output = new Output\Output($output);
     }
 
-    public function pid(): Pid
+    public function pid(): Maybe
     {
-        throw new BackgroundProcessInformationNotAvailable;
+        /** @var Maybe<Pid> */
+        return Maybe::nothing();
     }
 
     public function output(): Output

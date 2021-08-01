@@ -8,6 +8,7 @@ use Innmind\Server\Control\{
     Server\Command,
     Exception\ProcessTimedOut,
 };
+use Innmind\Immutable\Maybe;
 use Psr\Log\LoggerInterface;
 
 final class LoggerProcess implements Process
@@ -26,15 +27,19 @@ final class LoggerProcess implements Process
         $this->logger = $logger;
     }
 
-    public function pid(): Pid
+    public function pid(): Maybe
     {
-        $pid = $this->process->pid();
-        $this->logger->debug('Command {command} is running with pid {pid}', [
-            'command' => $this->command->toString(),
-            'pid' => $pid->toInt(),
-        ]);
+        return $this
+            ->process
+            ->pid()
+            ->map(function($pid) {
+                $this->logger->debug('Command {command} is running with pid {pid}', [
+                    'command' => $this->command->toString(),
+                    'pid' => $pid->toInt(),
+                ]);
 
-        return $pid;
+                return $pid;
+            });
     }
 
     public function output(): Output

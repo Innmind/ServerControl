@@ -11,6 +11,7 @@ use Innmind\Server\Control\{
 use Innmind\Immutable\{
     Sequence,
     Str,
+    Maybe,
 };
 use Symfony\Component\Process\{
     Process,
@@ -20,7 +21,6 @@ use Symfony\Component\Process\{
 final class ForegroundProcess implements ProcessInterface
 {
     private Process $process;
-    private ?Pid $pid = null;
     private Output $output;
     private ?ExitCode $exitCode = null;
 
@@ -60,10 +60,9 @@ final class ForegroundProcess implements ProcessInterface
         $this->output = new Output\Output($output);
     }
 
-    public function pid(): Pid
+    public function pid(): Maybe
     {
-        /** @psalm-suppress PossiblyNullArgument */
-        return $this->pid ??= new Pid($this->process->getPid());
+        return Maybe::of($this->process->getPid())->map(static fn($pid) => new Pid($pid));
     }
 
     public function output(): Output

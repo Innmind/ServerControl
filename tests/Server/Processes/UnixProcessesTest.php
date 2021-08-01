@@ -71,7 +71,13 @@ class UnixProcessesTest extends TestCase
             Command::foreground('php')->withArgument('fixtures/slow.php')
         );
 
-        $this->assertNull($processes->kill($process->pid(), Signal::kill()));
+        $this->assertNull($processes->kill(
+            $process->pid()->match(
+                static fn($pid) => $pid,
+                static fn() => null,
+            ),
+            Signal::kill(),
+        ));
         \sleep(1);
         $this->assertFalse($process->isRunning());
         $this->assertTrue((\time() - $start) < 2);

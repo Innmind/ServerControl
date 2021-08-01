@@ -35,9 +35,10 @@ class BackgroundProcessTest extends TestCase
         $ps->start();
         $process = new BackgroundProcess($ps);
 
-        $this->expectException(BackgroundProcessInformationNotAvailable::class);
-
-        $process->pid();
+        $this->assertFalse($process->pid()->match(
+            static fn() => true,
+            static fn() => false,
+        ));
     }
 
     public function testOutput()

@@ -12,6 +12,7 @@ use Innmind\Server\Control\{
     Server\Command,
     Exception\ProcessTimedOut,
 };
+use Innmind\Immutable\Maybe;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -42,9 +43,9 @@ class LoggerProcessTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('pid')
-            ->willReturn($pid = new Pid(2));
+            ->willReturn($pid = Maybe::just(new Pid(2)));
 
-        $this->assertSame($pid, $process->pid());
+        $this->assertEquals($pid, $process->pid());
     }
 
     public function testExitCode()

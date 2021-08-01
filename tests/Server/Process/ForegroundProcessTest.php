@@ -34,8 +34,13 @@ class ForegroundProcessTest extends TestCase
         $ps->start();
         $process = new ForegroundProcess($ps);
 
-        $this->assertInstanceOf(Pid::class, $process->pid());
-        $this->assertTrue($process->pid()->toInt() >= 2);
+        $this->assertGreaterThanOrEqual(
+            2,
+            $process->pid()->match(
+                static fn($pid) => $pid->toInt(),
+                static fn() => -1,
+            ),
+        );
     }
 
     public function testOutput()
