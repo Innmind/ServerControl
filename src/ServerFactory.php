@@ -10,7 +10,7 @@ use Innmind\Server\Control\{
 
 final class ServerFactory
 {
-    public function __invoke(): Server
+    public static function build(): Server
     {
         switch (\PHP_OS) {
             case 'Darwin':
@@ -19,10 +19,5 @@ final class ServerFactory
         }
 
         throw new UnsupportedOperatingSystem;
-    }
-
-    public static function build(): Server
-    {
-        return (new self)();
     }
 }
