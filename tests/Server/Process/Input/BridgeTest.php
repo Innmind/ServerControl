@@ -29,6 +29,12 @@ class BridgeTest extends TestCase
         }
 
         $this->assertFalse($bridge->valid());
-        $this->assertSame($log->size()->toInt(), $bridge->key());
+        $this->assertSame(
+            $log->size()->match(
+                static fn($size) => $size->toInt(),
+                static fn() => throw new \Exception,
+            ),
+            $bridge->key(),
+        );
     }
 }

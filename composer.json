@@ -15,12 +15,14 @@
     },
     "require": {
         "php": "~8.0",
-        "innmind/immutable": "~3.0",
+        "innmind/immutable": "dev-next",
         "symfony/process": "~5.0",
-        "innmind/stream": "~2.0",
-        "innmind/url": "~3.0",
+        "innmind/stream": "dev-next",
+        "innmind/url": "dev-next",
         "psr/log": "^1.0"
     },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "Innmind\\Server\\Control\\": "src/"

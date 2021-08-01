@@ -22,7 +22,7 @@ final class BackgroundProcess implements ProcessInterface
         //read process pipes once otherwise the process will be killed
         $process->getIterator()->next();
         /** @var Sequence<array{0: Str, 1: Output\Type}> */
-        $output = Sequence::of('array');
+        $output = Sequence::of();
         $this->output = new Output\Output($output);
     }
 

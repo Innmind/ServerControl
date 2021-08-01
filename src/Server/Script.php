@@ -15,16 +15,19 @@ final class Script
     /** @var Sequence<Command> */
     private Sequence $commands;
 
+    /**
+     * @no-named-arguments
+     */
     public function __construct(Command ...$commands)
     {
-        $this->commands = Sequence::of(Command::class, ...$commands);
+        $this->commands = Sequence::of(...$commands);
     }
 
     public function __invoke(Server $server): void
     {
         $processes = $server->processes();
 
-        $this->commands->reduce(
+        $_ = $this->commands->reduce(
             $processes,
             static function(Processes $processes, Command $command): Processes {
                 $process = $processes->execute($command);
@@ -46,6 +49,9 @@ final class Script
         );
     }
 
+    /**
+     * @no-named-arguments
+     */
     public static function of(string ...$commands): self
     {
         return new self(...\array_map(

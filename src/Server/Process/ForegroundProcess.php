@@ -51,10 +51,10 @@ final class ForegroundProcess implements ProcessInterface
 
         if ($streamOutput) {
             /** @var Sequence<array{0: Str, 1: Output\Type}> */
-            $output = Sequence::lazy('array', $generator);
+            $output = Sequence::lazy($generator);
         } else {
             /** @var Sequence<array{0: Str, 1: Output\Type}> */
-            $output = Sequence::defer('array', ($generator)());
+            $output = Sequence::defer(($generator)());
         }
 
         $this->output = new Output\Output($output);

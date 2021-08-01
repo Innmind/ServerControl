@@ -104,10 +104,11 @@ class CommandTest extends TestCase
         $this->assertInstanceOf(Command::class, $command);
         $this->assertSame('bin/console', $command->toString());
         $this->assertInstanceOf(Map::class, $command->environment());
-        $this->assertSame('string', (string) $command->environment()->keyType());
-        $this->assertSame('string', (string) $command->environment()->valueType());
         $this->assertCount(1, $command->environment());
-        $this->assertSame('prod', $command->environment()->get('SYMFONY_ENV'));
+        $this->assertSame('prod', $command->environment()->get('SYMFONY_ENV')->match(
+            static fn($env) => $env,
+            static fn() => null,
+        ));
     }
 
     public function testWithWorkingDirectory()

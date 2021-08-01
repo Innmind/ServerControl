@@ -45,9 +45,9 @@ final class Command
         $this->executable = $executable;
         $this->background = $background;
         /** @var Sequence<Command\Parameter> */
-        $this->parameters = Sequence::of(Command\Parameter::class);
+        $this->parameters = Sequence::of();
         /** @var Map<string, string> */
-        $this->environment = Map::of('string', 'string');
+        $this->environment = Map::of();
     }
 
     /**
@@ -243,8 +243,7 @@ final class Command
         $string = $this->executable;
 
         if ($this->parameters->size() > 0) {
-            $parameters = $this->parameters->mapTo(
-                'string',
+            $parameters = $this->parameters->map(
                 static fn($parameter): string => $parameter->toString(),
             );
             $string .= ' '.join(' ', $parameters)->toString();

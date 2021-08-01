@@ -21,22 +21,14 @@ class OutputTest extends TestCase
     {
         $this->assertInstanceOf(
             OutputInterface::class,
-            new Output(Sequence::of('array'))
+            new Output(Sequence::of())
         );
-    }
-
-    public function testThrowWhenInvalidSequence()
-    {
-        $this->expectException(\TypeError::class);
-
-        new Output(Sequence::of('string'));
     }
 
     public function testForeach()
     {
         $output = new Output(
             Sequence::of(
-                'array',
                 [Str::of('0'), Type::output()],
                 [Str::of('1'), Type::output()],
                 [Str::of('2'), Type::output()],
@@ -57,7 +49,6 @@ class OutputTest extends TestCase
     {
         $output = new Output(
             Sequence::of(
-                'array',
                 [Str::of('0'), Type::output()],
                 [Str::of('1'), Type::output()],
                 [Str::of('2'), Type::output()],
@@ -79,7 +70,6 @@ class OutputTest extends TestCase
     {
         $output = new Output(
             Sequence::of(
-                'array',
                 [Str::of('0'), Type::output()],
                 [Str::of('1'), Type::output()],
                 [Str::of('2'), Type::output()],
@@ -99,7 +89,6 @@ class OutputTest extends TestCase
     {
         $output = new Output(
             Sequence::of(
-                'array',
                 [Str::of('0'), Type::output()],
                 [Str::of('1'), Type::output()],
                 [Str::of('2'), Type::output()],
@@ -110,18 +99,21 @@ class OutputTest extends TestCase
         });
 
         $this->assertInstanceOf(Map::class, $groups);
-        $this->assertSame('int', (string) $groups->keyType());
-        $this->assertSame(OutputInterface::class, (string) $groups->valueType());
         $this->assertCount(2, $groups);
-        $this->assertSame('02', $groups->get(0)->toString());
-        $this->assertSame('1', $groups->get(1)->toString());
+        $this->assertSame('02', $groups->get(0)->match(
+            static fn($output) => $output->toString(),
+            static fn() => null
+        ));
+        $this->assertSame('1', $groups->get(1)->match(
+            static fn($output) => $output->toString(),
+            static fn() => null
+        ));
     }
 
     public function testPartition()
     {
         $output = new Output(
             Sequence::of(
-                'array',
                 [Str::of('0'), Type::output()],
                 [Str::of('1'), Type::output()],
                 [Str::of('2'), Type::output()],
@@ -132,18 +124,21 @@ class OutputTest extends TestCase
         });
 
         $this->assertInstanceOf(Map::class, $partitions);
-        $this->assertSame('bool', (string) $partitions->keyType());
-        $this->assertSame(OutputInterface::class, (string) $partitions->valueType());
         $this->assertCount(2, $partitions);
-        $this->assertSame('02', $partitions->get(true)->toString());
-        $this->assertSame('1', $partitions->get(false)->toString());
+        $this->assertSame('02', $partitions->get(true)->match(
+            static fn($output) => $output->toString(),
+            static fn() => null
+        ));
+        $this->assertSame('1', $partitions->get(false)->match(
+            static fn($output) => $output->toString(),
+            static fn() => null
+        ));
     }
 
     public function testStringCast()
     {
         $output = new Output(
             Sequence::of(
-                'array',
                 [Str::of('0'), Type::output()],
                 [Str::of('1'), Type::output()],
                 [Str::of('2'), Type::output()],

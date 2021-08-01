@@ -110,7 +110,7 @@ class LoggerTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('groupBy')
-            ->willReturn($map = Map::of('string', Output::class));
+            ->willReturn($map = Map::of());
 
         $this->assertSame($map, $output->groupBy(static fn() => ''));
     }
@@ -125,7 +125,7 @@ class LoggerTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('partition')
-            ->willReturn($map = Map::of('string', Output::class));
+            ->willReturn($map = Map::of());
 
         $this->assertSame($map, $output->partition(static fn() => true));
     }

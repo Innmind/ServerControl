@@ -9,10 +9,7 @@ use Innmind\Immutable\{
     Sequence,
     Str,
 };
-use function Innmind\Immutable\{
-    join,
-    assertSequence,
-};
+use function Innmind\Immutable\join;
 
 final class Output implements OutputInterface
 {
@@ -24,8 +21,6 @@ final class Output implements OutputInterface
      */
     public function __construct(Sequence $output)
     {
-        assertSequence('array', $output, 1);
-
         $this->output = $output;
     }
 
@@ -34,7 +29,7 @@ final class Output implements OutputInterface
      */
     public function foreach(callable $function): void
     {
-        $this->output->foreach(static function(array $output) use ($function): void {
+        $_ = $this->output->foreach(static function(array $output) use ($function): void {
             $function($output[0], $output[1]);
         });
     }
@@ -82,21 +77,16 @@ final class Output implements OutputInterface
      */
     public function groupBy(callable $discriminator): Map
     {
-        $groups = $this->output->groupBy(static function(array $output) use ($discriminator) {
-            return $discriminator($output[0], $output[1]);
-        });
-
         /**
          * @psalm-suppress MissingClosureParamType
          * @var Map<G, OutputInterface>
          */
-        return $groups->toMapOf(
-            $groups->keyType(),
-            OutputInterface::class,
-            static function($key, Sequence $discriminated): \Generator {
-                yield $key => new self($discriminated);
-            },
-        );
+        return $this
+            ->output
+            ->groupBy(static function(array $output) use ($discriminator) {
+                return $discriminator($output[0], $output[1]);
+            })
+            ->map(static fn($_, $discriminated) => new self($discriminated));
     }
 
     /**
@@ -106,24 +96,18 @@ final class Output implements OutputInterface
      */
     public function partition(callable $predicate): Map
     {
-        $partitions = $this->output->partition(static function(array $output) use ($predicate): bool {
-            return $predicate($output[0], $output[1]);
-        });
-
         /** @var Map<bool, OutputInterface> */
-        return $partitions->toMapOf(
-            'bool',
-            OutputInterface::class,
-            static function(bool $bool, Sequence $output): \Generator {
-                yield $bool => new self($output);
-            },
-        );
+        return $this
+            ->output
+            ->partition(static function(array $output) use ($predicate): bool {
+                return $predicate($output[0], $output[1]);
+            })
+            ->map(static fn($_, $output) => new self($output));
     }
 
     public function toString(): string
     {
-        $bits = $this->output->mapTo(
-            'string',
+        $bits = $this->output->map(
             static fn(array $output): string => $output[0]->toString(),
         );
 
