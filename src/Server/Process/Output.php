@@ -7,6 +7,7 @@ use Innmind\Server\Control\Server\Process\Output\Type;
 use Innmind\Immutable\{
     Map,
     Str,
+    SideEffect,
 };
 
 interface Output
@@ -14,7 +15,7 @@ interface Output
     /**
      * @param callable(Str, Type): void $function
      */
-    public function foreach(callable $function): void;
+    public function foreach(callable $function): SideEffect;
 
     /**
      * @template C

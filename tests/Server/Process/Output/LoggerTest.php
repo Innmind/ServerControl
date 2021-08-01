@@ -12,6 +12,7 @@ use Innmind\Server\Control\Server\{
 use Innmind\Immutable\{
     Map,
     Str,
+    SideEffect,
 };
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -47,9 +48,13 @@ class LoggerTest extends TestCase
                 $callback(Str::of(''), Type::output());
 
                 return true;
-            }));
+            }))
+            ->willReturn(new SideEffect);
 
-        $this->assertNull($output->foreach(static fn() => null));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $output->foreach(static fn() => null),
+        );
     }
 
     public function testWarnErrors()
@@ -69,9 +74,13 @@ class LoggerTest extends TestCase
                 $callback(Str::of(''), Type::error());
 
                 return true;
-            }));
+            }))
+            ->willReturn(new SideEffect);
 
-        $this->assertNull($output->foreach(static fn() => null));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $output->foreach(static fn() => null),
+        );
     }
 
     public function testReduce()

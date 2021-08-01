@@ -10,6 +10,7 @@ use Innmind\Server\Control\Server\{
 use Innmind\Immutable\{
     Map,
     Str,
+    SideEffect,
 };
 use Psr\Log\LoggerInterface;
 
@@ -29,9 +30,9 @@ final class Logger implements Output
         $this->logger = $logger;
     }
 
-    public function foreach(callable $function): void
+    public function foreach(callable $function): SideEffect
     {
-        $this->output->foreach(function(Str $output, Type $type) use ($function): void {
+        return $this->output->foreach(function(Str $output, Type $type) use ($function): void {
             $method = ($type === Type::output()) ? 'debug' : 'warning';
             $this->logger->$method('Command {command} output', [
                 'command' => $this->command->toString(),

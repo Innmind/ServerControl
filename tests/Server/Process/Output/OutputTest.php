@@ -12,6 +12,7 @@ use Innmind\Immutable\{
     Map,
     Sequence,
     Str,
+    SideEffect,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -36,7 +37,8 @@ class OutputTest extends TestCase
         );
         $count = 0;
 
-        $this->assertNull(
+        $this->assertInstanceOf(
+            SideEffect::class,
             $output->foreach(function(Str $data, Type $type) use (&$count) {
                 $this->assertSame((string) $count, $data->toString());
                 ++$count;

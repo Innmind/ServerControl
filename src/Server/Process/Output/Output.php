@@ -8,6 +8,7 @@ use Innmind\Immutable\{
     Map,
     Sequence,
     Str,
+    SideEffect,
 };
 use function Innmind\Immutable\join;
 
@@ -27,9 +28,9 @@ final class Output implements OutputInterface
     /**
      * @param callable(Str, Type): void $function
      */
-    public function foreach(callable $function): void
+    public function foreach(callable $function): SideEffect
     {
-        $_ = $this->output->foreach(static function(array $output) use ($function): void {
+        return $this->output->foreach(static function(array $output) use ($function): void {
             $function($output[0], $output[1]);
         });
     }
