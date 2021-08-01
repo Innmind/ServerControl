@@ -86,7 +86,10 @@ final class Output implements OutputInterface
             return $discriminator($output[0], $output[1]);
         });
 
-        /** @var Map<G, OutputInterface> */
+        /**
+         * @psalm-suppress MissingClosureParamType
+         * @var Map<G, OutputInterface>
+         */
         return $groups->toMapOf(
             $groups->keyType(),
             OutputInterface::class,
