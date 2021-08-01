@@ -5,6 +5,9 @@ namespace Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\Exception\OutOfRangeExitCode;
 
+/**
+ * @psalm-immutable
+ */
 final class ExitCode
 {
     private int $value;

@@ -14,6 +14,9 @@ use Innmind\Immutable\{
 };
 use Psr\Log\LoggerInterface;
 
+/**
+ * @psalm-immutable
+ */
 final class Logger implements Output
 {
     private Output $output;
@@ -33,7 +36,7 @@ final class Logger implements Output
     public function foreach(callable $function): SideEffect
     {
         return $this->output->foreach(function(Str $output, Type $type) use ($function): void {
-            $method = ($type === Type::output()) ? 'debug' : 'warning';
+            $method = $type->equals(Type::output()) ? 'debug' : 'warning';
             $this->logger->$method('Command {command} output', [
                 'command' => $this->command->toString(),
                 'output' => $output->toString(),

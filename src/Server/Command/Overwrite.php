@@ -5,6 +5,9 @@ namespace Innmind\Server\Control\Server\Command;
 
 use Innmind\Url\Path;
 
+/**
+ * @psalm-immutable
+ */
 final class Overwrite implements Parameter
 {
     private string $value;

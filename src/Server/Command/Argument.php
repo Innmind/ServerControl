@@ -3,6 +3,9 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Command;
 
+/**
+ * @psalm-immutable
+ */
 final class Argument implements Parameter
 {
     private string $value;

@@ -10,6 +10,9 @@ use Innmind\Immutable\{
     SideEffect,
 };
 
+/**
+ * @psalm-immutable
+ */
 interface Output
 {
     /**

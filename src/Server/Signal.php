@@ -3,6 +3,9 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server;
 
+/**
+ * @psalm-immutable
+ */
 final class Signal
 {
     private const HANG_UP = \SIGHUP;
@@ -20,36 +23,57 @@ final class Signal
         $this->value = $value;
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function hangUp(): self
     {
         return new self(self::HANG_UP);
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function interrupt(): self
     {
         return new self(self::INTERRUPT);
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function quit(): self
     {
         return new self(self::QUIT);
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function abort(): self
     {
         return new self(self::ABORT);
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function kill(): self
     {
         return new self(self::KILL);
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function alarm(): self
     {
         return new self(self::ALARM);
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function terminate(): self
     {
         return new self(self::TERMINATE);

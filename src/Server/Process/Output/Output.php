@@ -12,6 +12,9 @@ use Innmind\Immutable\{
 };
 use function Innmind\Immutable\join;
 
+/**
+ * @psalm-immutable
+ */
 final class Output implements OutputInterface
 {
     /** @var Sequence<array{0: Str, 1: Type}> */

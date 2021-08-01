@@ -5,6 +5,9 @@ namespace Innmind\Server\Control\Server\Command;
 
 use Innmind\Immutable\Str as S;
 
+/**
+ * @psalm-immutable
+ */
 final class Str
 {
     private string $value;

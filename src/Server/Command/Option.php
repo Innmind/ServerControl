@@ -6,6 +6,9 @@ namespace Innmind\Server\Control\Server\Command;
 use Innmind\Server\Control\Exception\EmptyOptionNotAllowed;
 use Innmind\Immutable\Str as S;
 
+/**
+ * @psalm-immutable
+ */
 final class Option implements Parameter
 {
     private bool $long;

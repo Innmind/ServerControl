@@ -6,6 +6,9 @@ namespace Innmind\Server\Control\Server\Volumes;
 use Innmind\Server\Control\Exception\DomainException;
 use Innmind\Immutable\Str;
 
+/**
+ * @psalm-immutable
+ */
 final class Name
 {
     private string $value;

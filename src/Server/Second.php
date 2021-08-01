@@ -5,6 +5,9 @@ namespace Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\Exception\DomainException;
 
+/**
+ * @psalm-immutable
+ */
 final class Second
 {
     private int $value;

@@ -14,7 +14,7 @@ class TypeTest extends TestCase
 
         $this->assertInstanceOf(Type::class, $output);
         $this->assertSame(Type::OUTPUT, $output->toString());
-        $this->assertSame($output, Type::output());
+        $this->assertEquals($output, Type::output());
     }
 
     public function testError()
@@ -23,6 +23,6 @@ class TypeTest extends TestCase
 
         $this->assertInstanceOf(Type::class, $error);
         $this->assertSame(Type::ERROR, $error->toString());
-        $this->assertSame($error, Type::error());
+        $this->assertEquals($error, Type::error());
     }
 }

@@ -3,13 +3,13 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process\Output;
 
+/**
+ * @psalm-immutable
+ */
 final class Type
 {
     public const OUTPUT = 'stdout';
     public const ERROR = 'stderr';
-
-    private static ?self $output = null;
-    private static ?self $error = null;
 
     private string $value;
 
@@ -18,14 +18,25 @@ final class Type
         $this->value = $type;
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function output(): self
     {
-        return self::$output ??= new self(self::OUTPUT);
+        return new self(self::OUTPUT);
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function error(): self
     {
-        return self::$error ??=  new self(self::ERROR);
+        return new self(self::ERROR);
+    }
+
+    public function equals(self $type): bool
+    {
+        return $this->value === $type->value;
     }
 
     public function toString(): string
