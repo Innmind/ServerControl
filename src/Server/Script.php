@@ -6,11 +6,11 @@ namespace Innmind\Server\Control\Server;
 use Innmind\Server\Control\{
     Server,
     Exception\ScriptFailed,
-    Exception\ProcessTimedOut,
 };
 use Innmind\Immutable\{
     Sequence,
     Either,
+    SideEffect,
 };
 
 final class Script
@@ -26,26 +26,23 @@ final class Script
         $this->commands = Sequence::of(...$commands);
     }
 
-    public function __invoke(Server $server): void
+    /**
+     * @return Either<ScriptFailed, SideEffect>
+     */
+    public function __invoke(Server $server): Either
     {
         $processes = $server->processes();
 
-        $_ = $this->commands->reduce(
-            $processes,
-            static function(Processes $processes, Command $command): Processes {
+        /** @var Either<ScriptFailed, SideEffect> */
+        return $this->commands->reduce(
+            Either::right(new SideEffect),
+            static fn(Either $success, $command) => $success->flatMap(static function() use ($command, $processes) {
                 $process = $processes->execute($command);
 
-                $throwOnError = $process
+                return $process
                     ->wait()
-                    ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e))
-                    ->match(
-                        static fn($e) => static fn() => throw $e,
-                        static fn() => static fn() => null,
-                    );
-                $throwOnError();
-
-                return $processes;
-            },
+                    ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
+            }),
         );
     }
 

@@ -47,7 +47,13 @@ class ScriptTest extends TestCase
             ->method('wait')
             ->willReturn(Either::right(new SideEffect));
 
-        $this->assertNull($script($server));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $script($server)->match(
+                static fn($e) => $e,
+                static fn($sideEffect) => $sideEffect,
+            ),
+        );
     }
 
     public function testThrowOnFailure()
@@ -81,13 +87,13 @@ class ScriptTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($process1, $process2));
 
-        try {
-            $script($server);
-            $this->fail('it should throw');
-        } catch (ScriptFailed $e) {
-            $this->assertSame($process2, $e->process());
-            $this->assertSame($command2, $e->command());
-        }
+        $e = $script($server)->match(
+            static fn($e) => $e,
+            static fn() => null,
+        );
+        $this->assertInstanceOf(ScriptFailed::class, $e);
+        $this->assertSame($process2, $e->process());
+        $this->assertSame($command2, $e->command());
     }
 
     public function testOf()
@@ -112,7 +118,13 @@ class ScriptTest extends TestCase
             ->with(Command::foreground('ls'))
             ->willReturn($process);
 
-        $this->assertNull($script($server));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $script($server)->match(
+                static fn($e) => $e,
+                static fn($sideEffect) => $sideEffect,
+            ),
+        );
     }
 
     public function testFailDueToTimeout()
@@ -135,13 +147,14 @@ class ScriptTest extends TestCase
             ->method('wait')
             ->willReturn(Either::left($expected = new ProcessTimedOut));
 
-        try {
-            $script($server);
-            $this->fail('it should throw');
-        } catch (ScriptFailed $e) {
-            $this->assertSame($process, $e->process());
-            $this->assertSame($command, $e->command());
-            $this->assertSame($expected, $e->getPrevious());
-        }
+        $e = $script($server)->match(
+            static fn($e) => $e,
+            static fn() => null,
+        );
+
+        $this->assertInstanceOf(ScriptFailed::class, $e);
+        $this->assertSame($process, $e->process());
+        $this->assertSame($command, $e->command());
+        $this->assertSame($expected, $e->getPrevious());
     }
 }
