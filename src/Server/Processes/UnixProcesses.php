@@ -3,16 +3,18 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Processes;
 
-use Innmind\Server\Control\Server\{
-    Processes,
-    Command,
-    Process,
-    Process\Pid,
-    Process\ForegroundProcess,
-    Process\BackgroundProcess,
-    Signal,
-    Process\Input\Bridge,
+use Innmind\Server\Control\{
+    Server\Processes,
+    Server\Command,
+    Server\Process,
+    Server\Process\Pid,
+    Server\Process\ForegroundProcess,
+    Server\Process\BackgroundProcess,
+    Server\Signal,
+    Server\Process\Input\Bridge,
+    Exception\ScriptFailed,
 };
+use Innmind\Immutable\Either;
 use Symfony\Component\Process\Process as SfProcess;
 
 final class UnixProcesses implements Processes
@@ -57,14 +59,16 @@ final class UnixProcesses implements Processes
         return new ForegroundProcess($process, $command->outputToBeStreamed());
     }
 
-    public function kill(Pid $pid, Signal $signal): void
+    public function kill(Pid $pid, Signal $signal): Either
     {
-        $this
-            ->execute(
-                Command::foreground('kill')
-                    ->withShortOption($signal->toString())
-                    ->withArgument($pid->toString()),
-            )
-            ->wait();
+        $process = $this->execute(
+            $command = Command::foreground('kill')
+                ->withShortOption($signal->toString())
+                ->withArgument($pid->toString()),
+        );
+
+        return $process
+            ->wait()
+            ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
     }
 }

@@ -161,7 +161,13 @@ class RemoteTest extends TestCase
             Host::of('example.com'),
         );
 
-        $this->assertNull($remote->reboot());
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $remote->reboot()->match(
+                static fn() => null,
+                static fn($sideEffect) => $sideEffect,
+            ),
+        );
     }
 
     public function testShutdown()
@@ -189,6 +195,12 @@ class RemoteTest extends TestCase
             Host::of('example.com'),
         );
 
-        $this->assertNull($remote->shutdown());
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $remote->shutdown()->match(
+                static fn() => null,
+                static fn($sideEffect) => $sideEffect,
+            ),
+        );
     }
 }

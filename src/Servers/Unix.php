@@ -9,6 +9,7 @@ use Innmind\Server\Control\{
     Server\Processes\UnixProcesses,
     Server\Volumes,
 };
+use Innmind\Immutable\Either;
 
 final class Unix implements Server
 {
@@ -31,13 +32,13 @@ final class Unix implements Server
         return $this->volumes;
     }
 
-    public function reboot(): void
+    public function reboot(): Either
     {
-        Server\Script::of('sudo shutdown -r now')($this);
+        return Server\Script::of('sudo shutdown -r now')($this);
     }
 
-    public function shutdown(): void
+    public function shutdown(): Either
     {
-        Server\Script::of('sudo shutdown -h now')($this);
+        return Server\Script::of('sudo shutdown -h now')($this);
     }
 }

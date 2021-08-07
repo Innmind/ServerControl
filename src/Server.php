@@ -3,15 +3,28 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control;
 
-use Innmind\Server\Control\Server\{
-    Processes,
-    Volumes,
+use Innmind\Server\Control\{
+    Server\Processes,
+    Server\Volumes,
+    Exception\ScriptFailed,
+};
+use Innmind\Immutable\{
+    Either,
+    SideEffect,
 };
 
 interface Server
 {
     public function processes(): Processes;
     public function volumes(): Volumes;
-    public function reboot(): void;
-    public function shutdown(): void;
+
+    /**
+     * @return Either<ScriptFailed, SideEffect>
+     */
+    public function reboot(): Either;
+
+    /**
+     * @return Either<ScriptFailed, SideEffect>
+     */
+    public function shutdown(): Either;
 }

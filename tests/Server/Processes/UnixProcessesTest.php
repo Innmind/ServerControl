@@ -14,6 +14,7 @@ use Innmind\Server\Control\{
     Exception\ProcessTimedOut,
 };
 use Innmind\Stream\Readable\Stream;
+use Innmind\Immutable\SideEffect;
 use PHPUnit\Framework\TestCase;
 
 class UnixProcessesTest extends TestCase
@@ -74,7 +75,13 @@ class UnixProcessesTest extends TestCase
             static fn($pid) => $pid,
             static fn() => null,
         );
-        $this->assertNull($processes->kill($pid, Signal::kill()));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $processes->kill($pid, Signal::kill())->match(
+                static fn() => null,
+                static fn($sideEffect) => $sideEffect,
+            ),
+        );
         \sleep(1);
         \exec('pgrep -P '.\posix_getpid(), $pids);
         $this->assertNotContains((string) $pid->toInt(), $pids);

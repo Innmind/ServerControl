@@ -129,7 +129,13 @@ class RemoteProcessesTest extends TestCase
             ->method('wait')
             ->willReturn(Either::right(new SideEffect));
 
-        $this->assertNull($remote->kill(new Pid(42), Signal::kill()));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $remote->kill(new Pid(42), Signal::kill())->match(
+                static fn() => null,
+                static fn($sideEffect) => $sideEffect,
+            ),
+        );
     }
 
     public function testKillViaSpecificPort()
@@ -152,6 +158,12 @@ class RemoteProcessesTest extends TestCase
             ->method('wait')
             ->willReturn(Either::right(new SideEffect));
 
-        $this->assertNull($remote->kill(new Pid(42), Signal::kill()));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $remote->kill(new Pid(42), Signal::kill())->match(
+                static fn() => null,
+                static fn($sideEffect) => $sideEffect,
+            ),
+        );
     }
 }

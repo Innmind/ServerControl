@@ -148,7 +148,13 @@ class LoggerTest extends TestCase
                 ],
             );
 
-        $this->assertNull($logger->reboot());
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $logger->reboot()->match(
+                static fn() => null,
+                static fn($sideEffect) => $sideEffect,
+            ),
+        );
     }
 
     public function testShutdown()
@@ -185,6 +191,12 @@ class LoggerTest extends TestCase
                 ],
             );
 
-        $this->assertNull($logger->shutdown());
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $logger->shutdown()->match(
+                static fn() => null,
+                static fn($sideEffect) => $sideEffect,
+            ),
+        );
     }
 }

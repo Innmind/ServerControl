@@ -3,18 +3,20 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Processes;
 
-use Innmind\Server\Control\Server\{
-    Processes,
-    Command,
-    Signal,
-    Process,
-    Process\Pid,
+use Innmind\Server\Control\{
+    Server\Processes,
+    Server\Command,
+    Server\Signal,
+    Server\Process,
+    Server\Process\Pid,
+    Exception\ScriptFailed,
 };
 use Innmind\Url\Authority\{
     Host,
     Port,
     UserInformation\User,
 };
+use Innmind\Immutable\Either;
 
 final class RemoteProcesses implements Processes
 {
@@ -62,14 +64,16 @@ final class RemoteProcesses implements Processes
             );
     }
 
-    public function kill(Pid $pid, Signal $signal): void
+    public function kill(Pid $pid, Signal $signal): Either
     {
-        $this
-            ->execute(
-                Command::foreground('kill')
-                    ->withShortOption($signal->toString())
-                    ->withArgument($pid->toString()),
-            )
-            ->wait();
+        $process = $this->execute(
+            $command = Command::foreground('kill')
+                ->withShortOption($signal->toString())
+                ->withArgument($pid->toString()),
+        );
+
+        return $process
+            ->wait()
+            ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
     }
 }

@@ -14,6 +14,7 @@ use Innmind\Url\Authority\{
     Port,
     UserInformation\User,
 };
+use Innmind\Immutable\Either;
 
 final class Remote implements Server
 {
@@ -45,13 +46,13 @@ final class Remote implements Server
         return $this->volumes;
     }
 
-    public function reboot(): void
+    public function reboot(): Either
     {
-        Server\Script::of('sudo shutdown -r now')($this);
+        return Server\Script::of('sudo shutdown -r now')($this);
     }
 
-    public function shutdown(): void
+    public function shutdown(): Either
     {
-        Server\Script::of('sudo shutdown -h now')($this);
+        return Server\Script::of('sudo shutdown -h now')($this);
     }
 }

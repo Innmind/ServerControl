@@ -10,6 +10,7 @@ use Innmind\Server\Control\Server\{
     Process,
     Process\Pid,
 };
+use Innmind\Immutable\Either;
 use Psr\Log\LoggerInterface;
 
 final class LoggerProcesses implements Processes
@@ -42,12 +43,13 @@ final class LoggerProcesses implements Processes
         );
     }
 
-    public function kill(Pid $pid, Signal $signal): void
+    public function kill(Pid $pid, Signal $signal): Either
     {
         $this->logger->info('About to kill a process', [
             'pid' => $pid->toInt(),
             'signal' => $signal->toInt(),
         ]);
-        $this->processes->kill($pid, $signal);
+
+        return $this->processes->kill($pid, $signal);
     }
 }

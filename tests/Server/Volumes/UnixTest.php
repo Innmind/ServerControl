@@ -60,10 +60,16 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->assertNull($volumes->mount(
-            new Name('/dev/disk1s2'),
-            Path::of('/somewhere'),
-        ));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $volumes->mount(
+                new Name('/dev/disk1s2'),
+                Path::of('/somewhere'),
+            )->match(
+                static fn() => null,
+                static fn($sideEffect) => $sideEffect,
+            ),
+        );
     }
 
     public function testThrowWhenFailToMountOSXVolume()
@@ -94,11 +100,15 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->expectException(ScriptFailed::class);
-
-        $volumes->mount(
-            new Name('/dev/disk1s2'),
-            Path::of('/somewhere'),
+        $this->assertInstanceOf(
+            ScriptFailed::class,
+            $volumes->mount(
+                new Name('/dev/disk1s2'),
+                Path::of('/somewhere'),
+            )->match(
+                static fn($e) => $e,
+                static fn() => null,
+            ),
         );
     }
 
@@ -130,12 +140,16 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->assertNull($volumes->unmount(
-            new Name('/dev/disk1s2'),
-        ));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $volumes->unmount(new Name('/dev/disk1s2'))->match(
+                static fn() => null,
+                static fn($sideEffect) => $sideEffect,
+            ),
+        );
     }
 
-    public function testThrowWhenFailToUnmountOSXVolume()
+    public function testReturnErrorWhenFailToUnmountOSXVolume()
     {
         $volumes = new Unix(
             $processes = $this->createMock(Processes::class),
@@ -163,10 +177,12 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->expectException(ScriptFailed::class);
-
-        $volumes->unmount(
-            new Name('/dev/disk1s2'),
+        $this->assertInstanceOf(
+            ScriptFailed::class,
+            $volumes->unmount(new Name('/dev/disk1s2'))->match(
+                static fn($e) => $e,
+                static fn() => null,
+            ),
         );
     }
 
@@ -198,13 +214,19 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->assertNull($volumes->mount(
-            new Name('/dev/disk1s2'),
-            Path::of('/somewhere'),
-        ));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $volumes->mount(
+                new Name('/dev/disk1s2'),
+                Path::of('/somewhere'),
+            )->match(
+                static fn() => null,
+                static fn($sideEffect) => $sideEffect,
+            ),
+        );
     }
 
-    public function testThrowWhenFailToMountLinuxVolume()
+    public function testReturnErrorWhenFailToMountLinuxVolume()
     {
         $volumes = new Unix(
             $processes = $this->createMock(Processes::class),
@@ -232,11 +254,15 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->expectException(ScriptFailed::class);
-
-        $volumes->mount(
-            new Name('/dev/disk1s2'),
-            Path::of('/somewhere'),
+        $this->assertInstanceOf(
+            ScriptFailed::class,
+            $volumes->mount(
+                new Name('/dev/disk1s2'),
+                Path::of('/somewhere'),
+            )->match(
+                static fn($e) => $e,
+                static fn() => null,
+            ),
         );
     }
 
@@ -268,12 +294,16 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->assertNull($volumes->unmount(
-            new Name('/dev/disk1s2'),
-        ));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $volumes->unmount(new Name('/dev/disk1s2'))->match(
+                static fn() => null,
+                static fn($sideEffect) => $sideEffect,
+            ),
+        );
     }
 
-    public function testThrowWhenFailToUnmountLinuxVolume()
+    public function testReturnErrorWhenFailToUnmountLinuxVolume()
     {
         $volumes = new Unix(
             $processes = $this->createMock(Processes::class),
@@ -301,10 +331,12 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->expectException(ScriptFailed::class);
-
-        $volumes->unmount(
-            new Name('/dev/disk1s2'),
+        $this->assertInstanceOf(
+            ScriptFailed::class,
+            $volumes->unmount(new Name('/dev/disk1s2'))->match(
+                static fn($e) => $e,
+                static fn() => null,
+            ),
         );
     }
 }

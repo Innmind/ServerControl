@@ -10,6 +10,10 @@ use Innmind\Server\Control\{
     Exception\ScriptFailed,
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\{
+    Either,
+    SideEffect,
+};
 
 final class Unix implements Volumes
 {
@@ -20,62 +24,55 @@ final class Unix implements Volumes
         $this->processes = $processes;
     }
 
-    public function mount(Name $name, Path $mountpoint): void
+    public function mount(Name $name, Path $mountpoint): Either
     {
         if ($this->isOSX()) {
-            $this->run(
+            return $this->run(
                 Command::foreground('diskutil')
                     ->withArgument('mount')
                     ->withArgument($name->toString()),
             );
-
-            return;
         }
 
-        $this->run(
+        return $this->run(
             Command::foreground('mount')
                 ->withArgument($name->toString())
                 ->withArgument($mountpoint->toString()),
         );
     }
 
-    public function unmount(Name $name): void
+    public function unmount(Name $name): Either
     {
         if ($this->isOSX()) {
-            $this->run(
+            return $this->run(
                 Command::foreground('diskutil')
                     ->withArgument('unmount')
                     ->withArgument($name->toString()),
             );
-
-            return;
         }
 
-        $this->run(
+        return $this->run(
             Command::foreground('umount')
                 ->withArgument($name->toString()),
         );
     }
 
-    private function run(Command $command): void
+    /**
+     * @return Either<ScriptFailed, SideEffect>
+     */
+    private function run(Command $command): Either
     {
         $process = $this->processes->execute($command);
-        $throwOnError = $process
+
+        return $process
             ->wait()
-            ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e))
-            ->match(
-                static fn($e) => static fn() => throw $e,
-                static fn() => static fn() => null,
-            );
-        $throwOnError();
+            ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
     }
 
     private function isOSX(): bool
     {
         return $this
-            ->processes
-            ->execute(Command::foreground('which diskutil'))
-            ->wait()
+            ->run(Command::foreground('which diskutil'))
             ->match(
                 static fn() => false,
                 static fn() => true,

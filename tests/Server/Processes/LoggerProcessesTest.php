@@ -12,6 +12,10 @@ use Innmind\Server\Control\Server\{
     Process\Pid
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\{
+    Either,
+    SideEffect,
+};
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -103,7 +107,8 @@ class LoggerProcessesTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('kill')
-            ->with(new Pid(42), Signal::kill());
+            ->with(new Pid(42), Signal::kill())
+            ->willReturn($expected = Either::right(new SideEffect));
         $log
             ->expects($this->once())
             ->method('info')
@@ -115,6 +120,6 @@ class LoggerProcessesTest extends TestCase
                 ]
             );
 
-        $this->assertNull($logger->kill(new Pid(42), Signal::kill()));
+        $this->assertSame($expected, $logger->kill(new Pid(42), Signal::kill()));
     }
 }
