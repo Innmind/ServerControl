@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\{
-    Server\Process as ProcessInterface,
-    Exception\BackgroundProcessInformationNotAvailable,
-};
+use Innmind\Server\Control\Server\Process as ProcessInterface;
 use Innmind\Immutable\{
     Sequence,
     Str,
@@ -45,10 +42,5 @@ final class BackgroundProcess implements ProcessInterface
         $exit = Maybe::nothing();
 
         return Either::right($exit);
-    }
-
-    public function isRunning(): bool
-    {
-        throw new BackgroundProcessInformationNotAvailable;
     }
 }

@@ -31,7 +31,6 @@ class UnixProcessesTest extends TestCase
             Command::foreground('php')->withArgument('fixtures/slow.php')
         );
 
-        $this->assertTrue($process->isRunning());
         $this->assertInstanceOf(ForegroundProcess::class, $process);
         $process->wait();
         $this->assertTrue((\time() - $start) >= 6);
@@ -71,15 +70,14 @@ class UnixProcessesTest extends TestCase
             Command::foreground('php')->withArgument('fixtures/slow.php')
         );
 
-        $this->assertNull($processes->kill(
-            $process->pid()->match(
-                static fn($pid) => $pid,
-                static fn() => null,
-            ),
-            Signal::kill(),
-        ));
+        $pid = $process->pid()->match(
+            static fn($pid) => $pid,
+            static fn() => null,
+        );
+        $this->assertNull($processes->kill($pid, Signal::kill()));
         \sleep(1);
-        $this->assertFalse($process->isRunning());
+        \exec('pgrep -P '.\posix_getpid(), $pids);
+        $this->assertNotContains((string) $pid->toInt(), $pids);
         $this->assertTrue((\time() - $start) < 2);
     }
 

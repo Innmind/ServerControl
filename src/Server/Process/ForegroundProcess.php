@@ -87,9 +87,4 @@ final class ForegroundProcess implements ProcessInterface
             ));
         }
     }
-
-    public function isRunning(): bool
-    {
-        return $this->process->isRunning();
-    }
 }

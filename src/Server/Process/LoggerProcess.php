@@ -74,15 +74,4 @@ final class LoggerProcess implements Process
                 return $exit;
             }));
     }
-
-    public function isRunning(): bool
-    {
-        $isRunning = $this->process->isRunning();
-        $this->logger->debug('Checking if command {command} is running', [
-            'command' => $this->command->toString(),
-            'running' => $isRunning,
-        ]);
-
-        return $isRunning;
-    }
 }

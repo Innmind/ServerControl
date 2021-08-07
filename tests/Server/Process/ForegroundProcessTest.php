@@ -123,15 +123,4 @@ class ForegroundProcessTest extends TestCase
                 ),
         );
     }
-
-    public function testIsRunning()
-    {
-        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
-        $slow->start();
-        $process = new ForegroundProcess($slow);
-
-        $this->assertTrue($process->isRunning());
-        \sleep(7);
-        $this->assertFalse($process->isRunning());
-    }
 }

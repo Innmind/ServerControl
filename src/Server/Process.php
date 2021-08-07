@@ -31,5 +31,4 @@ interface Process
      * @return Either<ProcessTimedOut, Maybe<ExitCode>>
      */
     public function wait(): Either;
-    public function isRunning(): bool;
 }

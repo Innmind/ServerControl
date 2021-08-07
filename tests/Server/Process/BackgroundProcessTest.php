@@ -3,14 +3,13 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\{
-    Server\Process\BackgroundProcess,
-    Server\Process as ProcessInterface,
-    Server\Process\Pid,
-    Server\Process\ExitCode,
-    Server\Process\Output\Output,
-    Server\Process\Output\Type,
-    Exception\BackgroundProcessInformationNotAvailable,
+use Innmind\Server\Control\Server\{
+    Process\BackgroundProcess,
+    Process as ProcessInterface,
+    Process\Pid,
+    Process\ExitCode,
+    Process\Output\Output,
+    Process\Output\Type,
 };
 use Symfony\Component\Process\Process as SfProcess;
 use PHPUnit\Framework\TestCase;
@@ -70,16 +69,5 @@ class BackgroundProcessTest extends TestCase
                     static fn($exit) => $exit,
                 ),
         );
-    }
-
-    public function testIsRunning()
-    {
-        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
-        $slow->start();
-        $process = new BackgroundProcess($slow);
-
-        $this->expectException(BackgroundProcessInformationNotAvailable::class);
-
-        $process->isRunning();
     }
 }
