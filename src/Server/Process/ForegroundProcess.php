@@ -79,8 +79,7 @@ final class ForegroundProcess implements ProcessInterface
             $exitCode = $this->process->getExitCode();
 
             if (!\is_int($exitCode)) {
-                /** @var Either<ProcessTimedOut|ProcessFailed, SideEffect> */
-                return Either::right(Maybe::nothing());
+                return Either::right(new SideEffect);
             }
 
             $exitCode = new ExitCode($exitCode);
