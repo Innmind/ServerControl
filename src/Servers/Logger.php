@@ -19,7 +19,7 @@ final class Logger implements Server
 
     public function __construct(
         Server $server,
-        LoggerInterface $logger
+        LoggerInterface $logger,
     ) {
         $this->processes = new LoggerProcesses(
             $server->processes(),

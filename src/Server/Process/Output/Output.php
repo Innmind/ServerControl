@@ -33,9 +33,10 @@ final class Output implements OutputInterface
      */
     public function foreach(callable $function): SideEffect
     {
-        return $this->output->foreach(static function(array $output) use ($function): void {
-            $function($output[0], $output[1]);
-        });
+        return $this->output->foreach(static fn(array $output) => $function(
+            $output[0],
+            $output[1],
+        ));
     }
 
     /**
@@ -54,9 +55,11 @@ final class Output implements OutputInterface
          */
         return $this->output->reduce(
             $carry,
-            static function($carry, array $output) use ($reducer) {
-                return $reducer($carry, $output[0], $output[1]);
-            },
+            static fn($carry, array $output) => $reducer(
+                $carry,
+                $output[0],
+                $output[1],
+            ),
         );
     }
 
@@ -66,9 +69,7 @@ final class Output implements OutputInterface
     public function filter(callable $predicate): OutputInterface
     {
         return new self($this->output->filter(
-            static function(array $output) use ($predicate): bool {
-                return $predicate($output[0], $output[1]);
-            },
+            static fn(array $output) => $predicate($output[0], $output[1]),
         ));
     }
 
@@ -87,9 +88,10 @@ final class Output implements OutputInterface
          */
         return $this
             ->output
-            ->groupBy(static function(array $output) use ($discriminator) {
-                return $discriminator($output[0], $output[1]);
-            })
+            ->groupBy(static fn(array $output) => $discriminator(
+                $output[0],
+                $output[1],
+            ))
             ->map(static fn($_, $discriminated) => new self($discriminated));
     }
 
@@ -103,9 +105,10 @@ final class Output implements OutputInterface
         /** @var Map<bool, OutputInterface> */
         return $this
             ->output
-            ->partition(static function(array $output) use ($predicate): bool {
-                return $predicate($output[0], $output[1]);
-            })
+            ->partition(static fn(array $output) => $predicate(
+                $output[0],
+                $output[1],
+            ))
             ->map(static fn($_, $output) => new self($output));
     }
 

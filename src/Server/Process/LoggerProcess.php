@@ -23,7 +23,7 @@ final class LoggerProcess implements Process
     public function __construct(
         Process $process,
         Command $command,
-        LoggerInterface $logger
+        LoggerInterface $logger,
     ) {
         $this->process = $process;
         $this->command = $command;

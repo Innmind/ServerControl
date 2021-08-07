@@ -26,7 +26,7 @@ final class Logger implements Output
     public function __construct(
         Output $output,
         Command $command,
-        LoggerInterface $logger
+        LoggerInterface $logger,
     ) {
         $this->output = $output;
         $this->command = $command;

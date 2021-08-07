@@ -155,13 +155,12 @@ final class Command
     {
         $self = clone $this;
 
-        $self->parameters = $this->redirection->match(
-            fn($redirection) => ($this->parameters)($redirection),
-            fn() => $this->parameters,
-        );
-
-        $self->parameters = $self
-            ->parameters
+        $self->parameters = $this
+            ->redirection
+            ->match(
+                fn($redirection) => ($this->parameters)($redirection),
+                fn() => $this->parameters,
+            )
             ->add(new Pipe)
             ->add(new Argument($command->executable))
             ->append($command->parameters);

@@ -25,7 +25,7 @@ final class Remote implements Server
         Server $server,
         User $user,
         Host $host,
-        Port $port = null
+        Port $port = null,
     ) {
         $this->processes = new RemoteProcesses(
             $server->processes(),

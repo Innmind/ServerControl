@@ -20,7 +20,7 @@ final class LoggerProcesses implements Processes
 
     public function __construct(
         Processes $processes,
-        LoggerInterface $logger
+        LoggerInterface $logger,
     ) {
         $this->processes = $processes;
         $this->logger = $logger;
