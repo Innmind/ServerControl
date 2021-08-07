@@ -10,7 +10,6 @@ use Innmind\Server\Control\{
     Exception\ScriptFailed,
 };
 use Innmind\Url\Path;
-use Innmind\Immutable\Either;
 
 final class Unix implements Volumes
 {
@@ -63,17 +62,7 @@ final class Unix implements Volumes
         $process = $this->processes->execute($command);
         $throwOnError = $process
             ->wait()
-            ->flatMap(
-                static fn($exit) => $exit
-                    ->map(static fn($exit) => $exit->successful())
-                    ->match(
-                        static fn($successful) => $successful ? Either::right(null) : Either::left(new ScriptFailed(
-                            $command,
-                            $process,
-                        )),
-                        static fn() => Either::right(null),
-                    ),
-            )
+            ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e))
             ->match(
                 static fn($e) => static fn() => throw $e,
                 static fn() => static fn() => null,
@@ -87,13 +76,9 @@ final class Unix implements Volumes
             ->processes
             ->execute(Command::foreground('which diskutil'))
             ->wait()
-            ->map(static fn($exit) => $exit->match(
-                static fn($exit) => $exit->successful(),
-                static fn() => false,
-            ))
             ->match(
                 static fn() => false,
-                static fn($isOSX) => $isOSX,
+                static fn() => true,
             );
     }
 }

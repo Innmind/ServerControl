@@ -3,9 +3,10 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\Server\{
-    Process,
-    Command,
+use Innmind\Server\Control\{
+    Server\Process,
+    Server\Command,
+    Exception\ProcessFailed,
 };
 use Innmind\Immutable\{
     Maybe,
@@ -59,19 +60,25 @@ final class LoggerProcess implements Process
             ->process
             ->wait()
             ->leftMap(function($e) {
-                $this->logger->warning('Command {command} timed out', [
-                    'command' => $this->command->toString(),
-                ]);
+                if ($e instanceof ProcessFailed) {
+                    $this->logger->warning('Command {command} failed with {exitCode}', [
+                        'command' => $this->command->toString(),
+                        'exitCode' => $e->exitCode()->toInt(),
+                    ]);
+                } else {
+                    $this->logger->warning('Command {command} timed out', [
+                        'command' => $this->command->toString(),
+                    ]);
+                }
 
                 return $e;
             })
-            ->map(fn($exit) => $exit->map(function($exit) {
-                $this->logger->debug('Command {command} terminated with {exitCode}', [
+            ->map(function($sideEffect) {
+                $this->logger->debug('Command {command} terminated correctly', [
                     'command' => $this->command->toString(),
-                    'exitCode' => $exit->toInt(),
                 ]);
 
-                return $exit;
-            }));
+                return $sideEffect;
+            });
     }
 }

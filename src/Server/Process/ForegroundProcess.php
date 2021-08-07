@@ -6,12 +6,14 @@ namespace Innmind\Server\Control\Server\Process;
 use Innmind\Server\Control\{
     Server\Process as ProcessInterface,
     Exception\ProcessTimedOut,
+    Exception\ProcessFailed,
 };
 use Innmind\Immutable\{
     Sequence,
     Str,
     Maybe,
     Either,
+    SideEffect,
 };
 use Symfony\Component\Process\{
     Process,
@@ -74,12 +76,23 @@ final class ForegroundProcess implements ProcessInterface
     {
         try {
             $this->process->wait();
+            $exitCode = $this->process->getExitCode();
 
-            return Either::right(
-                Maybe::of($this->process->getExitCode())
-                    ->map(static fn($code) => new ExitCode($code)),
-            );
+            if (!\is_int($exitCode)) {
+                /** @var Either<ProcessTimedOut|ProcessFailed, SideEffect> */
+                return Either::right(Maybe::nothing());
+            }
+
+            $exitCode = new ExitCode($exitCode);
+
+            if (!$exitCode->successful()) {
+                /** @var Either<ProcessTimedOut|ProcessFailed, SideEffect> */
+                return Either::left(new ProcessFailed($exitCode));
+            }
+
+            return Either::right(new SideEffect);
         } catch (ProcessTimedOutException $e) {
+            /** @var Either<ProcessTimedOut|ProcessFailed, SideEffect> */
             return Either::left(new ProcessTimedOut(
                 $e->getMessage(),
                 (int) $e->getCode(),

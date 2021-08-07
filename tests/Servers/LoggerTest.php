@@ -14,8 +14,8 @@ use Innmind\Server\Control\{
     Server\Volumes,
 };
 use Innmind\Immutable\{
-    Maybe,
     Either,
+    SideEffect,
 };
 use Psr\Log\{
     LoggerInterface,
@@ -73,12 +73,12 @@ class LoggerTest extends TestCase
         $which1
             ->expects($this->once())
             ->method('wait')
-            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
+            ->willReturn(Either::right(new SideEffect));
         $which2 = $this->createMock(Process::class);
         $which2
             ->expects($this->once())
             ->method('wait')
-            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
+            ->willReturn(Either::right(new SideEffect));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -131,7 +131,7 @@ class LoggerTest extends TestCase
         $shutdown
             ->expects($this->once())
             ->method('wait')
-            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
+            ->willReturn(Either::right(new SideEffect));
 
         $logger = new Logger(
             $server,
@@ -168,7 +168,7 @@ class LoggerTest extends TestCase
         $shutdown
             ->expects($this->once())
             ->method('wait')
-            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
+            ->willReturn(Either::right(new SideEffect));
 
         $logger = new Logger(
             $server,

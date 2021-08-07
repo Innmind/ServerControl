@@ -11,6 +11,7 @@ use Innmind\Server\Control\Server\{
     Process\Output\Output,
     Process\Output\Type,
 };
+use Innmind\Immutable\SideEffect;
 use Symfony\Component\Process\Process as SfProcess;
 use PHPUnit\Framework\TestCase;
 
@@ -57,16 +58,13 @@ class BackgroundProcessTest extends TestCase
         $slow->start();
         $process = new BackgroundProcess($slow);
 
-        $this->assertNull(
+        $this->assertInstanceOf(
+            SideEffect::class,
             $process
                 ->wait()
-                ->map(static fn($exit) => $exit->match(
-                    static fn($exit) => $exit,
-                    static fn() => null,
-                ))
                 ->match(
                     static fn($e) => $e,
-                    static fn($exit) => $exit,
+                    static fn($sideEffect) => $sideEffect,
                 ),
         );
     }

@@ -8,10 +8,12 @@ use Innmind\Server\Control\{
     Server\Process\Output,
     Server\Process\ExitCode,
     Exception\ProcessTimedOut,
+    Exception\ProcessFailed,
 };
 use Innmind\Immutable\{
     Maybe,
     Either,
+    SideEffect,
 };
 
 interface Process
@@ -28,7 +30,12 @@ interface Process
     public function output(): Output;
 
     /**
-     * @return Either<ProcessTimedOut, Maybe<ExitCode>>
+     * This method returns a side effect either when a foreground process
+     * returned a 0 exit code or when waiting for a background process
+     *
+     * Waiting on a background process does nothing
+     *
+     * @return Either<ProcessTimedOut|ProcessFailed, SideEffect>
      */
     public function wait(): Either;
 }

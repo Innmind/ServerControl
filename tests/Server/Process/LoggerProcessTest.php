@@ -15,6 +15,7 @@ use Innmind\Server\Control\{
 use Innmind\Immutable\{
     Maybe,
     Either,
+    SideEffect,
 };
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -64,7 +65,7 @@ class LoggerProcessTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('wait')
-            ->willReturn($expected = Either::right(Maybe::just(new ExitCode(0))));
+            ->willReturn($expected = Either::right(new SideEffect));
 
         $this->assertEquals($expected, $process->wait());
     }
@@ -82,7 +83,7 @@ class LoggerProcessTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('wait')
-            ->willReturn($expected = Either::right(Maybe::nothing()));
+            ->willReturn($expected = Either::right(new SideEffect));
 
         $this->assertEquals($expected, $process->wait());
     }

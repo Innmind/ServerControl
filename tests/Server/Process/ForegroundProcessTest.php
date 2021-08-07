@@ -3,15 +3,19 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\Server\{
-    Process\ForegroundProcess,
-    Process as ProcessInterface,
-    Process\Pid,
-    Process\ExitCode,
-    Process\Output,
-    Process\Output\Type,
+use Innmind\Server\Control\{
+    Server\Process\ForegroundProcess,
+    Server\Process as ProcessInterface,
+    Server\Process\Pid,
+    Server\Process\ExitCode,
+    Server\Process\Output,
+    Server\Process\Output\Type,
+    Exception\ProcessFailed,
 };
-use Innmind\Immutable\Str;
+use Innmind\Immutable\{
+    Str,
+    SideEffect,
+};
 use Symfony\Component\Process\Process as SfProcess;
 use PHPUnit\Framework\TestCase;
 
@@ -65,26 +69,6 @@ class ForegroundProcessTest extends TestCase
         $this->assertSame(6, $count);
     }
 
-    public function testExitCode()
-    {
-        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
-        $slow->start();
-        $process = new ForegroundProcess($slow);
-
-        \sleep(7);
-
-        $this->assertSame(
-            0,
-            $process->wait()->match(
-                static fn($e) => $e,
-                static fn($exit) => $exit->match(
-                    static fn($exit) => $exit->toInt(),
-                    static fn() => null,
-                ),
-            ),
-        );
-    }
-
     public function testExitCodeForFailingProcess()
     {
         $slow = SfProcess::fromShellCommandline('php fixtures/fails.php');
@@ -93,14 +77,20 @@ class ForegroundProcessTest extends TestCase
 
         \sleep(1);
 
+        $return = $process->wait();
+
+        $this->assertInstanceOf(
+            ProcessFailed::class,
+            $return->match(
+                static fn($e) => $e,
+                static fn($exit) => $exit,
+            ),
+        );
         $this->assertSame(
             1,
-            $process->wait()->match(
-                static fn($e) => $e,
-                static fn($exit) => $exit->match(
-                    static fn($exit) => $exit->toInt(),
-                    static fn() => null,
-                ),
+            $return->match(
+                static fn($e) => $e->exitCode()->toInt(),
+                static fn($exit) => null,
             ),
         );
     }
@@ -110,16 +100,13 @@ class ForegroundProcessTest extends TestCase
         $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
         $slow->start();
         $process = new ForegroundProcess($slow);
-        $this->assertIsInt(
+        $this->assertInstanceOf(
+            SideEffect::class,
             $process
                 ->wait()
-                ->map(static fn($exit) => $exit->match(
-                    static fn($exit) => $exit->toInt(),
-                    static fn() => null,
-                ))
                 ->match(
                     static fn($e) => $e,
-                    static fn($exit) => $exit,
+                    static fn($sideEffect) => $sideEffect,
                 ),
         );
     }

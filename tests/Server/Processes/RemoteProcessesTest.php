@@ -19,8 +19,8 @@ use Innmind\Url\{
     Authority\UserInformation\User
 };
 use Innmind\Immutable\{
-    Maybe,
     Either,
+    SideEffect,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -127,7 +127,7 @@ class RemoteProcessesTest extends TestCase
         $process
             ->expects($this->once())
             ->method('wait')
-            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
+            ->willReturn(Either::right(new SideEffect));
 
         $this->assertNull($remote->kill(new Pid(42), Signal::kill()));
     }
@@ -150,7 +150,7 @@ class RemoteProcessesTest extends TestCase
         $process
             ->expects($this->once())
             ->method('wait')
-            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
+            ->willReturn(Either::right(new SideEffect));
 
         $this->assertNull($remote->kill(new Pid(42), Signal::kill()));
     }

@@ -10,12 +10,13 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Process,
     Server\Process\ExitCode,
+    Exception\ProcessFailed,
     Exception\ScriptFailed,
     Exception\ProcessTimedOut,
 };
 use Innmind\Immutable\{
     Either,
-    Maybe,
+    SideEffect,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -44,7 +45,7 @@ class ScriptTest extends TestCase
         $process
             ->expects($this->any())
             ->method('wait')
-            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
+            ->willReturn(Either::right(new SideEffect));
 
         $this->assertNull($script($server));
     }
@@ -65,12 +66,12 @@ class ScriptTest extends TestCase
         $process1
             ->expects($this->any())
             ->method('wait')
-            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
+            ->willReturn(Either::right(new SideEffect));
         $process2 = $this->createMock(Process::class);
         $process2
             ->expects($this->any())
             ->method('wait')
-            ->willReturn(Either::right(Maybe::just(new ExitCode(1))));
+            ->willReturn(Either::left(new ProcessFailed(new ExitCode(1))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -104,7 +105,7 @@ class ScriptTest extends TestCase
         $process
             ->expects($this->any())
             ->method('wait')
-            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
+            ->willReturn(Either::right(new SideEffect));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')

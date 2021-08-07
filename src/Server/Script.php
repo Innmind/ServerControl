@@ -38,17 +38,6 @@ final class Script
                 $throwOnError = $process
                     ->wait()
                     ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e))
-                    ->flatMap(
-                        static fn($exit): Either => $exit
-                            ->map(static fn($exit) => $exit->successful())
-                            ->match(
-                                static fn($successful) => $successful ? Either::right(null) : Either::left(new ScriptFailed(
-                                    $command,
-                                    $process,
-                                )),
-                                static fn() => Either::right(null),
-                            ),
-                    )
                     ->match(
                         static fn($e) => static fn() => throw $e,
                         static fn() => static fn() => null,

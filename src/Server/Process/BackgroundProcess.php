@@ -9,6 +9,7 @@ use Innmind\Immutable\{
     Str,
     Maybe,
     Either,
+    SideEffect,
 };
 use Symfony\Component\Process\Process;
 
@@ -38,9 +39,6 @@ final class BackgroundProcess implements ProcessInterface
 
     public function wait(): Either
     {
-        /** @var Maybe<ExitCode> */
-        $exit = Maybe::nothing();
-
-        return Either::right($exit);
+        return Either::right(new SideEffect);
     }
 }

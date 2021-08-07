@@ -19,8 +19,8 @@ use Innmind\Url\Authority\{
     UserInformation\User
 };
 use Innmind\Immutable\{
-    Maybe,
     Either,
+    SideEffect,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -104,12 +104,12 @@ class RemoteTest extends TestCase
         $which1
             ->expects($this->once())
             ->method('wait')
-            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
+            ->willReturn(Either::right(new SideEffect));
         $which2 = $this->createMock(Process::class);
         $which2
             ->expects($this->once())
             ->method('wait')
-            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
+            ->willReturn(Either::right(new SideEffect));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -153,7 +153,7 @@ class RemoteTest extends TestCase
         $shutdown
             ->expects($this->once())
             ->method('wait')
-            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
+            ->willReturn(Either::right(new SideEffect));
 
         $remote = new Remote(
             $server,
@@ -181,7 +181,7 @@ class RemoteTest extends TestCase
         $shutdown
             ->expects($this->once())
             ->method('wait')
-            ->willReturn(Either::right(Maybe::just(new ExitCode(0))));
+            ->willReturn(Either::right(new SideEffect));
 
         $remote = new Remote(
             $server,
