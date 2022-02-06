@@ -7,6 +7,8 @@ use Innmind\Server\Control\{
     Server\Process,
     Server\Command,
     Exception\ProcessFailed,
+    Exception\ProcessSignaled,
+    Exception\ProcessTimedOut,
 };
 use Innmind\Immutable\{
     Maybe,
@@ -60,16 +62,24 @@ final class LoggerProcess implements Process
             ->process
             ->wait()
             ->leftMap(function($e) {
-                if ($e instanceof ProcessFailed) {
-                    $this->logger->warning('Command {command} failed with {exitCode}', [
-                        'command' => $this->command->toString(),
-                        'exitCode' => $e->exitCode()->toInt(),
-                    ]);
-                } else {
-                    $this->logger->warning('Command {command} timed out', [
-                        'command' => $this->command->toString(),
-                    ]);
-                }
+                [$message, $context] = match (\get_class($e)) {
+                    ProcessSignaled::class => [
+                        'Command {command} stopped due to external signal',
+                        ['command' => $this->command->toString()],
+                    ],
+                    ProcessFailed::class => [
+                        'Command {command} failed with {exitCode}',
+                        [
+                            'command' => $this->command->toString(),
+                            'exitCode' => $e->exitCode()->toInt(),
+                        ],
+                    ],
+                    ProcessTimedOut::class => [
+                        'Command {command} timed out',
+                        ['command' => $this->command->toString()],
+                    ],
+                };
+                $this->logger->warning($message, $context);
 
                 return $e;
             })

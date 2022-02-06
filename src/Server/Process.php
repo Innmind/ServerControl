@@ -9,6 +9,7 @@ use Innmind\Server\Control\{
     Server\Process\ExitCode,
     Exception\ProcessTimedOut,
     Exception\ProcessFailed,
+    Exception\ProcessSignaled,
 };
 use Innmind\Immutable\{
     Maybe,
@@ -35,7 +36,7 @@ interface Process
      *
      * Waiting on a background process does nothing
      *
-     * @return Either<ProcessTimedOut|ProcessFailed, SideEffect>
+     * @return Either<ProcessTimedOut|ProcessFailed|ProcessSignaled, SideEffect>
      */
     public function wait(): Either;
 }

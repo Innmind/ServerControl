@@ -7,6 +7,7 @@ use Innmind\Server\Control\{
     Server\Process as ProcessInterface,
     Exception\ProcessTimedOut,
     Exception\ProcessFailed,
+    Exception\ProcessSignaled,
 };
 use Innmind\Immutable\{
     Sequence,
@@ -18,6 +19,7 @@ use Innmind\Immutable\{
 use Symfony\Component\Process\{
     Process,
     Exception\ProcessTimedOutException,
+    Exception\ProcessSignaledException,
 };
 
 final class ForegroundProcess implements ProcessInterface
@@ -94,18 +96,21 @@ final class ForegroundProcess implements ProcessInterface
             $exitCode = new ExitCode($exitCode);
 
             if (!$exitCode->successful()) {
-                /** @var Either<ProcessTimedOut|ProcessFailed, SideEffect> */
+                /** @var Either<ProcessTimedOut|ProcessFailed|ProcessSignaled, SideEffect> */
                 return Either::left(new ProcessFailed($exitCode));
             }
 
             return Either::right(new SideEffect);
         } catch (ProcessTimedOutException $e) {
-            /** @var Either<ProcessTimedOut|ProcessFailed, SideEffect> */
+            /** @var Either<ProcessTimedOut|ProcessFailed|ProcessSignaled, SideEffect> */
             return Either::left(new ProcessTimedOut(
                 $e->getMessage(),
                 (int) $e->getCode(),
                 $e,
             ));
+        } catch (ProcessSignaledException $e) {
+            /** @var Either<ProcessTimedOut|ProcessFailed|ProcessSignaled, SideEffect> */
+            return Either::left(new ProcessSignaled);
         }
     }
 }

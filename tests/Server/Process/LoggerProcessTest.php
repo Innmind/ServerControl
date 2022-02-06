@@ -11,6 +11,7 @@ use Innmind\Server\Control\{
     Server\Process,
     Server\Command,
     Exception\ProcessTimedOut,
+    Exception\ProcessSignaled,
 };
 use Innmind\Immutable\{
     Maybe,
@@ -97,11 +98,31 @@ class LoggerProcessTest extends TestCase
         );
         $logger
             ->expects($this->once())
-            ->method('warning');
+            ->method('warning')
+            ->with('Command {command} timed out');
         $inner
             ->expects($this->once())
             ->method('wait')
             ->willReturn($expected = Either::left(new ProcessTimedOut));
+
+        $this->assertEquals($expected, $process->wait());
+    }
+
+    public function testWarnSignals()
+    {
+        $process = new LoggerProcess(
+            $inner = $this->createMock(Process::class),
+            Command::foreground('echo'),
+            $logger = $this->createMock(LoggerInterface::class),
+        );
+        $logger
+            ->expects($this->once())
+            ->method('warning')
+            ->with('Command {command} stopped due to external signal');
+        $inner
+            ->expects($this->once())
+            ->method('wait')
+            ->willReturn($expected = Either::left(new ProcessSignaled));
 
         $this->assertEquals($expected, $process->wait());
     }
