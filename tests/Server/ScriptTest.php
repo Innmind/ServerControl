@@ -155,6 +155,6 @@ class ScriptTest extends TestCase
         $this->assertInstanceOf(ScriptFailed::class, $e);
         $this->assertSame($process, $e->process());
         $this->assertSame($command, $e->command());
-        $this->assertSame($expected, $e->getPrevious());
+        $this->assertSame($expected, $e->reason());
     }
 }

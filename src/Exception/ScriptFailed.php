@@ -12,15 +12,16 @@ final class ScriptFailed extends RuntimeException
 {
     private Command $command;
     private Process $process;
+    private ProcessFailed|ProcessTimedOut|ProcessSignaled $reason;
 
     public function __construct(
         Command $command,
         Process $process,
-        \Throwable $previous = null,
+        ProcessFailed|ProcessTimedOut|ProcessSignaled $reason,
     ) {
-        parent::__construct($command->toString(), 0, $previous);
         $this->command = $command;
         $this->process = $process;
+        $this->reason = $reason;
     }
 
     public function command(): Command
@@ -31,5 +32,10 @@ final class ScriptFailed extends RuntimeException
     public function process(): Process
     {
         return $this->process;
+    }
+
+    public function reason(): ProcessFailed|ProcessTimedOut|ProcessSignaled
+    {
+        return $this->reason;
     }
 }
