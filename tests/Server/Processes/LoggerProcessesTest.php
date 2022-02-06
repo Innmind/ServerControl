@@ -27,8 +27,8 @@ class LoggerProcessesTest extends TestCase
             Processes::class,
             new LoggerProcesses(
                 $this->createMock(Processes::class),
-                $this->createMock(LoggerInterface::class)
-            )
+                $this->createMock(LoggerInterface::class),
+            ),
         );
     }
 
@@ -36,7 +36,7 @@ class LoggerProcessesTest extends TestCase
     {
         $logger = new LoggerProcesses(
             $processes = $this->createMock(Processes::class),
-            $log = $this->createMock(LoggerInterface::class)
+            $log = $this->createMock(LoggerInterface::class),
         );
         $processes
             ->expects($this->once())
@@ -53,14 +53,14 @@ class LoggerProcessesTest extends TestCase
                 [
                     'command' => "ls '-l'",
                     'workingDirectory' => null,
-                ]
+                ],
             );
 
         $this->assertInstanceOf(
             Process\LoggerProcess::class,
             $logger->execute(
-                Command::foreground('ls')->withShortOption('l')
-            )
+                Command::foreground('ls')->withShortOption('l'),
+            ),
         );
     }
 
@@ -68,7 +68,7 @@ class LoggerProcessesTest extends TestCase
     {
         $logger = new LoggerProcesses(
             $processes = $this->createMock(Processes::class),
-            $log = $this->createMock(LoggerInterface::class)
+            $log = $this->createMock(LoggerInterface::class),
         );
         $processes
             ->expects($this->once())
@@ -85,7 +85,7 @@ class LoggerProcessesTest extends TestCase
                 [
                     'command' => "ls '-l'",
                     'workingDirectory' => '/tmp/foo',
-                ]
+                ],
             );
 
         $this->assertInstanceOf(
@@ -94,7 +94,7 @@ class LoggerProcessesTest extends TestCase
                 Command::foreground('ls')
                     ->withShortOption('l')
                     ->withWorkingDirectory(Path::of('/tmp/foo')),
-            )
+            ),
         );
     }
 
@@ -102,7 +102,7 @@ class LoggerProcessesTest extends TestCase
     {
         $logger = new LoggerProcesses(
             $processes = $this->createMock(Processes::class),
-            $log = $this->createMock(LoggerInterface::class)
+            $log = $this->createMock(LoggerInterface::class),
         );
         $processes
             ->expects($this->once())
@@ -117,7 +117,7 @@ class LoggerProcessesTest extends TestCase
                 [
                     'pid' => 42,
                     'signal' => 9,
-                ]
+                ],
             );
 
         $this->assertSame($expected, $logger->kill(new Pid(42), Signal::kill()));

@@ -26,8 +26,8 @@ class ForegroundProcessTest extends TestCase
         $this->assertInstanceOf(
             ProcessInterface::class,
             new ForegroundProcess(
-                SfProcess::fromShellCommandline('ps')
-            )
+                SfProcess::fromShellCommandline('ps'),
+            ),
         );
     }
 
@@ -61,7 +61,7 @@ class ForegroundProcessTest extends TestCase
                 $this->assertSame($count."\n", $data->toString());
                 $this->assertEquals(
                     (int) $data->toString() % 2 === 0 ? Type::output() : Type::error(),
-                    $type
+                    $type,
                 );
                 $this->assertTrue((\time() - $start) >= (1 + $count));
                 ++$count;

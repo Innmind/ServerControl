@@ -22,7 +22,7 @@ class OutputTest extends TestCase
     {
         $this->assertInstanceOf(
             OutputInterface::class,
-            new Output(Sequence::of())
+            new Output(Sequence::of()),
         );
     }
 
@@ -42,7 +42,7 @@ class OutputTest extends TestCase
             $output->foreach(function(Str $data, Type $type) use (&$count) {
                 $this->assertSame((string) $count, $data->toString());
                 ++$count;
-            })
+            }),
         );
         $this->assertSame(3, $count);
     }
@@ -63,8 +63,8 @@ class OutputTest extends TestCase
                 0,
                 static function(int $carry, Str $data, Type $type) {
                     return $carry + (int) $data->toString();
-                }
-            )
+                },
+            ),
         );
     }
 
@@ -104,11 +104,11 @@ class OutputTest extends TestCase
         $this->assertCount(2, $groups);
         $this->assertSame('02', $groups->get(0)->match(
             static fn($output) => $output->toString(),
-            static fn() => null
+            static fn() => null,
         ));
         $this->assertSame('1', $groups->get(1)->match(
             static fn($output) => $output->toString(),
-            static fn() => null
+            static fn() => null,
         ));
     }
 
@@ -129,11 +129,11 @@ class OutputTest extends TestCase
         $this->assertCount(2, $partitions);
         $this->assertSame('02', $partitions->get(true)->match(
             static fn($output) => $output->toString(),
-            static fn() => null
+            static fn() => null,
         ));
         $this->assertSame('1', $partitions->get(false)->match(
             static fn($output) => $output->toString(),
-            static fn() => null
+            static fn() => null,
         ));
     }
 

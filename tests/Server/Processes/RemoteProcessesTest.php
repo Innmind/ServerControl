@@ -34,7 +34,7 @@ class RemoteProcessesTest extends TestCase
                 $this->createMock(Processes::class),
                 User::none(),
                 Host::of('example.com'),
-            )
+            ),
         );
     }
 
@@ -56,8 +56,8 @@ class RemoteProcessesTest extends TestCase
         $this->assertSame(
             $process,
             $remote->execute(
-                Command::foreground('ls')->withShortOption('l')
-            )
+                Command::foreground('ls')->withShortOption('l'),
+            ),
         );
     }
 
@@ -80,8 +80,8 @@ class RemoteProcessesTest extends TestCase
         $this->assertSame(
             $process,
             $remote->execute(
-                Command::foreground('ls')->withShortOption('l')
-            )
+                Command::foreground('ls')->withShortOption('l'),
+            ),
         );
     }
 
@@ -106,7 +106,7 @@ class RemoteProcessesTest extends TestCase
                 Command::foreground('ls')
                     ->withShortOption('l')
                     ->withWorkingDirectory(Path::of('/tmp/foo')),
-            )
+            ),
         );
     }
 

@@ -10,7 +10,6 @@ use Innmind\Immutable\{
     Str,
     SideEffect,
 };
-use function Innmind\Immutable\join;
 
 /**
  * @psalm-immutable

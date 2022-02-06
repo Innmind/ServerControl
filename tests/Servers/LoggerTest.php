@@ -31,8 +31,8 @@ class LoggerTest extends TestCase
             Server::class,
             new Logger(
                 $this->createMock(Server::class),
-                $this->createMock(LoggerInterface::class)
-            )
+                $this->createMock(LoggerInterface::class),
+            ),
         );
     }
 
@@ -52,12 +52,12 @@ class LoggerTest extends TestCase
 
         $logger = new Logger(
             $server,
-            new NullLogger
+            new NullLogger,
         );
 
         $this->assertInstanceOf(
             LoggerProcesses::class,
-            $logger->processes()
+            $logger->processes(),
         );
         $logger->processes()->execute(Command::foreground('ls'));
     }
@@ -109,7 +109,7 @@ class LoggerTest extends TestCase
 
         $this->assertInstanceOf(
             Volumes::class,
-            $logger->volumes()
+            $logger->volumes(),
         );
         $logger->volumes()->unmount(new Volumes\Name('/dev'));
     }

@@ -29,7 +29,7 @@ class UnixProcessesTest extends TestCase
         $processes = new UnixProcesses;
         $start = \time();
         $process = $processes->execute(
-            Command::foreground('php')->withArgument('fixtures/slow.php')
+            Command::foreground('php')->withArgument('fixtures/slow.php'),
         );
 
         $this->assertInstanceOf(ForegroundProcess::class, $process);
@@ -42,7 +42,7 @@ class UnixProcessesTest extends TestCase
         $processes = new UnixProcesses;
         $start = \time();
         $process = $processes->execute(
-            Command::background('php')->withArgument('fixtures/slow.php')
+            Command::background('php')->withArgument('fixtures/slow.php'),
         );
 
         $this->assertInstanceOf(BackgroundProcess::class, $process);
@@ -53,7 +53,7 @@ class UnixProcessesTest extends TestCase
     {
         $processes = new UnixProcesses;
         $process = $processes->execute(
-            Command::foreground('cat')->withInput(Stream::of(\fopen('fixtures/symfony.log', 'r')))
+            Command::foreground('cat')->withInput(Stream::of(\fopen('fixtures/symfony.log', 'r'))),
         );
         $process->wait();
 
@@ -68,7 +68,7 @@ class UnixProcessesTest extends TestCase
         $processes = new UnixProcesses;
         $start = \time();
         $process = $processes->execute(
-            Command::foreground('php')->withArgument('fixtures/slow.php')
+            Command::foreground('php')->withArgument('fixtures/slow.php'),
         );
 
         $pid = $process->pid()->match(
@@ -154,7 +154,7 @@ class UnixProcessesTest extends TestCase
         $process = $processes
             ->execute(
                 Command::foreground('cat')
-                    ->withArgument('fixtures/symfony.log')
+                    ->withArgument('fixtures/symfony.log'),
             );
         $process->output()->foreach(static fn() => null);
         $process

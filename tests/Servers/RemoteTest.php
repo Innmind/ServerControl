@@ -60,7 +60,7 @@ class RemoteTest extends TestCase
 
         $this->assertInstanceOf(
             RemoteProcesses::class,
-            $remote->processes()
+            $remote->processes(),
         );
         $remote->processes()->execute(Command::foreground('ls'));
     }
@@ -88,7 +88,7 @@ class RemoteTest extends TestCase
 
         $this->assertInstanceOf(
             RemoteProcesses::class,
-            $remote->processes()
+            $remote->processes(),
         );
         $remote->processes()->execute(Command::foreground('ls'));
     }
@@ -131,7 +131,7 @@ class RemoteTest extends TestCase
 
         $this->assertInstanceOf(
             Volumes::class,
-            $remote->volumes()
+            $remote->volumes(),
         );
         $remote->volumes()->unmount(new Volumes\Name('/dev'));
     }

@@ -26,7 +26,7 @@ class ScriptTest extends TestCase
     {
         $script = new Script(
             $command1 = Command::foreground('ls'),
-            $command2 = Command::foreground('ls')
+            $command2 = Command::foreground('ls'),
         );
         $server = $this->createMock(Server::class);
         $server
@@ -61,7 +61,7 @@ class ScriptTest extends TestCase
         $script = new Script(
             $command1 = Command::foreground('ls'),
             $command2 = Command::foreground('ls'),
-            $command3 = Command::foreground('ls')
+            $command3 = Command::foreground('ls'),
         );
         $server = $this->createMock(Server::class);
         $server

@@ -66,7 +66,7 @@ class CommandTest extends TestCase
     {
         $this->assertSame(
             "echo ''",
-            Command::foreground('echo')->withArgument('')->toString()
+            Command::foreground('echo')->withArgument('')->toString(),
         );
     }
 
@@ -134,7 +134,7 @@ class CommandTest extends TestCase
     {
         $command = Command::foreground('bin/console')
             ->withInput(
-                $input = $this->createMock(Readable::class)
+                $input = $this->createMock(Readable::class),
             );
 
         $this->assertInstanceOf(Command::class, $command);
@@ -180,7 +180,7 @@ class CommandTest extends TestCase
         $this->assertSame("wc > 'count.txt'", $commandC->toString());
         $this->assertSame(
             "echo 'bar' >> 'foo.txt' | 'cat' 'foo.txt' | 'wc' > 'count.txt'",
-            $command->toString()
+            $command->toString(),
         );
     }
 

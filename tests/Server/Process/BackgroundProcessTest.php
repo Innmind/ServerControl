@@ -24,7 +24,7 @@ class BackgroundProcessTest extends TestCase
 
         $this->assertInstanceOf(
             ProcessInterface::class,
-            new BackgroundProcess($process)
+            new BackgroundProcess($process),
         );
     }
 
