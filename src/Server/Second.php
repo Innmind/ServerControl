@@ -3,24 +3,25 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server;
 
-use Innmind\Server\Control\Exception\DomainException;
-
 /**
  * @psalm-immutable
  */
 final class Second
 {
+    /** @var positive-int */
     private int $value;
 
+    /**
+     * @param positive-int $value
+     */
     public function __construct(int $value)
     {
-        if ($value < 1) {
-            throw new DomainException((string) $value);
-        }
-
         $this->value = $value;
     }
 
+    /**
+     * @return positive-int
+     */
     public function toInt(): int
     {
         return $this->value;

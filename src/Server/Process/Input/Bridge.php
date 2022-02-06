@@ -17,6 +17,11 @@ final class Bridge implements \Iterator
         $this->stream = $stream;
     }
 
+    /**
+     * Todo avoid moving the stream pointer
+     *
+     * @throws RuntimeException If it fails to seek the position before reading the stream
+     */
     public function current(): string
     {
         $position = $this->stream->position();
@@ -43,6 +48,9 @@ final class Bridge implements \Iterator
         $this->stream->read(self::CHUNK);
     }
 
+    /**
+     * @throws RuntimeException If it fails to rewind the stream
+     */
     public function rewind(): void
     {
         /** @var Readable */

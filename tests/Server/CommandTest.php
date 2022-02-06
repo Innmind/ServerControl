@@ -6,8 +6,6 @@ namespace Tests\Innmind\Server\Control\Server;
 use Innmind\Server\Control\{
     Server\Command,
     Server\Second,
-    Exception\EmptyExecutableNotAllowed,
-    Exception\EmptyOptionNotAllowed,
 };
 use Innmind\Stream\Readable;
 use Innmind\Url\Path;
@@ -46,13 +44,6 @@ class CommandTest extends TestCase
         $this->assertFalse($command->toBeRunInBackground());
     }
 
-    public function testThrowWhenEmptyForegroundExecutable()
-    {
-        $this->expectException(EmptyExecutableNotAllowed::class);
-
-        Command::foreground('');
-    }
-
     public function testWithArgument()
     {
         $command = Command::foreground('echo')
@@ -79,13 +70,6 @@ class CommandTest extends TestCase
         $this->assertSame("bin/console '--env=prod'", $command->toString());
     }
 
-    public function testThrowWhenEmptyOption()
-    {
-        $this->expectException(EmptyOptionNotAllowed::class);
-
-        Command::foreground('bin/console')->withOption('');
-    }
-
     public function testWithShortOption()
     {
         $command = Command::foreground('bin/console')
@@ -93,13 +77,6 @@ class CommandTest extends TestCase
 
         $this->assertInstanceOf(Command::class, $command);
         $this->assertSame("bin/console '-e' 'prod'", $command->toString());
-    }
-
-    public function testThrowWhenEmptyShortOption()
-    {
-        $this->expectException(EmptyOptionNotAllowed::class);
-
-        Command::foreground('bin/console')->withShortOption('');
     }
 
     public function testWithEnvironment()

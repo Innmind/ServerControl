@@ -60,7 +60,15 @@ final class ForegroundProcess implements ProcessInterface
 
     public function pid(): Maybe
     {
-        return Maybe::of($this->process->getPid())->map(static fn($pid) => new Pid($pid));
+        /**
+         * Unless the symfony process does something wrong the pid cannot be
+         * below 2 as 1 is the root process of the system and there is no
+         * negative pid
+         * @var int<2, max>
+         */
+        $pid = $this->process->getPid();
+
+        return Maybe::of($pid)->map(static fn($pid) => new Pid($pid));
     }
 
     public function output(): Output
@@ -72,6 +80,11 @@ final class ForegroundProcess implements ProcessInterface
     {
         try {
             $this->process->wait();
+            /**
+             * Unless the symfony process does something wrong the exit code
+             * cannont be outside this range of values
+             * @var int<0, 255>|null
+             */
             $exitCode = $this->process->getExitCode();
 
             if (!\is_int($exitCode)) {

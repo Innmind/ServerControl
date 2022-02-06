@@ -48,6 +48,7 @@ final class Script
 
     /**
      * @no-named-arguments
+     * @param non-empty-string $commands
      */
     public static function of(string ...$commands): self
     {

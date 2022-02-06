@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\{
-    Server\Process\ExitCode,
-    Exception\OutOfRangeExitCode,
-};
+use Innmind\Server\Control\Server\Process\ExitCode;
 use PHPUnit\Framework\TestCase;
 
 class ExitCodeTest extends TestCase
@@ -27,19 +24,5 @@ class ExitCodeTest extends TestCase
         $this->assertFalse($exit->successful());
         $this->assertSame(255, $exit->toInt());
         $this->assertSame('255', $exit->toString());
-    }
-
-    public function testThrowWhenCodeTooLow()
-    {
-        $this->expectException(OutOfRangeExitCode::class);
-
-        new ExitCode(-1);
-    }
-
-    public function testThrowWhenCodeTooHigh()
-    {
-        $this->expectException(OutOfRangeExitCode::class);
-
-        new ExitCode(256);
     }
 }

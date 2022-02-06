@@ -29,6 +29,9 @@ enum Signal
         };
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function toString(): string
     {
         return (string) $this->toInt();

@@ -3,34 +3,37 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Command;
 
-use Innmind\Server\Control\Exception\EmptyOptionNotAllowed;
-use Innmind\Immutable\Str as S;
-
 /**
  * @psalm-immutable
  */
 final class Option implements Parameter
 {
     private bool $long;
+    /** @var non-empty-string */
     private string $key;
     private ?string $value;
 
+    /**
+     * @param non-empty-string $key
+     */
     private function __construct(bool $long, string $key, string $value = null)
     {
-        if (S::of($key)->empty()) {
-            throw new EmptyOptionNotAllowed;
-        }
-
         $this->long = $long;
         $this->key = $key;
         $this->value = $value;
     }
 
+    /**
+     * @param non-empty-string $key
+     */
     public static function long(string $key, string $value = null): self
     {
         return new self(true, $key, $value);
     }
 
+    /**
+     * @param non-empty-string $key
+     */
     public static function short(string $key, string $value = null): self
     {
         return new self(false, $key, $value);

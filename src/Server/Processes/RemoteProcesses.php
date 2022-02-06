@@ -45,6 +45,7 @@ final class RemoteProcesses implements Processes
 
     public function execute(Command $command): Process
     {
+        /** @psalm-suppress ArgumentTypeCoercion Due psalm not understing that $bash cannot be empty */
         $command = $command
             ->workingDirectory()
             ->map(static fn($path) => \sprintf(

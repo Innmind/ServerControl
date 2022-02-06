@@ -9,8 +9,6 @@ use Innmind\Server\Control\{
     Server\Command\Overwrite,
     Server\Command\Append,
     Server\Command\Pipe,
-    Exception\EmptyExecutableNotAllowed,
-    Exception\EmptyEnvironmentKeyNotAllowed,
 };
 use Innmind\Stream\Readable;
 use Innmind\Url\Path;
@@ -23,6 +21,7 @@ use Innmind\Immutable\{
 
 final class Command
 {
+    /** @var non-empty-string */
     private string $executable;
     /** @var Sequence<Command\Parameter> */
     private Sequence $parameters;
@@ -39,12 +38,11 @@ final class Command
     private Maybe $timeout;
     private bool $streamOutput = false;
 
+    /**
+     * @param non-empty-string $executable
+     */
     private function __construct(bool $background, string $executable)
     {
-        if (Str::of($executable)->empty()) {
-            throw new EmptyExecutableNotAllowed;
-        }
-
         $this->executable = $executable;
         $this->background = $background;
         /** @var Sequence<Command\Parameter> */
@@ -67,6 +65,8 @@ final class Command
      *
      * You will not have access to the process output nor if the process is
      * still running
+     *
+     * @param non-empty-string $executable
      */
     public static function background(string $executable): self
     {
@@ -76,6 +76,8 @@ final class Command
     /**
      * Will run the command in a non blocking way but will be killed when the
      * current process ends
+     *
+     * @param non-empty-string $executable
      */
     public static function foreground(string $executable): self
     {
@@ -90,6 +92,9 @@ final class Command
         return $self;
     }
 
+    /**
+     * @param non-empty-string $key
+     */
     public function withOption(string $key, string $value = null): self
     {
         $self = clone $this;
@@ -98,6 +103,9 @@ final class Command
         return $self;
     }
 
+    /**
+     * @param non-empty-string $key
+     */
     public function withShortOption(string $key, string $value = null): self
     {
         $self = clone $this;
@@ -106,12 +114,11 @@ final class Command
         return $self;
     }
 
+    /**
+     * @param non-empty-string $key
+     */
     public function withEnvironment(string $key, string $value): self
     {
-        if (Str::of($key)->empty()) {
-            throw new EmptyEnvironmentKeyNotAllowed;
-        }
-
         $self = clone $this;
         $self->environment = ($this->environment)($key, $value);
 
@@ -237,6 +244,9 @@ final class Command
         return $this->streamOutput;
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function toString(): string
     {
         $string = $this->executable;
