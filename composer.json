@@ -32,7 +32,7 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "~9.5",
+        "phpunit/phpunit": "^9.5.13",
         "vimeo/psalm": "~4.11",
         "innmind/black-box": "^4.12",
         "innmind/coding-standard": "~2.0"
