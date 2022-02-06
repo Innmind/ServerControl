@@ -7,9 +7,9 @@ use Innmind\Server\Control\{
     Server\Process\Pid,
     Server\Process\Output,
     Server\Process\ExitCode,
-    Exception\ProcessTimedOut,
-    Exception\ProcessFailed,
-    Exception\ProcessSignaled,
+    ProcessTimedOut,
+    ProcessFailed,
+    ProcessSignaled,
 };
 use Innmind\Immutable\{
     Maybe,

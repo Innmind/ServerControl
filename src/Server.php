@@ -6,7 +6,6 @@ namespace Innmind\Server\Control;
 use Innmind\Server\Control\{
     Server\Processes,
     Server\Volumes,
-    Exception\ScriptFailed,
 };
 use Innmind\Immutable\{
     Either,

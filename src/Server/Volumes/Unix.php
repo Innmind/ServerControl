@@ -7,7 +7,7 @@ use Innmind\Server\Control\{
     Server\Volumes,
     Server\Processes,
     Server\Command,
-    Exception\ScriptFailed,
+    ScriptFailed,
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{

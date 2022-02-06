@@ -6,9 +6,9 @@ namespace Innmind\Server\Control\Server\Process;
 use Innmind\Server\Control\{
     Server\Process,
     Server\Command,
-    Exception\ProcessFailed,
-    Exception\ProcessSignaled,
-    Exception\ProcessTimedOut,
+    ProcessFailed,
+    ProcessSignaled,
+    ProcessTimedOut,
 };
 use Innmind\Immutable\{
     Maybe,

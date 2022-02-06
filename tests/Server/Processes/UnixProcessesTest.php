@@ -11,7 +11,7 @@ use Innmind\Server\Control\{
     Server\Process\ForegroundProcess,
     Server\Process\BackgroundProcess,
     Server\Signal,
-    Exception\ProcessTimedOut,
+    ProcessTimedOut,
 };
 use Innmind\Stream\Readable\Stream;
 use Innmind\Immutable\SideEffect;

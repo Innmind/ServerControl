@@ -10,9 +10,9 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Process,
     Server\Process\ExitCode,
-    Exception\ProcessFailed,
-    Exception\ScriptFailed,
-    Exception\ProcessTimedOut,
+    ProcessFailed,
+    ScriptFailed,
+    ProcessTimedOut,
 };
 use Innmind\Immutable\{
     Either,

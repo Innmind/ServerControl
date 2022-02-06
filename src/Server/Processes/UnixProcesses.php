@@ -12,7 +12,7 @@ use Innmind\Server\Control\{
     Server\Process\BackgroundProcess,
     Server\Signal,
     Server\Process\Input\Bridge,
-    Exception\ScriptFailed,
+    ScriptFailed,
 };
 use Innmind\Immutable\Either;
 use Symfony\Component\Process\Process as SfProcess;

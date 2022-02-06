@@ -1,19 +1,22 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Server\Control\Exception;
+namespace Innmind\Server\Control;
 
 use Innmind\Server\Control\Server\{
     Command,
     Process,
 };
 
-final class ScriptFailed extends RuntimeException
+final class ScriptFailed
 {
     private Command $command;
     private Process $process;
     private ProcessFailed|ProcessTimedOut|ProcessSignaled $reason;
 
+    /**
+     * @internal
+     */
     public function __construct(
         Command $command,
         Process $process,

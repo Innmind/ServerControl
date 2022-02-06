@@ -5,7 +5,7 @@ namespace Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\{
     Server\Process\Pid,
-    Exception\ScriptFailed,
+    ScriptFailed,
 };
 use Innmind\Immutable\{
     Either,

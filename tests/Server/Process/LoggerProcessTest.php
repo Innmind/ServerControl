@@ -10,9 +10,9 @@ use Innmind\Server\Control\{
     Server\Process\Output,
     Server\Process,
     Server\Command,
-    Exception\ProcessTimedOut,
-    Exception\ProcessSignaled,
-    Exception\ProcessFailed,
+    ProcessTimedOut,
+    ProcessSignaled,
+    ProcessFailed,
 };
 use Innmind\Immutable\{
     Maybe,

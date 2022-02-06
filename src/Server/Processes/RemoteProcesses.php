@@ -9,7 +9,7 @@ use Innmind\Server\Control\{
     Server\Signal,
     Server\Process,
     Server\Process\Pid,
-    Exception\ScriptFailed,
+    ScriptFailed,
 };
 use Innmind\Url\Authority\{
     Host,

@@ -5,9 +5,9 @@ namespace Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\{
     Server\Process as ProcessInterface,
-    Exception\ProcessTimedOut,
-    Exception\ProcessFailed,
-    Exception\ProcessSignaled,
+    ProcessTimedOut,
+    ProcessFailed,
+    ProcessSignaled,
 };
 use Innmind\Immutable\{
     Sequence,
@@ -103,11 +103,7 @@ final class ForegroundProcess implements ProcessInterface
             return Either::right(new SideEffect);
         } catch (ProcessTimedOutException $e) {
             /** @var Either<ProcessTimedOut|ProcessFailed|ProcessSignaled, SideEffect> */
-            return Either::left(new ProcessTimedOut(
-                $e->getMessage(),
-                (int) $e->getCode(),
-                $e,
-            ));
+            return Either::left(new ProcessTimedOut);
         } catch (ProcessSignaledException $e) {
             /** @var Either<ProcessTimedOut|ProcessFailed|ProcessSignaled, SideEffect> */
             return Either::left(new ProcessSignaled);

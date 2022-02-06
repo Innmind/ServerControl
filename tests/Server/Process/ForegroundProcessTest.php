@@ -10,7 +10,7 @@ use Innmind\Server\Control\{
     Server\Process\ExitCode,
     Server\Process\Output,
     Server\Process\Output\Type,
-    Exception\ProcessFailed,
+    ProcessFailed,
 };
 use Innmind\Immutable\{
     Str,

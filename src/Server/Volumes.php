@@ -5,7 +5,7 @@ namespace Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\{
     Server\Volumes\Name,
-    Exception\ScriptFailed,
+    ScriptFailed,
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{

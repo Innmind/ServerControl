@@ -10,8 +10,8 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Process,
     Server\Process\ExitCode,
-    Exception\ProcessFailed,
-    Exception\ScriptFailed,
+    ProcessFailed,
+    ScriptFailed,
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
