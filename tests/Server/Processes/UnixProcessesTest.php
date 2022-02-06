@@ -82,11 +82,10 @@ class UnixProcessesTest extends TestCase
                 static fn() => null,
             ),
         );
-        \sleep(3);
+        \sleep(1);
         \exec('pgrep -P '.\posix_getpid(), $pids);
-        var_dump($pids);
         $this->assertNotContains((string) $pid->toInt(), $pids);
-        $this->assertTrue((\time() - $start) < 4);
+        $this->assertTrue((\time() - $start) < 2);
     }
 
     public function testTimeout()
