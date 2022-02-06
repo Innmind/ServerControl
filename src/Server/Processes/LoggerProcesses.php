@@ -18,12 +18,17 @@ final class LoggerProcesses implements Processes
     private Processes $processes;
     private LoggerInterface $logger;
 
-    public function __construct(
+    private function __construct(
         Processes $processes,
         LoggerInterface $logger,
     ) {
         $this->processes = $processes;
         $this->logger = $logger;
+    }
+
+    public static function psr(Processes $processes, LoggerInterface $logger): self
+    {
+        return new self($processes, $logger);
     }
 
     public function execute(Command $command): Process
@@ -36,7 +41,7 @@ final class LoggerProcesses implements Processes
             ),
         ]);
 
-        return new Process\LoggerProcess(
+        return Process\LoggerProcess::psr(
             $this->processes->execute($command),
             $command,
             $this->logger,

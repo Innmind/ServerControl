@@ -23,7 +23,7 @@ final class Logger implements Output
     private Command $command;
     private LoggerInterface $logger;
 
-    public function __construct(
+    private function __construct(
         Output $output,
         Command $command,
         LoggerInterface $logger,
@@ -31,6 +31,14 @@ final class Logger implements Output
         $this->output = $output;
         $this->command = $command;
         $this->logger = $logger;
+    }
+
+    public static function psr(
+        Output $output,
+        Command $command,
+        LoggerInterface $logger,
+    ): self {
+        return new self($output, $command, $logger);
     }
 
     public function foreach(callable $function): SideEffect

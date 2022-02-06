@@ -28,7 +28,7 @@ class LoggerProcessTest extends TestCase
     {
         $this->assertInstanceOf(
             Process::class,
-            new LoggerProcess(
+            LoggerProcess::psr(
                 $this->createMock(Process::class),
                 Command::foreground('echo'),
                 $this->createMock(LoggerInterface::class),
@@ -38,7 +38,7 @@ class LoggerProcessTest extends TestCase
 
     public function testPid()
     {
-        $process = new LoggerProcess(
+        $process = LoggerProcess::psr(
             $inner = $this->createMock(Process::class),
             Command::foreground('echo'),
             $logger = $this->createMock(LoggerInterface::class),
@@ -56,7 +56,7 @@ class LoggerProcessTest extends TestCase
 
     public function testExitCode()
     {
-        $process = new LoggerProcess(
+        $process = LoggerProcess::psr(
             $inner = $this->createMock(Process::class),
             Command::foreground('echo'),
             $logger = $this->createMock(LoggerInterface::class),
@@ -74,7 +74,7 @@ class LoggerProcessTest extends TestCase
 
     public function testWarnFailure()
     {
-        $process = new LoggerProcess(
+        $process = LoggerProcess::psr(
             $inner = $this->createMock(Process::class),
             Command::foreground('echo'),
             $logger = $this->createMock(LoggerInterface::class),
@@ -93,7 +93,7 @@ class LoggerProcessTest extends TestCase
 
     public function testWarnTimeouts()
     {
-        $process = new LoggerProcess(
+        $process = LoggerProcess::psr(
             $inner = $this->createMock(Process::class),
             Command::foreground('echo'),
             $logger = $this->createMock(LoggerInterface::class),
@@ -112,7 +112,7 @@ class LoggerProcessTest extends TestCase
 
     public function testWarnSignals()
     {
-        $process = new LoggerProcess(
+        $process = LoggerProcess::psr(
             $inner = $this->createMock(Process::class),
             Command::foreground('echo'),
             $logger = $this->createMock(LoggerInterface::class),
@@ -131,7 +131,7 @@ class LoggerProcessTest extends TestCase
 
     public function testOutput()
     {
-        $process = new LoggerProcess(
+        $process = LoggerProcess::psr(
             $this->createMock(Process::class),
             Command::foreground('echo'),
             $this->createMock(LoggerInterface::class),

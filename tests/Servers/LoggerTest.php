@@ -29,7 +29,7 @@ class LoggerTest extends TestCase
     {
         $this->assertInstanceOf(
             Server::class,
-            new Logger(
+            Logger::psr(
                 $this->createMock(Server::class),
                 $this->createMock(LoggerInterface::class),
             ),
@@ -50,7 +50,7 @@ class LoggerTest extends TestCase
                 return $command->toString() === 'ls';
             }));
 
-        $logger = new Logger(
+        $logger = Logger::psr(
             $server,
             new NullLogger,
         );
@@ -92,7 +92,7 @@ class LoggerTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which1, $which2));
 
-        $logger = new Logger(
+        $logger = Logger::psr(
             $server,
             $log = $this->createMock(LoggerInterface::class),
         );
@@ -133,7 +133,7 @@ class LoggerTest extends TestCase
             ->method('wait')
             ->willReturn(Either::right(new SideEffect));
 
-        $logger = new Logger(
+        $logger = Logger::psr(
             $server,
             $log = $this->createMock(LoggerInterface::class),
         );
@@ -176,7 +176,7 @@ class LoggerTest extends TestCase
             ->method('wait')
             ->willReturn(Either::right(new SideEffect));
 
-        $logger = new Logger(
+        $logger = Logger::psr(
             $server,
             $log = $this->createMock(LoggerInterface::class),
         );

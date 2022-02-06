@@ -23,7 +23,7 @@ class LoggerTest extends TestCase
     {
         $this->assertInstanceOf(
             Output::class,
-            new Logger(
+            Logger::psr(
                 $this->createMock(Output::class),
                 Command::foreground('echo'),
                 $this->createMock(LoggerInterface::class),
@@ -33,7 +33,7 @@ class LoggerTest extends TestCase
 
     public function testLogOutput()
     {
-        $output = new Logger(
+        $output = Logger::psr(
             $inner = $this->createMock(Output::class),
             Command::foreground('echo'),
             $logger = $this->createMock(LoggerInterface::class),
@@ -59,7 +59,7 @@ class LoggerTest extends TestCase
 
     public function testWarnErrors()
     {
-        $output = new Logger(
+        $output = Logger::psr(
             $inner = $this->createMock(Output::class),
             Command::foreground('echo'),
             $logger = $this->createMock(LoggerInterface::class),
@@ -85,7 +85,7 @@ class LoggerTest extends TestCase
 
     public function testReduce()
     {
-        $output = new Logger(
+        $output = Logger::psr(
             $inner = $this->createMock(Output::class),
             Command::foreground('echo'),
             $this->createMock(LoggerInterface::class),
@@ -100,7 +100,7 @@ class LoggerTest extends TestCase
 
     public function testFilterStillLogs()
     {
-        $output = new Logger(
+        $output = Logger::psr(
             $this->createMock(Output::class),
             Command::foreground('echo'),
             $this->createMock(LoggerInterface::class),
@@ -111,7 +111,7 @@ class LoggerTest extends TestCase
 
     public function testGroupBy()
     {
-        $output = new Logger(
+        $output = Logger::psr(
             $inner = $this->createMock(Output::class),
             Command::foreground('echo'),
             $this->createMock(LoggerInterface::class),
@@ -126,7 +126,7 @@ class LoggerTest extends TestCase
 
     public function testPartition()
     {
-        $output = new Logger(
+        $output = Logger::psr(
             $inner = $this->createMock(Output::class),
             Command::foreground('echo'),
             $this->createMock(LoggerInterface::class),
@@ -141,7 +141,7 @@ class LoggerTest extends TestCase
 
     public function testToString()
     {
-        $output = new Logger(
+        $output = Logger::psr(
             $inner = $this->createMock(Output::class),
             Command::foreground('echo'),
             $this->createMock(LoggerInterface::class),

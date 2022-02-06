@@ -22,7 +22,7 @@ final class LoggerProcess implements Process
     private Command $command;
     private LoggerInterface $logger;
 
-    public function __construct(
+    private function __construct(
         Process $process,
         Command $command,
         LoggerInterface $logger,
@@ -30,6 +30,14 @@ final class LoggerProcess implements Process
         $this->process = $process;
         $this->command = $command;
         $this->logger = $logger;
+    }
+
+    public static function psr(
+        Process $process,
+        Command $command,
+        LoggerInterface $logger,
+    ): self {
+        return new self($process, $command, $logger);
     }
 
     public function pid(): Maybe
@@ -49,7 +57,7 @@ final class LoggerProcess implements Process
 
     public function output(): Output
     {
-        return new Output\Logger(
+        return Output\Logger::psr(
             $this->process->output(),
             $this->command,
             $this->logger,

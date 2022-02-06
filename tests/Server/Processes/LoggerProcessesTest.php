@@ -25,7 +25,7 @@ class LoggerProcessesTest extends TestCase
     {
         $this->assertInstanceOf(
             Processes::class,
-            new LoggerProcesses(
+            LoggerProcesses::psr(
                 $this->createMock(Processes::class),
                 $this->createMock(LoggerInterface::class),
             ),
@@ -34,7 +34,7 @@ class LoggerProcessesTest extends TestCase
 
     public function testExecute()
     {
-        $logger = new LoggerProcesses(
+        $logger = LoggerProcesses::psr(
             $processes = $this->createMock(Processes::class),
             $log = $this->createMock(LoggerInterface::class),
         );
@@ -66,7 +66,7 @@ class LoggerProcessesTest extends TestCase
 
     public function testExecuteWithWorkingDirectory()
     {
-        $logger = new LoggerProcesses(
+        $logger = LoggerProcesses::psr(
             $processes = $this->createMock(Processes::class),
             $log = $this->createMock(LoggerInterface::class),
         );
@@ -100,7 +100,7 @@ class LoggerProcessesTest extends TestCase
 
     public function testKill()
     {
-        $logger = new LoggerProcesses(
+        $logger = LoggerProcesses::psr(
             $processes = $this->createMock(Processes::class),
             $log = $this->createMock(LoggerInterface::class),
         );

@@ -17,15 +17,20 @@ final class Logger implements Server
     private Processes $processes;
     private Volumes $volumes;
 
-    public function __construct(
+    private function __construct(
         Server $server,
         LoggerInterface $logger,
     ) {
-        $this->processes = new LoggerProcesses(
+        $this->processes = LoggerProcesses::psr(
             $server->processes(),
             $logger,
         );
         $this->volumes = new Volumes\Unix($this->processes);
+    }
+
+    public static function psr(Server $server, LoggerInterface $logger): self
+    {
+        return new self($server, $logger);
     }
 
     public function processes(): Processes
