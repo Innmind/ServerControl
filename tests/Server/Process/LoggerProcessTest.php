@@ -72,24 +72,6 @@ class LoggerProcessTest extends TestCase
         $this->assertEquals($expected, $process->wait());
     }
 
-    public function testDoesntLogWhenWaitingWithoutTimeout()
-    {
-        $process = new LoggerProcess(
-            $inner = $this->createMock(Process::class),
-            Command::foreground('echo'),
-            $logger = $this->createMock(LoggerInterface::class),
-        );
-        $logger
-            ->expects($this->never())
-            ->method('warning');
-        $inner
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn($expected = Either::right(new SideEffect));
-
-        $this->assertEquals($expected, $process->wait());
-    }
-
     public function testWarnFailure()
     {
         $process = new LoggerProcess(
