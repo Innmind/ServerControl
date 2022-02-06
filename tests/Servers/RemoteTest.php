@@ -164,8 +164,8 @@ class RemoteTest extends TestCase
         $this->assertInstanceOf(
             SideEffect::class,
             $remote->reboot()->match(
-                static fn() => null,
                 static fn($sideEffect) => $sideEffect,
+                static fn() => null,
             ),
         );
     }
@@ -198,8 +198,8 @@ class RemoteTest extends TestCase
         $this->assertInstanceOf(
             SideEffect::class,
             $remote->shutdown()->match(
-                static fn() => null,
                 static fn($sideEffect) => $sideEffect,
+                static fn() => null,
             ),
         );
     }

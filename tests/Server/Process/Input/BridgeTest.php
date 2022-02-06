@@ -11,7 +11,7 @@ class BridgeTest extends TestCase
 {
     public function testInterface()
     {
-        $log = new Stream(\fopen('fixtures/symfony.log', 'r'));
+        $log = Stream::of(\fopen('fixtures/symfony.log', 'r'));
         $bridge = new Bridge($log);
 
         $this->assertInstanceOf(\Iterator::class, $bridge);

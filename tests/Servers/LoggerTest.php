@@ -151,8 +151,8 @@ class LoggerTest extends TestCase
         $this->assertInstanceOf(
             SideEffect::class,
             $logger->reboot()->match(
-                static fn() => null,
                 static fn($sideEffect) => $sideEffect,
+                static fn() => null,
             ),
         );
     }
@@ -194,8 +194,8 @@ class LoggerTest extends TestCase
         $this->assertInstanceOf(
             SideEffect::class,
             $logger->shutdown()->match(
-                static fn() => null,
                 static fn($sideEffect) => $sideEffect,
+                static fn() => null,
             ),
         );
     }

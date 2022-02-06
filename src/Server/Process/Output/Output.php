@@ -118,6 +118,6 @@ final class Output implements OutputInterface
             static fn(array $output): string => $output[0]->toString(),
         );
 
-        return join('', $bits)->toString();
+        return Str::of('')->join($bits)->toString();
     }
 }

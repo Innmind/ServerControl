@@ -66,8 +66,8 @@ class UnixTest extends TestCase
                 new Name('/dev/disk1s2'),
                 Path::of('/somewhere'),
             )->match(
-                static fn() => null,
                 static fn($sideEffect) => $sideEffect,
+                static fn() => null,
             ),
         );
     }
@@ -106,8 +106,8 @@ class UnixTest extends TestCase
                 new Name('/dev/disk1s2'),
                 Path::of('/somewhere'),
             )->match(
-                static fn($e) => $e,
                 static fn() => null,
+                static fn($e) => $e,
             ),
         );
     }
@@ -143,8 +143,8 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(
             SideEffect::class,
             $volumes->unmount(new Name('/dev/disk1s2'))->match(
-                static fn() => null,
                 static fn($sideEffect) => $sideEffect,
+                static fn() => null,
             ),
         );
     }
@@ -180,8 +180,8 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(
             ScriptFailed::class,
             $volumes->unmount(new Name('/dev/disk1s2'))->match(
-                static fn($e) => $e,
                 static fn() => null,
+                static fn($e) => $e,
             ),
         );
     }
@@ -220,8 +220,8 @@ class UnixTest extends TestCase
                 new Name('/dev/disk1s2'),
                 Path::of('/somewhere'),
             )->match(
-                static fn() => null,
                 static fn($sideEffect) => $sideEffect,
+                static fn() => null,
             ),
         );
     }
@@ -260,8 +260,8 @@ class UnixTest extends TestCase
                 new Name('/dev/disk1s2'),
                 Path::of('/somewhere'),
             )->match(
-                static fn($e) => $e,
                 static fn() => null,
+                static fn($e) => $e,
             ),
         );
     }
@@ -297,8 +297,8 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(
             SideEffect::class,
             $volumes->unmount(new Name('/dev/disk1s2'))->match(
-                static fn() => null,
                 static fn($sideEffect) => $sideEffect,
+                static fn() => null,
             ),
         );
     }
@@ -334,8 +334,8 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(
             ScriptFailed::class,
             $volumes->unmount(new Name('/dev/disk1s2'))->match(
-                static fn($e) => $e,
                 static fn() => null,
+                static fn($e) => $e,
             ),
         );
     }

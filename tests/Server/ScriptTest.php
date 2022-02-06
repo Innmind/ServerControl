@@ -50,8 +50,8 @@ class ScriptTest extends TestCase
         $this->assertInstanceOf(
             SideEffect::class,
             $script($server)->match(
-                static fn($e) => $e,
                 static fn($sideEffect) => $sideEffect,
+                static fn($e) => $e,
             ),
         );
     }
@@ -88,8 +88,8 @@ class ScriptTest extends TestCase
             ->will($this->onConsecutiveCalls($process1, $process2));
 
         $e = $script($server)->match(
-            static fn($e) => $e,
             static fn() => null,
+            static fn($e) => $e,
         );
         $this->assertInstanceOf(ScriptFailed::class, $e);
         $this->assertSame($process2, $e->process());
@@ -121,8 +121,8 @@ class ScriptTest extends TestCase
         $this->assertInstanceOf(
             SideEffect::class,
             $script($server)->match(
-                static fn($e) => $e,
                 static fn($sideEffect) => $sideEffect,
+                static fn($e) => $e,
             ),
         );
     }
@@ -148,8 +148,8 @@ class ScriptTest extends TestCase
             ->willReturn(Either::left($expected = new ProcessTimedOut));
 
         $e = $script($server)->match(
-            static fn($e) => $e,
             static fn() => null,
+            static fn($e) => $e,
         );
 
         $this->assertInstanceOf(ScriptFailed::class, $e);

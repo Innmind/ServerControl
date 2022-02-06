@@ -53,7 +53,7 @@ class UnixProcessesTest extends TestCase
     {
         $processes = new UnixProcesses;
         $process = $processes->execute(
-            Command::foreground('cat')->withInput(new Stream(\fopen('fixtures/symfony.log', 'r')))
+            Command::foreground('cat')->withInput(Stream::of(\fopen('fixtures/symfony.log', 'r')))
         );
         $process->wait();
 
@@ -78,8 +78,8 @@ class UnixProcessesTest extends TestCase
         $this->assertInstanceOf(
             SideEffect::class,
             $processes->kill($pid, Signal::kill())->match(
-                static fn() => null,
                 static fn($sideEffect) => $sideEffect,
+                static fn() => null,
             ),
         );
         \sleep(1);
@@ -101,8 +101,8 @@ class UnixProcessesTest extends TestCase
         $this->assertInstanceOf(
             ProcessTimedOut::class,
             $process->wait()->match(
-                static fn($e) => $e,
                 static fn() => null,
+                static fn($e) => $e,
             ),
         );
 

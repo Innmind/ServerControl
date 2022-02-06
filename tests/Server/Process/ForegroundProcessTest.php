@@ -82,15 +82,15 @@ class ForegroundProcessTest extends TestCase
         $this->assertInstanceOf(
             ProcessFailed::class,
             $return->match(
+                static fn($sideEffect) => null,
                 static fn($e) => $e,
-                static fn($exit) => $exit,
             ),
         );
         $this->assertSame(
             1,
             $return->match(
+                static fn($sideEffect) => null,
                 static fn($e) => $e->exitCode()->toInt(),
-                static fn($exit) => null,
             ),
         );
     }
@@ -105,8 +105,8 @@ class ForegroundProcessTest extends TestCase
             $process
                 ->wait()
                 ->match(
-                    static fn($e) => $e,
                     static fn($sideEffect) => $sideEffect,
+                    static fn($e) => $e,
                 ),
         );
     }

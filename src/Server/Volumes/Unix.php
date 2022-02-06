@@ -74,8 +74,8 @@ final class Unix implements Volumes
         return $this
             ->run(Command::foreground('which diskutil'))
             ->match(
-                static fn() => false,
                 static fn() => true,
+                static fn() => false,
             );
     }
 }

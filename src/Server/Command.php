@@ -20,7 +20,6 @@ use Innmind\Immutable\{
     Str,
     Maybe,
 };
-use function Innmind\Immutable\join;
 
 final class Command
 {
@@ -246,7 +245,7 @@ final class Command
             $parameters = $this->parameters->map(
                 static fn($parameter): string => $parameter->toString(),
             );
-            $string .= ' '.join(' ', $parameters)->toString();
+            $string .= ' '.Str::of(' ')->join($parameters)->toString();
         }
 
         return $this

@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process\Input;
 
+use Innmind\Server\Control\Exception\RuntimeException;
 use Innmind\Stream\Readable;
 
 final class Bridge implements \Iterator
@@ -19,10 +20,17 @@ final class Bridge implements \Iterator
     public function current(): string
     {
         $position = $this->stream->position();
-        $text = $this->stream->read(self::CHUNK);
-        $this->stream->seek($position);
+        $text = $this->stream->read(self::CHUNK)->match(
+            static fn($text) => $text->toString(),
+            static fn() => '',
+        );
+        /** @var Readable */
+        $this->stream = $this->stream->seek($position)->match(
+            static fn($stream) => $stream,
+            static fn() => throw new RuntimeException('Failed to seek stream'),
+        );
 
-        return $text->toString();
+        return $text;
     }
 
     public function key(): int
@@ -37,7 +45,11 @@ final class Bridge implements \Iterator
 
     public function rewind(): void
     {
-        $this->stream->rewind();
+        /** @var Readable */
+        $this->stream = $this->stream->rewind()->match(
+            static fn($stream) => $stream,
+            static fn() => throw new RuntimeException('Failed to rewind the stream'),
+        );
     }
 
     public function valid(): bool
