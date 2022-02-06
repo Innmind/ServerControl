@@ -10,6 +10,9 @@ use Innmind\Server\Control\{
 
 final class ServerFactory
 {
+    /**
+     * @throws UnsupportedOperatingSystem For windows system
+     */
     public static function build(): Server
     {
         switch (\PHP_OS) {
