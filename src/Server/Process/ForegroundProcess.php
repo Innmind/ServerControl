@@ -29,10 +29,6 @@ final class ForegroundProcess implements ProcessInterface
     public function __construct(Process $process, bool $streamOutput = false)
     {
         $generator = static function() use ($process): \Generator {
-            /**
-             * @var string $key
-             * @var string $value
-             */
             foreach ($process->getIterator() as $key => $value) {
                 $type = $key === Process::OUT ? Output\Type::output() : Output\Type::error();
 
