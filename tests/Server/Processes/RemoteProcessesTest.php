@@ -131,7 +131,7 @@ class RemoteProcessesTest extends TestCase
 
         $this->assertInstanceOf(
             SideEffect::class,
-            $remote->kill(new Pid(42), Signal::kill())->match(
+            $remote->kill(new Pid(42), Signal::kill)->match(
                 static fn($sideEffect) => $sideEffect,
                 static fn() => null,
             ),
@@ -160,7 +160,7 @@ class RemoteProcessesTest extends TestCase
 
         $this->assertInstanceOf(
             SideEffect::class,
-            $remote->kill(new Pid(42), Signal::kill())->match(
+            $remote->kill(new Pid(42), Signal::kill)->match(
                 static fn($sideEffect) => $sideEffect,
                 static fn() => null,
             ),

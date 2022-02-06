@@ -85,7 +85,7 @@ class UnixProcessesTest extends TestCase
         );
         $this->assertInstanceOf(
             SideEffect::class,
-            $processes->kill($pid, Signal::kill())->match(
+            $processes->kill($pid, Signal::kill)->match(
                 static fn($sideEffect) => $sideEffect,
                 static fn() => null,
             ),

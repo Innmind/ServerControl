@@ -107,7 +107,7 @@ class LoggerProcessesTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('kill')
-            ->with(new Pid(42), Signal::kill())
+            ->with(new Pid(42), Signal::kill)
             ->willReturn($expected = Either::right(new SideEffect));
         $log
             ->expects($this->once())
@@ -120,6 +120,6 @@ class LoggerProcessesTest extends TestCase
                 ],
             );
 
-        $this->assertSame($expected, $logger->kill(new Pid(42), Signal::kill()));
+        $this->assertSame($expected, $logger->kill(new Pid(42), Signal::kill));
     }
 }
