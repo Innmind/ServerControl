@@ -12,6 +12,7 @@ use Innmind\Server\Control\{
     Server\Command,
     Exception\ProcessTimedOut,
     Exception\ProcessSignaled,
+    Exception\ProcessFailed,
 };
 use Innmind\Immutable\{
     Maybe,
@@ -85,6 +86,25 @@ class LoggerProcessTest extends TestCase
             ->expects($this->once())
             ->method('wait')
             ->willReturn($expected = Either::right(new SideEffect));
+
+        $this->assertEquals($expected, $process->wait());
+    }
+
+    public function testWarnFailure()
+    {
+        $process = new LoggerProcess(
+            $inner = $this->createMock(Process::class),
+            Command::foreground('echo'),
+            $logger = $this->createMock(LoggerInterface::class),
+        );
+        $logger
+            ->expects($this->once())
+            ->method('warning')
+            ->with('Command {command} failed with {exitCode}');
+        $inner
+            ->expects($this->once())
+            ->method('wait')
+            ->willReturn($expected = Either::left(new ProcessFailed(new ExitCode(1))));
 
         $this->assertEquals($expected, $process->wait());
     }
