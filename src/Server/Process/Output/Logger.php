@@ -44,7 +44,10 @@ final class Logger implements Output
     public function foreach(callable $function): SideEffect
     {
         return $this->output->foreach(function(Str $output, Type $type) use ($function): void {
-            $method = $type->equals(Type::output()) ? 'debug' : 'warning';
+            $method = match ($type) {
+                Type::output => 'debug',
+                Type::error => 'warning',
+            };
             $this->logger->$method('Command {command} output', [
                 'command' => $this->command->toString(),
                 'output' => $output->toString(),

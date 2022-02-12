@@ -6,41 +6,16 @@ namespace Innmind\Server\Control\Server\Process\Output;
 /**
  * @psalm-immutable
  */
-final class Type
+enum Type
 {
-    public const OUTPUT = 'stdout';
-    public const ERROR = 'stderr';
-
-    private string $value;
-
-    private function __construct(string $type)
-    {
-        $this->value = $type;
-    }
-
-    /**
-     * @psalm-pure
-     */
-    public static function output(): self
-    {
-        return new self(self::OUTPUT);
-    }
-
-    /**
-     * @psalm-pure
-     */
-    public static function error(): self
-    {
-        return new self(self::ERROR);
-    }
-
-    public function equals(self $type): bool
-    {
-        return $this->value === $type->value;
-    }
+    case output;
+    case error;
 
     public function toString(): string
     {
-        return $this->value;
+        return match ($this) {
+            self::output => 'stdout',
+            self::error => 'stderr',
+        };
     }
 }

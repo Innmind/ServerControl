@@ -30,9 +30,9 @@ class OutputTest extends TestCase
     {
         $output = new Output(
             Sequence::of(
-                [Str::of('0'), Type::output()],
-                [Str::of('1'), Type::output()],
-                [Str::of('2'), Type::output()],
+                [Str::of('0'), Type::output],
+                [Str::of('1'), Type::output],
+                [Str::of('2'), Type::output],
             ),
         );
         $count = 0;
@@ -51,9 +51,9 @@ class OutputTest extends TestCase
     {
         $output = new Output(
             Sequence::of(
-                [Str::of('0'), Type::output()],
-                [Str::of('1'), Type::output()],
-                [Str::of('2'), Type::output()],
+                [Str::of('0'), Type::output],
+                [Str::of('1'), Type::output],
+                [Str::of('2'), Type::output],
             ),
         );
 
@@ -72,9 +72,9 @@ class OutputTest extends TestCase
     {
         $output = new Output(
             Sequence::of(
-                [Str::of('0'), Type::output()],
-                [Str::of('1'), Type::output()],
-                [Str::of('2'), Type::output()],
+                [Str::of('0'), Type::output],
+                [Str::of('1'), Type::output],
+                [Str::of('2'), Type::output],
             ),
         );
         $output2 = $output->filter(static function(Str $data, Type $type) {
@@ -91,9 +91,9 @@ class OutputTest extends TestCase
     {
         $output = new Output(
             Sequence::of(
-                [Str::of('0'), Type::output()],
-                [Str::of('1'), Type::output()],
-                [Str::of('2'), Type::output()],
+                [Str::of('0'), Type::output],
+                [Str::of('1'), Type::output],
+                [Str::of('2'), Type::output],
             ),
         );
         $groups = $output->groupBy(static function(Str $data, Type $type) {
@@ -116,9 +116,9 @@ class OutputTest extends TestCase
     {
         $output = new Output(
             Sequence::of(
-                [Str::of('0'), Type::output()],
-                [Str::of('1'), Type::output()],
-                [Str::of('2'), Type::output()],
+                [Str::of('0'), Type::output],
+                [Str::of('1'), Type::output],
+                [Str::of('2'), Type::output],
             ),
         );
         $partitions = $output->partition(static function(Str $data, Type $type) {
@@ -141,9 +141,9 @@ class OutputTest extends TestCase
     {
         $output = new Output(
             Sequence::of(
-                [Str::of('0'), Type::output()],
-                [Str::of('1'), Type::output()],
-                [Str::of('2'), Type::output()],
+                [Str::of('0'), Type::output],
+                [Str::of('1'), Type::output],
+                [Str::of('2'), Type::output],
             ),
         );
 

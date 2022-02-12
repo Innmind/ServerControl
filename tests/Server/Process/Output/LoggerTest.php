@@ -45,7 +45,7 @@ class LoggerTest extends TestCase
             ->expects($this->once())
             ->method('foreach')
             ->with($this->callback(static function($callback) {
-                $callback(Str::of(''), Type::output());
+                $callback(Str::of(''), Type::output);
 
                 return true;
             }))
@@ -71,7 +71,7 @@ class LoggerTest extends TestCase
             ->expects($this->once())
             ->method('foreach')
             ->with($this->callback(static function($callback) {
-                $callback(Str::of(''), Type::error());
+                $callback(Str::of(''), Type::error);
 
                 return true;
             }))
