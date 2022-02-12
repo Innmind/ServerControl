@@ -26,7 +26,6 @@ final class ForegroundProcess implements ProcessInterface
 {
     private Process $process;
     private Output $output;
-    private ?ExitCode $exitCode = null;
 
     public function __construct(Process $process, bool $streamOutput = false)
     {
