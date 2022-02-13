@@ -197,6 +197,15 @@ final class StartedProcess
         return $this
             ->content
             ->map(static fn($content) => (new Chunk)($content))
+            ->otherwise(function() {
+                $_ = $this->input->close()->match(
+                    static fn() => null, // closed correctly
+                    static fn() => throw new \RuntimeException('Failed to close input stream'),
+                );
+
+                /** @var Maybe<Sequence<Str>> */
+                return Maybe::nothing();
+            })
             ->match(
                 fn($chunks) => $this->writeAndRead(
                     $watch,
