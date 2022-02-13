@@ -198,4 +198,50 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(ProcessFailed::class, $value);
         $this->assertSame(1, $value->exitCode()->toInt());
     }
+
+    public function testWithInput()
+    {
+        $cat = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::foreground('cat')->withInput(Stream::of(\fopen('fixtures/symfony.log', 'r')))
+        );
+        $output = '';
+
+        foreach ($cat()->output() as $value) {
+            $output .= $value->toString();
+        }
+
+        $this->assertSame(
+            \file_get_contents('fixtures/symfony.log'),
+            $output,
+        );
+    }
+
+    public function testOverwrite()
+    {
+        @\unlink('test.log');
+        $cat = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::foreground('cat')
+                ->withInput(Stream::of(\fopen('fixtures/symfony.log', 'r')))
+                ->overwrite(Path::of('test.log')),
+        );
+
+        $value = $cat()->wait()->match(
+            static fn($value) => $value,
+            static fn() => null,
+        );
+
+        $this->assertInstanceOf(SideEffect::class, $value);
+        $this->assertSame(
+            \file_get_contents('fixtures/symfony.log'),
+            \file_get_contents('test.log'),
+        );
+    }
 }

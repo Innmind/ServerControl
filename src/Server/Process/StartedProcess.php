@@ -135,12 +135,16 @@ final class StartedProcess
     {
         $this->ensureExecuteOnce();
 
-        $this->writeInput();
-
         $watch = $this->watch->forRead(
             $this->output,
             $this->error,
         );
+
+        [$watch, $chunks] = $this->writeInputAndRead($watch);
+
+        foreach ($chunks->toList() as [$chunk, $type]) {
+            yield $type => $chunk;
+        }
 
         do {
             [$watch, $chunks] = $this->readOnce($watch);
@@ -180,9 +184,72 @@ final class StartedProcess
         return \proc_get_status($this->process);
     }
 
-    private function writeInput(): void
+    /**
+     * @return array{0: Watch, 1: Sequence<array{0: Str, 1: Type}>}
+     */
+    private function writeInputAndRead(Watch $watch): array
     {
+        return $this
+            ->content
+            ->map(static fn($content) => (new Chunk)($content))
+            ->match(
+                fn($chunks) => $this->writeAndRead(
+                    $watch,
+                    $this->input,
+                    $chunks,
+                    Sequence::of(),
+                ),
+                static fn() => [$watch, Sequence::of()],
+            );
+    }
 
+    /**
+     * @return array{0: Watch, 1: Sequence<array{0: Str, 1: Type}>}
+     */
+    private function writeAndRead(
+        Watch $watch,
+        Writable $stream,
+        Sequence $chunks,
+        Sequence $output,
+    ): array {
+        [$watch, $output, $stream] = $chunks
+            ->map(static fn($chunk) => $chunk->toEncoding('ASCII'))
+            ->reduce(
+                [$watch, $output, $stream],
+                function($state, $chunk) {
+                    [$watch, $output, $stream] = $state;
+                    $stream = $this
+                        ->waitAvailable($stream)
+                        ->write($chunk)
+                        ->match(
+                            static fn($stream) => $stream,
+                            static fn($e) => throw new \RuntimeException($e::class),
+                        );
+                    [$watch, $read] = $this->readOnce($watch);
+
+                    return [$watch, $output->append(Sequence::of(...$read)), $stream];
+                },
+            );
+        $stream->close()->match(
+            static fn() => null,
+            static fn() => throw new \RuntimeException('Failed to close input stream'),
+        );
+
+        return [$watch, $output];
+    }
+
+    private function waitAvailable(Writable $stream): Writable
+    {
+        $watch = $this->watch->forWrite($stream);
+
+        do {
+            $ready = $watch()->match(
+                static fn($ready) => $ready,
+                static fn() => throw new \RuntimeException('Failed to wait for input stream'),
+            );
+        } while (!$ready->toWrite()->contains($stream));
+
+        return $stream;
     }
 
     private function close(): void
@@ -218,7 +285,7 @@ final class StartedProcess
     }
 
     /**
-     * @return [Watch, Set<array{0: Str, 1: Type}>]
+     * @return [Watch, list<array{0: Str, 1: Type}>]
      */
     private function readOnce(Watch $watch): array
     {
