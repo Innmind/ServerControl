@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\Server\Command;
+use Innmind\Server\Control\{
+    Server\Command,
+    Exception\RuntimeException,
+};
 use Innmind\TimeContinuum\{
     Clock,
     Period,
@@ -59,15 +62,19 @@ final class Unix
             );
 
             if (!\is_resource($process)) {
-                // todo return a Maybe or Either instead
-                throw new \RuntimeException;
+                // optimistically this should not happen since we always close
+                // all the opened resources meaning we shouldn't reach the limit
+                // of opened resources
+                // this leaves us with the case where the system itself can't
+                // start the process and there is nothing much we could do about
+                // it, so the better option is to let the app crash with an
+                // exception
+                throw new RuntimeException('Failed to start new process');
             }
 
             return [$process, $pipes];
         };
 
-        // todo use a named constructor to allow to return a Maybe or Either
-        // when starting the process fails
         return new StartedProcess(
             $this->clock,
             $this->watch,
