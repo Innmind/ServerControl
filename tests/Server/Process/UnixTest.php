@@ -58,13 +58,10 @@ class UnixTest extends TestCase
     public function testOutput()
     {
         $this
-            ->forAll(Set\Decorate::immutable(
-                static fn($chars) => \implode('', $chars),
-                Set\Sequence::of(
-                    Set\Chars::ascii()->filter(static fn($char) => $char !== '\\'),
-                    Set\Integers::between(1, 126),
-                ),
-            ))
+            ->forAll(
+                Set\Strings::madeOf(Set\Chars::ascii()->filter(static fn($char) => $char !== '\\'))
+                    ->between(1, 126),
+            )
             ->then(function($echo) {
                 $cat = new Unix(
                     new Clock,
