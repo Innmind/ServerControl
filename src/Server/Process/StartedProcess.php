@@ -3,7 +3,11 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\Server\Process\Output\Type;
+use Innmind\Server\Control\{
+    Server\Process\Output\Type,
+    ProcessFailed,
+    ProcessSignaled,
+};
 use Innmind\Filesystem\{
     File\Content,
     Adapter\Chunk,
@@ -19,6 +23,8 @@ use Innmind\Immutable\{
     Maybe,
     Str,
     Sequence,
+    Either,
+    SideEffect,
 };
 
 /**
@@ -66,7 +72,10 @@ final class StartedProcess
         return $this->pid;
     }
 
-    public function wait(): ExitCode
+    /**
+     * @return Either<ProcessFailed|ProcessSignaled, SideEffect>
+     */
+    public function wait(): Either
     {
         $output = $this->output();
 
@@ -76,8 +85,17 @@ final class StartedProcess
 
         $status = $output->getReturn();
 
-        // todo handle signaled/stopped
-        return new ExitCode($status['exitcode']);
+        if ($status['signaled'] || $status['signaled']) {
+            return Either::left(new ProcessSignaled);
+        }
+
+        $exitCode = new ExitCode($status['exitcode']);
+
+        if (!$exitCode->successful()) {
+            return Either::left(new ProcessFailed($exitCode));
+        }
+
+        return Either::right(new SideEffect);
     }
 
     /**

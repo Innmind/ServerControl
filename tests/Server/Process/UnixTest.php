@@ -3,10 +3,11 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\Server\{
-    Process\Unix,
-    Process\Output\Type,
-    Command,
+use Innmind\Server\Control\{
+    Server\Process\Unix,
+    Server\Process\Output\Type,
+    Server\Command,
+    ProcessFailed,
 };
 use Innmind\TimeContinuum\Earth\ElapsedPeriod;
 use Innmind\Url\Path;
@@ -14,6 +15,7 @@ use Innmind\Stream\{
     Readable\Stream,
     Watch\Select,
 };
+use Innmind\Immutable\SideEffect;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -98,7 +100,12 @@ class UnixTest extends TestCase
             Command::foreground('echo')->withArgument('hello'),
         );
 
-        $this->assertSame(0, $cat()->wait()->toInt());
+        $value = $cat()->wait()->match(
+            static fn($value) => $value,
+            static fn() => null,
+        );
+
+        $this->assertInstanceOf(SideEffect::class, $value);
     }
 
     public function testWaitFail()
@@ -108,6 +115,12 @@ class UnixTest extends TestCase
             Command::foreground('php')->withArgument('fixtures/fails.php'),
         );
 
-        $this->assertSame(1, $cat()->wait()->toInt());
+        $value = $cat()->wait()->match(
+            static fn() => null,
+            static fn($e) => $e,
+        );
+
+        $this->assertInstanceOf(ProcessFailed::class, $value);
+        $this->assertSame(1, $value->exitCode()->toInt());
     }
 }
