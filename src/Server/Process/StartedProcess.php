@@ -10,6 +10,7 @@ use Innmind\Server\Control\{
     ProcessFailed,
     ProcessSignaled,
     ProcessTimedOut,
+    Exception\RuntimeException,
 };
 use Innmind\Filesystem\{
     File\Content,
@@ -199,10 +200,7 @@ final class StartedProcess
             ->content
             ->map(static fn($content) => (new Chunk)($content))
             ->otherwise(function() {
-                $_ = $this->input->close()->match(
-                    static fn() => null, // closed correctly
-                    static fn() => throw new \RuntimeException('Failed to close input stream'),
-                );
+                $this->closeInput($this->input);
 
                 /** @var Maybe<Sequence<Str>> */
                 return Maybe::nothing();
@@ -255,10 +253,7 @@ final class StartedProcess
                     return [$watch, $output->append($read), $stream];
                 },
             );
-        $_ = $stream->close()->match(
-            static fn() => null, // closed correctly
-            static fn() => throw new \RuntimeException('Failed to close input stream'),
-        );
+        $this->closeInput($stream);
 
         return [$watch, $output];
     }
@@ -276,6 +271,19 @@ final class StartedProcess
         } while (!$toWrite->contains($stream));
 
         return $stream;
+    }
+
+    private function closeInput(Writable $input): void
+    {
+        // we crash the app if we fail to close the input stream be cause the
+        // underlying process receiving the input may not behave correctly, in
+        // some cases this could result on this process hanging forever
+        // there is no way to recover safely from unpredictable behaviour so it's
+        // better to stop everything
+        $_ = $input->close()->match(
+            static fn() => null, // closed correctly
+            static fn() => throw new RuntimeException('Failed to close input stream'),
+        );
     }
 
     private function close(): void
