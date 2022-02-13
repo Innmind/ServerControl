@@ -55,7 +55,6 @@ class UnixProcessesTest extends TestCase
         $process = $processes->execute(
             Command::foreground('cat')->withInput(Stream::of(\fopen('fixtures/symfony.log', 'r'))),
         );
-        $process->wait();
 
         $this->assertSame(
             \file_get_contents('fixtures/symfony.log'),
@@ -135,7 +134,7 @@ class UnixProcessesTest extends TestCase
         $this->assertTrue($called);
     }
 
-    public function testSecondCallToStreamedOutputDoesNothing()
+    public function testSecondCallToStreamedOutputThrowsAnError()
     {
         $called = false;
         $processes = new UnixProcesses;
@@ -146,13 +145,10 @@ class UnixProcessesTest extends TestCase
                     ->streamOutput(),
             );
         $process->output()->foreach(static fn() => null);
-        $process
-            ->output()
-            ->foreach(static function() use (&$called) {
-                $called = true;
-            });
 
-        $this->assertFalse($called);
+        $this->expectException(\LogicException::class);
+
+        $process->output()->foreach(static fn() => null);
     }
 
     public function testOutputIsNotLostByDefault()

@@ -10,53 +10,36 @@ use Innmind\Server\Control\{
     Server\Process\Pid,
     Server\Process\ForegroundProcess,
     Server\Process\BackgroundProcess,
+    Server\Process\Unix,
     Server\Signal,
-    Server\Process\Input\Bridge,
     ScriptFailed,
 };
+use Innmind\TimeContinuum\Earth\{
+    Clock,
+    ElapsedPeriod,
+    Period\Second,
+};
+use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\Stream\Watch\Select;
 use Innmind\Immutable\Either;
-use Symfony\Component\Process\Process as SfProcess;
 
 final class UnixProcesses implements Processes
 {
     public function execute(Command $command): Process
     {
-        $process = SfProcess::fromShellCommandline(
-            $command->toString().($command->toBeRunInBackground() ? ' &' : ''),
-            $command->workingDirectory()->match(
-                static fn($path) => $path->toString(),
-                static fn() => null,
-            ),
-            $command
-                ->environment()
-                ->reduce(
-                    [],
-                    static function(array $env, string $key, string $value): array {
-                        $env[$key] = $value;
-
-                        return $env;
-                    },
-                ),
-            $command
-                ->input()
-                ->map(static fn($input) => new Bridge($input))
-                ->match(
-                    static fn($input) => $input,
-                    static fn() => null,
-                ),
+        $process = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            $command,
         );
-        $process
-            ->setTimeout($command->timeout()->match(
-                static fn($second) => $second->toInt(),
-                static fn() => 0,
-            ))
-            ->start();
 
         if ($command->toBeRunInBackground()) {
-            return new BackgroundProcess($process);
+            return new BackgroundProcess($process());
         }
 
-        return new ForegroundProcess($process, $command->outputToBeStreamed());
+        return new ForegroundProcess($process(), $command->outputToBeStreamed());
     }
 
     public function kill(Pid $pid, Signal $signal): Either

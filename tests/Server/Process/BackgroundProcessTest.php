@@ -5,34 +5,49 @@ namespace Tests\Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\Server\{
     Process\BackgroundProcess,
+    Process\Unix,
     Process as ProcessInterface,
-    Process\Pid,
-    Process\ExitCode,
     Process\Output\Output,
-    Process\Output\Type,
+    Command,
 };
+use Innmind\TimeContinuum\Earth\{
+    Clock,
+    ElapsedPeriod,
+    Period\Second,
+};
+use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\Stream\Watch\Select;
 use Innmind\Immutable\SideEffect;
-use Symfony\Component\Process\Process as SfProcess;
 use PHPUnit\Framework\TestCase;
 
 class BackgroundProcessTest extends TestCase
 {
     public function testInterface()
     {
-        $process = SfProcess::fromShellCommandline('ps &');
-        $process->start();
+        $process = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::background('ps'),
+        );
 
         $this->assertInstanceOf(
             ProcessInterface::class,
-            new BackgroundProcess($process),
+            new BackgroundProcess($process()),
         );
     }
 
     public function testPid()
     {
-        $ps = SfProcess::fromShellCommandline('ps &');
-        $ps->start();
-        $process = new BackgroundProcess($ps);
+        $ps = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::background('ps'),
+        );
+        $process = new BackgroundProcess($ps());
 
         $this->assertFalse($process->pid()->match(
             static fn() => true,
@@ -42,9 +57,14 @@ class BackgroundProcessTest extends TestCase
 
     public function testOutput()
     {
-        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php &');
-        $slow->start();
-        $process = new BackgroundProcess($slow);
+        $slow = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::background('php fixtures/slow.php'),
+        );
+        $process = new BackgroundProcess($slow());
 
         $this->assertInstanceOf(Output::class, $process->output());
         $start = \time();
@@ -54,17 +74,22 @@ class BackgroundProcessTest extends TestCase
 
     public function testWait()
     {
-        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
-        $slow->start();
-        $process = new BackgroundProcess($slow);
+        $slow = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::background('php fixtures/slow.php'),
+        );
+        $process = new BackgroundProcess($slow());
 
         $this->assertInstanceOf(
             SideEffect::class,
             $process
                 ->wait()
                 ->match(
-                    static fn($e) => $e,
                     static fn($sideEffect) => $sideEffect,
+                    static fn() => null,
                 ),
         );
     }

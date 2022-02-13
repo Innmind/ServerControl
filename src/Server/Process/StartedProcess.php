@@ -261,7 +261,7 @@ final class StartedProcess
     private function ensureExecuteOnce(): void
     {
         if ($this->executed) {
-            throw new \RuntimeException('Cannot call both wait() and output() on the same process');
+            throw new \LogicException('Cannot call both wait() and output() on the same process, or call them twice');
         }
 
         $this->executed = true;
@@ -299,6 +299,7 @@ final class StartedProcess
                 $this->output => [$this->read($stream), Type::output],
                 $this->error => [$this->read($stream), Type::error],
             })
+            ->filter(static fn($pair) => !$pair[0]->empty())
             ->toList();
 
         $watch = $toRead->reduce(
