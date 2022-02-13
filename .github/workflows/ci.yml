@@ -24,6 +24,8 @@ jobs:
         uses: "ramsey/composer-install@v2"
         with:
           dependency-versions: ${{ matrix.dependencies }}
+      - name: Slow
+        run: php fixtures/slow.php
       - name: PHPUnit
         run: vendor/bin/phpunit --coverage-clover=coverage.clover
         env:
