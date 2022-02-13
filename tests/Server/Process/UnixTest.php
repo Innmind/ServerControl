@@ -40,7 +40,7 @@ class UnixTest extends TestCase
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
             new Second(1),
-            Command::foreground('echo')->withArgument('hello')
+            Command::foreground('echo')->withArgument('hello'),
         );
         $count = 0;
         $process = $cat();
@@ -123,7 +123,7 @@ class UnixTest extends TestCase
         $process = $slow();
         $count = 0;
         $output = '';
-        $started = microtime(true);
+        $started = \microtime(true);
 
         $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
 
@@ -135,7 +135,7 @@ class UnixTest extends TestCase
 
         $this->assertSame("0\n", $output);
         // 3 because of the grace period
-        $this->assertEqualsWithDelta(3, microtime(true) - $started, 0.5);
+        $this->assertEqualsWithDelta(3, \microtime(true) - $started, 0.5);
     }
 
     public function testTimeoutWaitSlowProcess()
@@ -150,7 +150,7 @@ class UnixTest extends TestCase
                 ->timeoutAfter(new Timeout(2)),
         );
         $process = $slow();
-        $started = microtime(true);
+        $started = \microtime(true);
 
         $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
         $e = $process->wait()->match(
@@ -159,7 +159,7 @@ class UnixTest extends TestCase
         );
         $this->assertInstanceOf(ProcessTimedOut::class, $e);
         // 3 because of the grace period
-        $this->assertEqualsWithDelta(3, microtime(true) - $started, 0.5);
+        $this->assertEqualsWithDelta(3, \microtime(true) - $started, 0.5);
     }
 
     public function testWaitSuccess()
@@ -206,7 +206,7 @@ class UnixTest extends TestCase
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
             new Second(1),
-            Command::foreground('cat')->withInput(Stream::of(\fopen('fixtures/symfony.log', 'r')))
+            Command::foreground('cat')->withInput(Stream::of(\fopen('fixtures/symfony.log', 'r'))),
         );
         $output = '';
 
