@@ -4,7 +4,12 @@ declare(strict_types = 1);
 namespace Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\Server\Command;
+use Innmind\TimeContinuum\{
+    Clock,
+    Period,
+};
 use Innmind\Filesystem\File\Content;
+use Innmind\TimeWarp\Halt;
 use Innmind\Stream\Watch;
 use Innmind\Immutable\Maybe;
 
@@ -13,12 +18,23 @@ use Innmind\Immutable\Maybe;
  */
 final class Unix
 {
+    private Clock $clock;
     private Watch $watch;
+    private Halt $halt;
+    private Period $grace;
     private Command $command;
 
-    public function __construct(Watch $watch, Command $command)
-    {
+    public function __construct(
+        Clock $clock,
+        Watch $watch,
+        Halt $halt,
+        Period $grace,
+        Command $command,
+    ) {
+        $this->clock = $clock;
         $this->watch = $watch;
+        $this->halt = $halt;
+        $this->grace = $grace;
         $this->command = $command;
     }
 
@@ -28,29 +44,37 @@ final class Unix
         $cwd = $this->workingDirectory();
         $env = $this->env();
 
-        $process = @\proc_open(
-            $command,
-            [
-                ['pipe', 'r'],
-                ['pipe', 'w'],
-                ['pipe', 'w'],
-            ],
-            $pipes,
-            $cwd,
-            $env,
-        );
+        /** @var array{0: resource, 1: array{0: resource, 1: resource, 2: resource}} */
+        $start = static function() use ($command, $cwd, $env): array {
+            $process = @\proc_open(
+                $command,
+                [
+                    ['pipe', 'r'],
+                    ['pipe', 'w'],
+                    ['pipe', 'w'],
+                ],
+                $pipes,
+                $cwd,
+                $env,
+            );
 
-        if (!\is_resource($process)) {
-            // todo return a Maybe or Either instead
-            throw new \RuntimeException;
-        }
+            if (!\is_resource($process)) {
+                // todo return a Maybe or Either instead
+                throw new \RuntimeException;
+            }
 
-        // todo handle timeouts
+            return [$process, $pipes];
+        };
 
+        // todo use a named constructor to allow to return a Maybe or Either
+        // when starting the process fails
         return new StartedProcess(
+            $this->clock,
             $this->watch,
-            $process,
-            $pipes,
+            $this->halt,
+            $this->grace,
+            $start,
+            $this->command->timeout(),
             $this->input(),
         );
     }

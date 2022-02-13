@@ -5,14 +5,23 @@ namespace Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\{
     Server\Process\Output\Type,
+    Server\Second,
+    Server\Signal,
     ProcessFailed,
     ProcessSignaled,
+    ProcessTimedOut,
 };
 use Innmind\Filesystem\{
     File\Content,
     Adapter\Chunk,
 };
-use Innmind\TimeContinuum\Earth\ElapsedPeriod;
+use Innmind\TimeContinuum\{
+    Clock,
+    PointInTime,
+    Period,
+    Earth\ElapsedPeriod,
+};
+use Innmind\TimeWarp\Halt;
 use Innmind\Stream\{
     Readable,
     Writable,
@@ -32,30 +41,46 @@ use Innmind\Immutable\{
  */
 final class StartedProcess
 {
+    private Clock $clock;
     private Watch $watch;
+    private Halt $halt;
+    private Period $grace;
+    private PointInTime $startedAt;
     /** @var resource */
     private $process;
     private Readable\NonBlocking $output;
     private Readable\NonBlocking $error;
     private Writable $input;
+    /** @var Maybe<Second> */
+    private Maybe $timeout;
     /** @var Maybe<Content> */
     private Maybe $content;
     private Pid $pid;
     private bool $executed = false;
 
     /**
-     * @param resource $process
-     * @param array{0: resource, 1: resource, 2: resource} $pipes
+     * @param callable(): array{0: resource, 1: array{0: resource, 1: resource, 2: resource}} $start
+     * @param Maybe<Second> $timeout
      * @param Maybe<Content> $content
      */
     public function __construct(
+        Clock $clock,
         Watch $watch,
-        $process,
-        array $pipes,
+        Halt $halt,
+        Period $grace,
+        callable $start,
+        Maybe $timeout,
         Maybe $content,
     ) {
+        $this->clock = $clock;
         $this->watch = $watch;
-        $this->process = $process;
+        $this->halt = $halt;
+        $this->grace = $grace;
+        $this->startedAt = $clock->now();
+        // we defer the start of the process here instead of starting it in Unix
+        // to better control the property startedAt in case it needs to be moved
+        // after the process is really started
+        [$this->process, $pipes] = $start();
         $this->output = Readable\NonBlocking::of(
             Readable\Stream::of($pipes[1]),
         );
@@ -63,6 +88,7 @@ final class StartedProcess
             Readable\Stream::of($pipes[2]),
         );
         $this->input = Writable\Stream::of($pipes[0]);
+        $this->timeout = $timeout;
         $this->content = $content;
         $this->pid = new Pid($this->status()['pid']);
     }
@@ -73,7 +99,7 @@ final class StartedProcess
     }
 
     /**
-     * @return Either<ProcessFailed|ProcessSignaled, SideEffect>
+     * @return Either<ProcessFailed|ProcessSignaled|ProcessTimedOut, SideEffect>
      */
     public function wait(): Either
     {
@@ -84,6 +110,10 @@ final class StartedProcess
         }
 
         $status = $output->getReturn();
+
+        if ($status instanceof ProcessTimedOut) {
+            return Either::left($status);
+        }
 
         if ($status['signaled'] || $status['signaled']) {
             return Either::left(new ProcessSignaled);
@@ -117,6 +147,15 @@ final class StartedProcess
 
             foreach ($chunks as [$chunk, $type]) {
                 yield $type => $chunk;
+            }
+
+            $timedOut = $this->checkTimeout()->match(
+                static fn() => true,
+                static fn() => false,
+            );
+
+            if ($timedOut) {
+                return $this->abort();
             }
 
             $status = $this->status();
@@ -201,5 +240,39 @@ final class StartedProcess
         );
 
         return [$watch, $chunks];
+    }
+
+    /**
+     * @return Maybe<ProcessTimedOut>
+     */
+    private function checkTimeout(): Maybe
+    {
+        return $this
+            ->timeout
+            ->map(static fn($second) => new ElapsedPeriod(
+                $second->toInt() * 1000,
+            ))
+            ->filter(
+                fn($threshold) => $this
+                    ->clock
+                    ->now()
+                    ->elapsedSince($this->startedAt)
+                    ->longerThan($threshold),
+            )
+            ->map(static fn() => new ProcessTimedOut);
+    }
+
+    private function abort(): ProcessTimedOut
+    {
+        @\proc_terminate($this->process);
+        ($this->halt)($this->grace);
+
+        if ($this->status()['running']) {
+            @\proc_terminate($this->process, Signal::kill->toInt());
+        }
+
+        $this->close();
+
+        return new ProcessTimedOut;
     }
 }

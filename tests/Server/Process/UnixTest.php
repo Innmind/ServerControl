@@ -7,9 +7,16 @@ use Innmind\Server\Control\{
     Server\Process\Unix,
     Server\Process\Output\Type,
     Server\Command,
+    Server\Second as Timeout,
     ProcessFailed,
+    ProcessTimedOut,
 };
-use Innmind\TimeContinuum\Earth\ElapsedPeriod;
+use Innmind\TimeContinuum\Earth\{
+    Clock,
+    ElapsedPeriod,
+    Period\Second,
+};
+use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Url\Path;
 use Innmind\Stream\{
     Readable\Stream,
@@ -29,7 +36,10 @@ class UnixTest extends TestCase
     public function testSimpleOutput()
     {
         $cat = new Unix(
+            new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
             Command::foreground('echo')->withArgument('hello')
         );
         $count = 0;
@@ -57,7 +67,10 @@ class UnixTest extends TestCase
             ))
             ->then(function($echo) {
                 $cat = new Unix(
+                    new Clock,
                     Select::timeoutAfter(new ElapsedPeriod(0)),
+                    new Usleep,
+                    new Second(1),
                     Command::foreground('echo')->withArgument($echo),
                 );
                 $process = $cat();
@@ -75,7 +88,10 @@ class UnixTest extends TestCase
     public function testSlowOutput()
     {
         $slow = new Unix(
+            new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
             Command::foreground('php')->withArgument('fixtures/slow.php'),
         );
         $process = $slow();
@@ -93,10 +109,66 @@ class UnixTest extends TestCase
         $this->assertSame("0\n1\n2\n3\n4\n5\n", $output);
     }
 
+    public function testTimeoutSlowOutput()
+    {
+        $slow = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::foreground('php')
+                ->withArgument('fixtures/slow.php')
+                ->timeoutAfter(new Timeout(2)),
+        );
+        $process = $slow();
+        $count = 0;
+        $output = '';
+        $started = microtime(true);
+
+        $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
+
+        foreach ($process->output() as $type => $chunk) {
+            $output .= $chunk->toString();
+            $this->assertSame($count % 2 === 0 ? Type::output : Type::error, $type);
+            ++$count;
+        }
+
+        $this->assertSame("0\n", $output);
+        // 3 because of the grace period
+        $this->assertEqualsWithDelta(3, microtime(true) - $started, 0.5);
+    }
+
+    public function testTimeoutWaitSlowProcess()
+    {
+        $slow = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::foreground('php')
+                ->withArgument('fixtures/slow.php')
+                ->timeoutAfter(new Timeout(2)),
+        );
+        $process = $slow();
+        $started = microtime(true);
+
+        $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
+        $e = $process->wait()->match(
+            static fn() => null,
+            static fn($e) => $e,
+        );
+        $this->assertInstanceOf(ProcessTimedOut::class, $e);
+        // 3 because of the grace period
+        $this->assertEqualsWithDelta(3, microtime(true) - $started, 0.5);
+    }
+
     public function testWaitSuccess()
     {
         $cat = new Unix(
+            new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
             Command::foreground('echo')->withArgument('hello'),
         );
 
@@ -111,7 +183,10 @@ class UnixTest extends TestCase
     public function testWaitFail()
     {
         $cat = new Unix(
+            new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
             Command::foreground('php')->withArgument('fixtures/fails.php'),
         );
 
