@@ -114,7 +114,7 @@ final class StartedProcess
     {
         $output = $this->output();
 
-        foreach ($output as $_ => $__) {
+        foreach ($output as $_) {
             // do nothing with the output
         }
 
@@ -142,7 +142,7 @@ final class StartedProcess
     }
 
     /**
-     * @return \Generator<Type, Str, mixed, Status|ProcessTimedOut>
+     * @return \Generator<int, array{0: Str, 1: Type}, mixed, Status|ProcessTimedOut>
      */
     public function output(): \Generator
     {
@@ -155,15 +155,15 @@ final class StartedProcess
 
         [$watch, $chunks] = $this->writeInputAndRead($watch);
 
-        foreach ($chunks->toList() as [$chunk, $type]) {
-            yield $type => $chunk;
+        foreach ($chunks->toList() as $value) {
+            yield $value;
         }
 
         do {
             [$watch, $chunks] = $this->readOnce($watch);
 
-            foreach ($chunks->toList() as [$chunk, $type]) {
-                yield $type => $chunk;
+            foreach ($chunks->toList() as $value) {
+                yield $value;
             }
 
             $timedOut = $this->checkTimeout()->match(

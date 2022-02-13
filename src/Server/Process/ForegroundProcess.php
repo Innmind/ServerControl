@@ -19,18 +19,14 @@ final class ForegroundProcess implements ProcessInterface
     public function __construct(StartedProcess $process, bool $streamOutput = false)
     {
         $generator = static function() use ($process): \Generator {
-            foreach ($process->output() as $type => $value) {
-                yield [$value, $type];
-            }
+            yield from $process->output();
         };
 
         $this->process = $process;
 
         if ($streamOutput) {
-            /** @var Sequence<array{0: Str, 1: Output\Type}> */
             $output = Sequence::lazy($generator);
         } else {
-            /** @var Sequence<array{0: Str, 1: Output\Type}> */
             $output = Sequence::defer(($generator)());
         }
 
