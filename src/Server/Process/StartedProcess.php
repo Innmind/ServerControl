@@ -89,24 +89,11 @@ final class StartedProcess
         );
 
         do {
-            $toRead = $select()->match(
-                static fn($ready) => $ready->toRead(),
-                static fn() => throw new \RuntimeException('Failed to read process output'),
-            );
-
-            $chunks = $toRead
-                ->map(fn($stream) => match ($stream) {
-                    $this->output => [$this->read($stream), Type::output],
-                    $this->error => [$this->read($stream), Type::error],
-                })
-                ->toList();
+            [$select, $chunks] = $this->readOnce($select);
 
             foreach ($chunks as [$chunk, $type]) {
                 yield $type => $chunk;
             }
-
-            $select = $this->maybeUnwatch($select, $this->output);
-            $select = $this->maybeUnwatch($select, $this->error);
 
             $status = $this->status();
         } while ($status['running']);
@@ -150,7 +137,7 @@ final class StartedProcess
         $this->executed = true;
     }
 
-    private function maybeUnwatch(Watch $select, Readable\NonBlocking $stream): Watch
+    private function maybeUnwatch(Watch $select, Readable $stream): Watch
     {
         if ($stream->end() || $stream->closed()) {
             $select = $select->unwatch($stream);
@@ -165,5 +152,30 @@ final class StartedProcess
             static fn($chunk) => $chunk,
             static fn() => Str::of(''),
         );
+    }
+
+    /**
+     * @return [Watch, Set<array{0: Str, 1: Type}>]
+     */
+    private function readOnce(Watch $select): array
+    {
+        $toRead = $select()->match(
+            static fn($ready) => $ready->toRead(),
+            static fn() => throw new \RuntimeException('Failed to read process output'),
+        );
+
+        $chunks = $toRead
+            ->map(fn($stream) => match ($stream) {
+                $this->output => [$this->read($stream), Type::output],
+                $this->error => [$this->read($stream), Type::error],
+            })
+            ->toList();
+
+        $select = $toRead->reduce(
+            $select,
+            $this->maybeUnwatch(...),
+        );
+
+        return [$select, $chunks];
     }
 }
