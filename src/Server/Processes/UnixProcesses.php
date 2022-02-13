@@ -14,24 +14,60 @@ use Innmind\Server\Control\{
     Server\Signal,
     ScriptFailed,
 };
-use Innmind\TimeContinuum\Earth\{
+use Innmind\TimeContinuum\{
     Clock,
     ElapsedPeriod,
-    Period\Second,
+    Period,
+    Earth,
+    Earth\Period\Second,
 };
-use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Watch\Select;
+use Innmind\TimeWarp\Halt;
+use Innmind\Stream\Watch;
 use Innmind\Immutable\Either;
 
 final class UnixProcesses implements Processes
 {
+    private Clock $clock;
+    private Watch $watch;
+    private Halt $halt;
+    private Period $grace;
+
+    private function __construct(
+        Clock $clock,
+        Watch $watch,
+        Halt $halt,
+        Period $grace,
+    ) {
+        $this->clock = $clock;
+        $this->watch = $watch;
+        $this->halt = $halt;
+        $this->grace = $grace;
+    }
+
+    /**
+     * @param callable(ElapsedPeriod): Watch $watch
+     */
+    public static function of(
+        Clock $clock,
+        callable $watch,
+        Halt $halt,
+        Period $grace = null,
+    ): self {
+        return new self(
+            $clock,
+            $watch(new Earth\ElapsedPeriod(0)),
+            $halt,
+            $grace ?? new Second(1),
+        );
+    }
+
     public function execute(Command $command): Process
     {
         $process = new Unix(
-            new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
-            new Usleep,
-            new Second(1),
+            $this->clock,
+            $this->watch,
+            $this->halt,
+            $this->grace,
             $command,
         );
 

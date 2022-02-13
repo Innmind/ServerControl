@@ -13,7 +13,12 @@ use Innmind\Server\Control\{
     Server\Signal,
     ProcessTimedOut,
 };
-use Innmind\Stream\Readable\Stream;
+use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\Stream\{
+    Readable\Stream,
+    Watch\Select,
+};
 use Innmind\Immutable\SideEffect;
 use PHPUnit\Framework\TestCase;
 
@@ -21,12 +26,20 @@ class UnixProcessesTest extends TestCase
 {
     public function testInterface()
     {
-        $this->assertInstanceOf(Processes::class, new UnixProcesses);
+        $this->assertInstanceOf(Processes::class, UnixProcesses::of(
+            new Clock,
+            Select::timeoutAfter(...),
+            new Usleep,
+        ));
     }
 
     public function testExecute()
     {
-        $processes = new UnixProcesses;
+        $processes = UnixProcesses::of(
+            new Clock,
+            Select::timeoutAfter(...),
+            new Usleep,
+        );
         $start = \time();
         $process = $processes->execute(
             Command::foreground('php')->withArgument('fixtures/slow.php'),
@@ -39,7 +52,11 @@ class UnixProcessesTest extends TestCase
 
     public function testExecuteInBackground()
     {
-        $processes = new UnixProcesses;
+        $processes = UnixProcesses::of(
+            new Clock,
+            Select::timeoutAfter(...),
+            new Usleep,
+        );
         $start = \time();
         $process = $processes->execute(
             Command::background('php')->withArgument('fixtures/slow.php'),
@@ -51,7 +68,11 @@ class UnixProcessesTest extends TestCase
 
     public function testExecuteWithInput()
     {
-        $processes = new UnixProcesses;
+        $processes = UnixProcesses::of(
+            new Clock,
+            Select::timeoutAfter(...),
+            new Usleep,
+        );
         $process = $processes->execute(
             Command::foreground('cat')->withInput(Stream::of(\fopen('fixtures/symfony.log', 'r'))),
         );
@@ -72,7 +93,11 @@ class UnixProcessesTest extends TestCase
             $this->markTestSkipped();
         }
 
-        $processes = new UnixProcesses;
+        $processes = UnixProcesses::of(
+            new Clock,
+            Select::timeoutAfter(...),
+            new Usleep,
+        );
         $start = \time();
         $process = $processes->execute(
             Command::foreground('php')->withArgument('fixtures/slow.php'),
@@ -97,7 +122,11 @@ class UnixProcessesTest extends TestCase
 
     public function testTimeout()
     {
-        $processes = new UnixProcesses;
+        $processes = UnixProcesses::of(
+            new Clock,
+            Select::timeoutAfter(...),
+            new Usleep,
+        );
         $start = \time();
         $process = $processes->execute(
             Command::foreground('sleep')
@@ -119,7 +148,11 @@ class UnixProcessesTest extends TestCase
     public function testStreamOutput()
     {
         $called = false;
-        $processes = new UnixProcesses;
+        $processes = UnixProcesses::of(
+            new Clock,
+            Select::timeoutAfter(...),
+            new Usleep,
+        );
         $processes
             ->execute(
                 Command::foreground('cat')
@@ -137,7 +170,11 @@ class UnixProcessesTest extends TestCase
     public function testSecondCallToStreamedOutputThrowsAnError()
     {
         $called = false;
-        $processes = new UnixProcesses;
+        $processes = UnixProcesses::of(
+            new Clock,
+            Select::timeoutAfter(...),
+            new Usleep,
+        );
         $process = $processes
             ->execute(
                 Command::foreground('cat')
@@ -154,7 +191,11 @@ class UnixProcessesTest extends TestCase
     public function testOutputIsNotLostByDefault()
     {
         $called = false;
-        $processes = new UnixProcesses;
+        $processes = UnixProcesses::of(
+            new Clock,
+            Select::timeoutAfter(...),
+            new Usleep,
+        );
         $process = $processes
             ->execute(
                 Command::foreground('cat')

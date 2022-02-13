@@ -9,22 +9,37 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Volumes,
 };
+use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\Stream\Watch\Select;
 use PHPUnit\Framework\TestCase;
 
 class UnixTest extends TestCase
 {
     public function testInterface()
     {
-        $this->assertInstanceOf(Server::class, new Unix);
+        $this->assertInstanceOf(Server::class, Unix::of(
+            new Clock,
+            Select::timeoutAfter(...),
+            new Usleep,
+        ));
     }
 
     public function testProcesses()
     {
-        $this->assertInstanceOf(Processes::class, (new Unix)->processes());
+        $this->assertInstanceOf(Processes::class, Unix::of(
+            new Clock,
+            Select::timeoutAfter(...),
+            new Usleep,
+        )->processes());
     }
 
     public function testVolumes()
     {
-        $this->assertInstanceOf(Volumes::class, (new Unix)->volumes());
+        $this->assertInstanceOf(Volumes::class, Unix::of(
+            new Clock,
+            Select::timeoutAfter(...),
+            new Usleep,
+        )->volumes());
     }
 }
