@@ -26,7 +26,7 @@ use Innmind\Stream\{
     Readable,
     Writable,
     Watch,
-    DataPartiallyWritten,
+    Selectable,
 };
 use Innmind\Immutable\{
     Maybe,
@@ -38,6 +38,13 @@ use Innmind\Immutable\{
 
 /**
  * @internal
+ * @psalm-type Status = array{
+ *         pid: int<2, max>,
+ *         running: bool,
+ *         stopped: bool,
+ *         signaled: bool,
+ *         exitcode: int<0, 255>,
+ * }
  */
 final class StartedProcess
 {
@@ -50,7 +57,7 @@ final class StartedProcess
     private $process;
     private Readable\NonBlocking $output;
     private Readable\NonBlocking $error;
-    private Writable $input;
+    private Writable\Stream $input;
     /** @var Maybe<Second> */
     private Maybe $timeout;
     /** @var Maybe<Content> */
@@ -112,24 +119,28 @@ final class StartedProcess
         $status = $output->getReturn();
 
         if ($status instanceof ProcessTimedOut) {
+            /** @var Either<ProcessFailed|ProcessSignaled|ProcessTimedOut, SideEffect> */
             return Either::left($status);
         }
 
-        if ($status['signaled'] || $status['signaled']) {
+        if ($status['signaled'] || $status['stopped']) {
+            /** @var Either<ProcessFailed|ProcessSignaled|ProcessTimedOut, SideEffect> */
             return Either::left(new ProcessSignaled);
         }
 
         $exitCode = new ExitCode($status['exitcode']);
 
         if (!$exitCode->successful()) {
+            /** @var Either<ProcessFailed|ProcessSignaled|ProcessTimedOut, SideEffect> */
             return Either::left(new ProcessFailed($exitCode));
         }
 
+        /** @var Either<ProcessFailed|ProcessSignaled|ProcessTimedOut, SideEffect> */
         return Either::right(new SideEffect);
     }
 
     /**
-     * @return \Generator<Type, Str>
+     * @return \Generator<Type, Str, mixed, Status|ProcessTimedOut>
      */
     public function output(): \Generator
     {
@@ -149,7 +160,7 @@ final class StartedProcess
         do {
             [$watch, $chunks] = $this->readOnce($watch);
 
-            foreach ($chunks as [$chunk, $type]) {
+            foreach ($chunks->toList() as [$chunk, $type]) {
                 yield $type => $chunk;
             }
 
@@ -171,13 +182,7 @@ final class StartedProcess
     }
 
     /**
-     * @return array{
-     *         pid: int<2, max>,
-     *         running: bool,
-     *         stopped: bool,
-     *         signaled: bool,
-     *         exitcode: int<0, 255>,
-     * }
+     * @return Status
      */
     private function status(): array
     {
@@ -204,11 +209,14 @@ final class StartedProcess
     }
 
     /**
+     * @param Sequence<Str> $chunks
+     * @param Sequence<array{0: Str, 1: Type}> $output
+     *
      * @return array{0: Watch, 1: Sequence<array{0: Str, 1: Type}>}
      */
     private function writeAndRead(
         Watch $watch,
-        Writable $stream,
+        Writable\Stream $stream,
         Sequence $chunks,
         Sequence $output,
     ): array {
@@ -217,6 +225,13 @@ final class StartedProcess
             ->reduce(
                 [$watch, $output, $stream],
                 function($state, $chunk) {
+                    /**
+                     * @var Watch $watch
+                     * @var Sequence<array{0: Str, 1: Type}> $output
+                     * @var Writable\Stream $stream
+                     * @psalm-suppress MixedAssignment
+                     * @psalm-suppress MixedArrayAccess
+                     */
                     [$watch, $output, $stream] = $state;
                     $stream = $this
                         ->waitAvailable($stream)
@@ -227,18 +242,18 @@ final class StartedProcess
                         );
                     [$watch, $read] = $this->readOnce($watch);
 
-                    return [$watch, $output->append(Sequence::of(...$read)), $stream];
+                    return [$watch, $output->append($read), $stream];
                 },
             );
-        $stream->close()->match(
-            static fn() => null,
+        $_ = $stream->close()->match(
+            static fn() => null, // closed correctly
             static fn() => throw new \RuntimeException('Failed to close input stream'),
         );
 
         return [$watch, $output];
     }
 
-    private function waitAvailable(Writable $stream): Writable
+    private function waitAvailable(Writable\Stream $stream): Writable
     {
         $watch = $this->watch->forWrite($stream);
 
@@ -267,7 +282,7 @@ final class StartedProcess
         $this->executed = true;
     }
 
-    private function maybeUnwatch(Watch $watch, Readable $stream): Watch
+    private function maybeUnwatch(Watch $watch, Selectable $stream): Watch
     {
         if ($stream->end() || $stream->closed()) {
             $watch = $watch->unwatch($stream);
@@ -285,7 +300,7 @@ final class StartedProcess
     }
 
     /**
-     * @return [Watch, list<array{0: Str, 1: Type}>]
+     * @return array{0: Watch, 1: Sequence<array{0: Str, 1: Type}>}
      */
     private function readOnce(Watch $watch): array
     {
@@ -294,6 +309,7 @@ final class StartedProcess
             static fn() => throw new \RuntimeException('Failed to read process output'),
         );
 
+        /** @var list<array{0: Str, 1: Type}> */
         $chunks = $toRead
             ->map(fn($stream) => match ($stream) {
                 $this->output => [$this->read($stream), Type::output],
@@ -307,7 +323,7 @@ final class StartedProcess
             $this->maybeUnwatch(...),
         );
 
-        return [$watch, $chunks];
+        return [$watch, Sequence::of(...$chunks)];
     }
 
     /**

@@ -44,7 +44,7 @@ final class Unix
         $cwd = $this->workingDirectory();
         $env = $this->env();
 
-        /** @var array{0: resource, 1: array{0: resource, 1: resource, 2: resource}} */
+        /** @var callable(): array{0: resource, 1: array{0: resource, 1: resource, 2: resource}} */
         $start = static function() use ($command, $cwd, $env): array {
             $process = @\proc_open(
                 $command,
