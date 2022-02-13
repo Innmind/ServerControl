@@ -8,8 +8,12 @@ use Innmind\Server\Control\Server\{
     Process\Output\Type,
     Command,
 };
+use Innmind\TimeContinuum\Earth\ElapsedPeriod;
 use Innmind\Url\Path;
-use Innmind\Stream\Readable\Stream;
+use Innmind\Stream\{
+    Readable\Stream,
+    Watch\Select,
+};
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -22,7 +26,10 @@ class UnixTest extends TestCase
 
     public function testSimpleOutput()
     {
-        $cat = new Unix(Command::foreground('echo')->withArgument('hello'));
+        $cat = new Unix(
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Command::foreground('echo')->withArgument('hello')
+        );
         $count = 0;
         $process = $cat();
 
@@ -47,7 +54,10 @@ class UnixTest extends TestCase
                 ),
             ))
             ->then(function($echo) {
-                $cat = new Unix(Command::foreground('echo')->withArgument($echo));
+                $cat = new Unix(
+                    Select::timeoutAfter(new ElapsedPeriod(0)),
+                    Command::foreground('echo')->withArgument($echo),
+                );
                 $process = $cat();
                 $output = '';
 
@@ -62,7 +72,10 @@ class UnixTest extends TestCase
 
     public function testSlowOutput()
     {
-        $slow = new Unix(Command::foreground('php')->withArgument('fixtures/slow.php'));
+        $slow = new Unix(
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Command::foreground('php')->withArgument('fixtures/slow.php'),
+        );
         $process = $slow();
         $count = 0;
         $output = '';
@@ -80,14 +93,20 @@ class UnixTest extends TestCase
 
     public function testWaitSuccess()
     {
-        $cat = new Unix(Command::foreground('echo')->withArgument('hello'));
+        $cat = new Unix(
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Command::foreground('echo')->withArgument('hello'),
+        );
 
         $this->assertSame(0, $cat()->wait()->toInt());
     }
 
     public function testWaitFail()
     {
-        $cat = new Unix(Command::foreground('php')->withArgument('fixtures/fails.php'));
+        $cat = new Unix(
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Command::foreground('php')->withArgument('fixtures/fails.php'),
+        );
 
         $this->assertSame(1, $cat()->wait()->toInt());
     }

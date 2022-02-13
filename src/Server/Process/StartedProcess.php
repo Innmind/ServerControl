@@ -26,6 +26,7 @@ use Innmind\Immutable\{
  */
 final class StartedProcess
 {
+    private Watch $watch;
     /** @var resource */
     private $process;
     private Readable\NonBlocking $output;
@@ -41,8 +42,13 @@ final class StartedProcess
      * @param array{0: resource, 1: resource, 2: resource} $pipes
      * @param Maybe<Content> $content
      */
-    public function __construct($process, array $pipes, Maybe $content)
-    {
+    public function __construct(
+        Watch $watch,
+        $process,
+        array $pipes,
+        Maybe $content,
+    ) {
+        $this->watch = $watch;
         $this->process = $process;
         $this->output = Readable\NonBlocking::of(
             Readable\Stream::of($pipes[1]),
@@ -83,13 +89,13 @@ final class StartedProcess
 
         $this->writeInput();
 
-        $select = Watch\Select::timeoutAfter(new ElapsedPeriod(0))->forRead(
+        $watch = $this->watch->forRead(
             $this->output,
             $this->error,
         );
 
         do {
-            [$select, $chunks] = $this->readOnce($select);
+            [$watch, $chunks] = $this->readOnce($watch);
 
             foreach ($chunks as [$chunk, $type]) {
                 yield $type => $chunk;
@@ -137,13 +143,13 @@ final class StartedProcess
         $this->executed = true;
     }
 
-    private function maybeUnwatch(Watch $select, Readable $stream): Watch
+    private function maybeUnwatch(Watch $watch, Readable $stream): Watch
     {
         if ($stream->end() || $stream->closed()) {
-            $select = $select->unwatch($stream);
+            $watch = $watch->unwatch($stream);
         }
 
-        return $select;
+        return $watch;
     }
 
     private function read(Readable $stream): Str
@@ -157,9 +163,9 @@ final class StartedProcess
     /**
      * @return [Watch, Set<array{0: Str, 1: Type}>]
      */
-    private function readOnce(Watch $select): array
+    private function readOnce(Watch $watch): array
     {
-        $toRead = $select()->match(
+        $toRead = $watch()->match(
             static fn($ready) => $ready->toRead(),
             static fn() => throw new \RuntimeException('Failed to read process output'),
         );
@@ -171,11 +177,11 @@ final class StartedProcess
             })
             ->toList();
 
-        $select = $toRead->reduce(
-            $select,
+        $watch = $toRead->reduce(
+            $watch,
             $this->maybeUnwatch(...),
         );
 
-        return [$select, $chunks];
+        return [$watch, $chunks];
     }
 }

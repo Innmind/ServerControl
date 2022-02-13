@@ -5,6 +5,7 @@ namespace Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\Server\Command;
 use Innmind\Filesystem\File\Content;
+use Innmind\Stream\Watch;
 use Innmind\Immutable\Maybe;
 
 /**
@@ -12,10 +13,12 @@ use Innmind\Immutable\Maybe;
  */
 final class Unix
 {
+    private Watch $watch;
     private Command $command;
 
-    public function __construct(Command $command)
+    public function __construct(Watch $watch, Command $command)
     {
+        $this->watch = $watch;
         $this->command = $command;
     }
 
@@ -45,6 +48,7 @@ final class Unix
         // todo handle timeouts
 
         return new StartedProcess(
+            $this->watch,
             $process,
             $pipes,
             $this->input(),
