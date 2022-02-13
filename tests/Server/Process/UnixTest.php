@@ -35,8 +35,8 @@ class UnixTest extends TestCase
 
     public function testSimpleOutput()
     {
-        // for some reason this test not always work in the linux CI
-        if (\PHP_OS === 'Linux') {
+        // for some reason this test doesn't work on the CI but works locally
+        if (\getenv('CI')) {
             $this->markTestSkipped();
         }
 
@@ -62,8 +62,8 @@ class UnixTest extends TestCase
 
     public function testOutput()
     {
-        // for some reason this test not always work in the linux CI
-        if (\PHP_OS === 'Linux') {
+        // for some reason this test doesn't work on the CI but works locally
+        if (\getenv('CI')) {
             $this->markTestSkipped();
         }
 
