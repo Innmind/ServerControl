@@ -241,12 +241,20 @@ final class StartedProcess
                      * @psalm-suppress MixedArrayAccess
                      */
                     [$watch, $output, $stream] = $state;
+                    // leave the exception here in case we can't write to the
+                    // input stream because for now there is no clear way to
+                    // handle this case
+                    // todo if the DataPartiallyWritten case happen in concrete
+                    // apps when the case should be handled by trying to rewrite
+                    // the part of the chunk that hasn't be written. This is not
+                    // done at this moment for sake of simplicity while the case
+                    // has never been encountered
                     $stream = $this
                         ->waitAvailable($stream)
                         ->write($chunk)
                         ->match(
                             static fn($stream) => $stream,
-                            static fn($e) => throw new \RuntimeException($e::class),
+                            static fn($e) => throw new RuntimeException($e::class),
                         );
                     [$watch, $read] = $this->readOnce($watch);
 
