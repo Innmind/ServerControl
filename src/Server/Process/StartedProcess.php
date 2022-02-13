@@ -94,18 +94,15 @@ final class StartedProcess
                 static fn() => throw new \RuntimeException('Failed to read process output'),
             );
 
-            if ($toRead->contains($this->output)) {
-                yield Type::output => $this->output->read()->match(
-                    static fn($chunk) => $chunk,
-                    static fn() => Str::of(''),
-                );
-            }
+            $chunks = $toRead
+                ->map(fn($stream) => match ($stream) {
+                    $this->output => [$this->read($stream), Type::output],
+                    $this->error => [$this->read($stream), Type::error],
+                })
+                ->toList();
 
-            if ($toRead->contains($this->error)) {
-                yield Type::error => $this->error->read()->match(
-                    static fn($chunk) => $chunk,
-                    static fn() => Str::of(''),
-                );
+            foreach ($chunks as [$chunk, $type]) {
+                yield $type => $chunk;
             }
 
             $select = $this->maybeUnwatch($select, $this->output);
@@ -160,5 +157,13 @@ final class StartedProcess
         }
 
         return $select;
+    }
+
+    private function read(Readable $stream): Str
+    {
+        return $stream->read()->match(
+            static fn($chunk) => $chunk,
+            static fn() => Str::of(''),
+        );
     }
 }
