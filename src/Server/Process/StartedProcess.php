@@ -192,6 +192,14 @@ final class StartedProcess
     }
 
     /**
+     * We are forced to read the process output while we are writing to its input
+     * otherwise the whole thing may hang because if the process outputed a lot
+     * of data then the output pipe is too big and it prevents us from writing
+     * to the input stream. This can be a problem in some cases where there is a
+     * large amount of data written to the input and a lot of data read during
+     * this process because the output will be kept in memory before being able
+     * to send it back to the caller. This may result in an "out of memory" error
+     *
      * @return array{0: Watch, 1: Sequence<array{0: Str, 1: Type}>}
      */
     private function writeInputAndRead(Watch $watch): array
