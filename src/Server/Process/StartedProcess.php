@@ -34,6 +34,7 @@ use Innmind\Immutable\{
     Sequence,
     Either,
     SideEffect,
+    Set,
 };
 
 /**
@@ -267,11 +268,12 @@ final class StartedProcess
         $watch = $this->watch->forWrite($stream);
 
         do {
-            $ready = $watch()->match(
-                static fn($ready) => $ready,
-                static fn() => throw new \RuntimeException('Failed to wait for input stream'),
+            /** @var Set<Selectable> */
+            $toWrite = $watch()->match(
+                static fn($ready) => $ready->toWrite(),
+                static fn() => Set::of(),
             );
-        } while (!$ready->toWrite()->contains($stream));
+        } while (!$toWrite->contains($stream));
 
         return $stream;
     }
@@ -313,9 +315,10 @@ final class StartedProcess
      */
     private function readOnce(Watch $watch): array
     {
+        /** @var Set<Selectable&Readable> */
         $toRead = $watch()->match(
             static fn($ready) => $ready->toRead(),
-            static fn() => throw new \RuntimeException('Failed to read process output'),
+            static fn() => Set::of(),
         );
 
         /** @var list<array{0: Str, 1: Type}> */
