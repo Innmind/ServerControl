@@ -7,6 +7,7 @@ use Innmind\Immutable\Str as S;
 
 /**
  * @psalm-immutable
+ * @internal
  */
 final class Str
 {

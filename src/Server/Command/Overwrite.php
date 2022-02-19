@@ -7,6 +7,7 @@ use Innmind\Url\Path;
 
 /**
  * @psalm-immutable
+ * @internal
  */
 final class Overwrite implements Parameter
 {

@@ -5,6 +5,7 @@ namespace Innmind\Server\Control\Server\Command;
 
 /**
  * @psalm-immutable
+ * @internal
  */
 final class Argument implements Parameter
 {
