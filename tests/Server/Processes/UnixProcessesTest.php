@@ -63,7 +63,7 @@ class UnixProcessesTest extends TestCase
         );
 
         $this->assertInstanceOf(BackgroundProcess::class, $process);
-        $this->assertTrue((\time() - $start) < 2);
+        $this->assertLessThan(2, \time() - $start);
     }
 
     public function testExecuteWithInput()
