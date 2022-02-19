@@ -10,8 +10,8 @@ use Innmind\Server\Control\{
     Server\Second,
     Server\Process\ForegroundProcess,
     Server\Process\BackgroundProcess,
+    Server\Process\TimedOut,
     Server\Signal,
-    ProcessTimedOut,
 };
 use Innmind\Filesystem\File\Content;
 use Innmind\TimeContinuum\Earth\Clock;
@@ -140,7 +140,7 @@ class UnixProcessesTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            ProcessTimedOut::class,
+            TimedOut::class,
             $process->wait()->match(
                 static fn() => null,
                 static fn($e) => $e,

@@ -3,15 +3,15 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\{
-    Server\Process\ForegroundProcess,
-    Server\Process\Unix,
-    Server\Process as ProcessInterface,
-    Server\Process\Pid,
-    Server\Process\Output,
-    Server\Process\Output\Type,
-    Server\Command,
-    ProcessFailed,
+use Innmind\Server\Control\Server\{
+    Process\ForegroundProcess,
+    Process\Unix,
+    Process as ProcessInterface,
+    Process\Pid,
+    Process\Output,
+    Process\Output\Type,
+    Process\Failed,
+    Command,
 };
 use Innmind\TimeContinuum\Earth\{
     Clock,
@@ -109,7 +109,7 @@ class ForegroundProcessTest extends TestCase
         $return = $process->wait();
 
         $this->assertInstanceOf(
-            ProcessFailed::class,
+            Failed::class,
             $return->match(
                 static fn($sideEffect) => null,
                 static fn($e) => $e,

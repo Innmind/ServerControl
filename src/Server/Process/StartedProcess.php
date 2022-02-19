@@ -7,9 +7,6 @@ use Innmind\Server\Control\{
     Server\Process\Output\Type,
     Server\Second,
     Server\Signal,
-    ProcessFailed,
-    ProcessSignaled,
-    ProcessTimedOut,
     Exception\RuntimeException,
 };
 use Innmind\Filesystem\{
@@ -111,7 +108,7 @@ final class StartedProcess
     }
 
     /**
-     * @return Either<ProcessFailed|ProcessSignaled|ProcessTimedOut, SideEffect>
+     * @return Either<Failed|Signaled|TimedOut, SideEffect>
      */
     public function wait(): Either
     {
@@ -127,29 +124,29 @@ final class StartedProcess
 
         $status = $output->getReturn();
 
-        if ($status instanceof ProcessTimedOut) {
-            /** @var Either<ProcessFailed|ProcessSignaled|ProcessTimedOut, SideEffect> */
+        if ($status instanceof TimedOut) {
+            /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
             return Either::left($status);
         }
 
         if ($status['signaled'] || $status['stopped']) {
-            /** @var Either<ProcessFailed|ProcessSignaled|ProcessTimedOut, SideEffect> */
-            return Either::left(new ProcessSignaled);
+            /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
+            return Either::left(new Signaled);
         }
 
         $exitCode = new ExitCode($status['exitcode']);
 
         if (!$exitCode->successful()) {
-            /** @var Either<ProcessFailed|ProcessSignaled|ProcessTimedOut, SideEffect> */
-            return Either::left(new ProcessFailed($exitCode));
+            /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
+            return Either::left(new Failed($exitCode));
         }
 
-        /** @var Either<ProcessFailed|ProcessSignaled|ProcessTimedOut, SideEffect> */
+        /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
         return Either::right(new SideEffect);
     }
 
     /**
-     * @return \Generator<int, array{0: Str, 1: Type}, mixed, Status|ProcessTimedOut>
+     * @return \Generator<int, array{0: Str, 1: Type}, mixed, Status|TimedOut>
      */
     public function output(bool $keepOutputWhileWriting = true): \Generator
     {
@@ -395,7 +392,7 @@ final class StartedProcess
     }
 
     /**
-     * @return Maybe<ProcessTimedOut>
+     * @return Maybe<TimedOut>
      */
     private function checkTimeout(): Maybe
     {
@@ -411,10 +408,10 @@ final class StartedProcess
                     ->elapsedSince($this->startedAt)
                     ->longerThan($threshold),
             )
-            ->map(static fn() => new ProcessTimedOut);
+            ->map(static fn() => new TimedOut);
     }
 
-    private function abort(): ProcessTimedOut
+    private function abort(): TimedOut
     {
         @\proc_terminate($this->process);
         ($this->halt)($this->grace);
@@ -425,7 +422,7 @@ final class StartedProcess
 
         $this->close();
 
-        return new ProcessTimedOut;
+        return new TimedOut;
     }
 
     private function outputStillOpen(): bool

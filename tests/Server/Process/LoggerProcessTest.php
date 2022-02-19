@@ -3,16 +3,13 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\{
-    Server\Process\LoggerProcess,
-    Server\Process\Pid,
-    Server\Process\ExitCode,
-    Server\Process\Output,
-    Server\Process,
-    Server\Command,
-    ProcessTimedOut,
-    ProcessSignaled,
-    ProcessFailed,
+use Innmind\Server\Control\Server\{
+    Process\LoggerProcess,
+    Process\Pid,
+    Process\ExitCode,
+    Process\Output,
+    Process,
+    Command,
 };
 use Innmind\Immutable\{
     Maybe,
@@ -86,7 +83,7 @@ class LoggerProcessTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('wait')
-            ->willReturn($expected = Either::left(new ProcessFailed(new ExitCode(1))));
+            ->willReturn($expected = Either::left(new Process\Failed(new ExitCode(1))));
 
         $this->assertEquals($expected, $process->wait());
     }
@@ -105,7 +102,7 @@ class LoggerProcessTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('wait')
-            ->willReturn($expected = Either::left(new ProcessTimedOut));
+            ->willReturn($expected = Either::left(new Process\TimedOut));
 
         $this->assertEquals($expected, $process->wait());
     }
@@ -124,7 +121,7 @@ class LoggerProcessTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('wait')
-            ->willReturn($expected = Either::left(new ProcessSignaled));
+            ->willReturn($expected = Either::left(new Process\Signaled));
 
         $this->assertEquals($expected, $process->wait());
     }

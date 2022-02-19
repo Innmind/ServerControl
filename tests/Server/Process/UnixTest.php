@@ -6,10 +6,10 @@ namespace Tests\Innmind\Server\Control\Server\Process;
 use Innmind\Server\Control\{
     Server\Process\Unix,
     Server\Process\Output\Type,
+    Server\Process\Failed,
+    Server\Process\TimedOut,
     Server\Command,
     Server\Second as Timeout,
-    ProcessFailed,
-    ProcessTimedOut,
 };
 use Innmind\Filesystem\File\Content;
 use Innmind\TimeContinuum\Earth\{
@@ -155,7 +155,7 @@ class UnixTest extends TestCase
             static fn() => null,
             static fn($e) => $e,
         );
-        $this->assertInstanceOf(ProcessTimedOut::class, $e);
+        $this->assertInstanceOf(TimedOut::class, $e);
         // 3 because of the grace period
         $this->assertEqualsWithDelta(3, \microtime(true) - $started, 0.5);
     }
@@ -193,7 +193,7 @@ class UnixTest extends TestCase
             static fn($e) => $e,
         );
 
-        $this->assertInstanceOf(ProcessFailed::class, $value);
+        $this->assertInstanceOf(Failed::class, $value);
         $this->assertSame(1, $value->exitCode()->toInt());
     }
 

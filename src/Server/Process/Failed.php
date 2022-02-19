@@ -1,11 +1,9 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Server\Control;
+namespace Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\Server\Process\ExitCode;
-
-final class ProcessFailed
+final class Failed
 {
     private ExitCode $exitCode;
 

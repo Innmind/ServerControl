@@ -6,9 +6,6 @@ namespace Innmind\Server\Control\Server\Process;
 use Innmind\Server\Control\{
     Server\Process,
     Server\Command,
-    ProcessFailed,
-    ProcessSignaled,
-    ProcessTimedOut,
 };
 use Innmind\Immutable\{
     Maybe,
@@ -71,18 +68,18 @@ final class LoggerProcess implements Process
             ->wait()
             ->leftMap(function($e) {
                 [$message, $context] = match (\get_class($e)) {
-                    ProcessSignaled::class => [
+                    Process\Signaled::class => [
                         'Command {command} stopped due to external signal',
                         ['command' => $this->command->toString()],
                     ],
-                    ProcessFailed::class => [
+                    Process\Failed::class => [
                         'Command {command} failed with {exitCode}',
                         [
                             'command' => $this->command->toString(),
                             'exitCode' => $e->exitCode()->toInt(),
                         ],
                     ],
-                    ProcessTimedOut::class => [
+                    Process\TimedOut::class => [
                         'Command {command} timed out',
                         ['command' => $this->command->toString()],
                     ],

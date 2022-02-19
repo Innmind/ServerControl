@@ -3,13 +3,13 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server;
 
-use Innmind\Server\Control\{
-    Server\Process\Pid,
-    Server\Process\Output,
-    Server\Process\ExitCode,
-    ProcessTimedOut,
-    ProcessFailed,
-    ProcessSignaled,
+use Innmind\Server\Control\Server\Process\{
+    Pid,
+    Output,
+    ExitCode,
+    TimedOut,
+    Failed,
+    Signaled,
 };
 use Innmind\Immutable\{
     Maybe,
@@ -36,7 +36,7 @@ interface Process
      *
      * Waiting on a background process does nothing
      *
-     * @return Either<ProcessTimedOut|ProcessFailed|ProcessSignaled, SideEffect>
+     * @return Either<TimedOut|Failed|Signaled, SideEffect>
      */
     public function wait(): Either;
 }

@@ -12,7 +12,7 @@ final class ScriptFailed
 {
     private Command $command;
     private Process $process;
-    private ProcessFailed|ProcessTimedOut|ProcessSignaled $reason;
+    private Process\Failed|Process\TimedOut|Process\Signaled $reason;
 
     /**
      * @internal
@@ -20,7 +20,7 @@ final class ScriptFailed
     public function __construct(
         Command $command,
         Process $process,
-        ProcessFailed|ProcessTimedOut|ProcessSignaled $reason,
+        Process\Failed|Process\TimedOut|Process\Signaled $reason,
     ) {
         $this->command = $command;
         $this->process = $process;
@@ -37,7 +37,7 @@ final class ScriptFailed
         return $this->process;
     }
 
-    public function reason(): ProcessFailed|ProcessTimedOut|ProcessSignaled
+    public function reason(): Process\Failed|Process\TimedOut|Process\Signaled
     {
         return $this->reason;
     }
