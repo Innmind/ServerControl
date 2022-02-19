@@ -25,6 +25,7 @@ final class Option implements Parameter
     }
 
     /**
+     * @psalm-pure
      * @param non-empty-string $key
      */
     public static function long(string $key, string $value = null): self
@@ -33,6 +34,7 @@ final class Option implements Parameter
     }
 
     /**
+     * @psalm-pure
      * @param non-empty-string $key
      */
     public static function short(string $key, string $value = null): self
