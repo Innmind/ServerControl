@@ -10,7 +10,7 @@ use Innmind\Server\Control\{
     Server\Command\Append,
     Server\Command\Pipe,
 };
-use Innmind\Stream\Readable;
+use Innmind\Filesystem\File\Content;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Sequence,
@@ -19,6 +19,9 @@ use Innmind\Immutable\{
     Maybe,
 };
 
+/**
+ * @psalm-immutable
+ */
 final class Command
 {
     /** @var non-empty-string */
@@ -29,7 +32,7 @@ final class Command
     private Map $environment;
     /** @var Maybe<Path> */
     private Maybe $workingDirectory;
-    /** @var Maybe<Readable> */
+    /** @var Maybe<Content> */
     private Maybe $input;
     /** @var Maybe<Append>|Maybe<Overwrite> */
     private Maybe $redirection;
@@ -51,7 +54,7 @@ final class Command
         $this->environment = Map::of();
         /** @var Maybe<Path> */
         $this->workingDirectory = Maybe::nothing();
-        /** @var Maybe<Readable> */
+        /** @var Maybe<Content> */
         $this->input = Maybe::nothing();
         /** @var Maybe<Append>|Maybe<Overwrite> */
         $this->redirection = Maybe::nothing();
@@ -133,7 +136,7 @@ final class Command
         return $self;
     }
 
-    public function withInput(Readable $input): self
+    public function withInput(Content $input): self
     {
         $self = clone $this;
         $self->input = Maybe::just($input);
@@ -219,7 +222,7 @@ final class Command
     }
 
     /**
-     * @return Maybe<Readable>
+     * @return Maybe<Content>
      */
     public function input(): Maybe
     {

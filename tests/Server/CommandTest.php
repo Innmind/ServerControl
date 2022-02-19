@@ -7,7 +7,7 @@ use Innmind\Server\Control\{
     Server\Command,
     Server\Second,
 };
-use Innmind\Stream\Readable;
+use Innmind\Filesystem\File\Content;
 use Innmind\Url\Path;
 use Innmind\Immutable\Map;
 use PHPUnit\Framework\TestCase;
@@ -111,7 +111,7 @@ class CommandTest extends TestCase
     {
         $command = Command::foreground('bin/console')
             ->withInput(
-                $input = $this->createMock(Readable::class),
+                $input = $this->createMock(Content::class),
             );
 
         $this->assertInstanceOf(Command::class, $command);

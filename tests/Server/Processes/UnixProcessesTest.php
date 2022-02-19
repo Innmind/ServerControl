@@ -13,6 +13,7 @@ use Innmind\Server\Control\{
     Server\Signal,
     ProcessTimedOut,
 };
+use Innmind\Filesystem\File\Content;
 use Innmind\TimeContinuum\Earth\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Stream\{
@@ -76,7 +77,9 @@ class UnixProcessesTest extends TestCase
             new Usleep,
         );
         $process = $processes->execute(
-            Command::foreground('cat')->withInput(Stream::of(\fopen('fixtures/symfony.log', 'r'))),
+            Command::foreground('cat')->withInput(Content\OfStream::of(
+                Stream::of(\fopen('fixtures/symfony.log', 'r')),
+            )),
         );
 
         $this->assertSame(

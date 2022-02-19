@@ -11,10 +11,8 @@ use Innmind\TimeContinuum\{
     Clock,
     Period,
 };
-use Innmind\Filesystem\File\Content;
 use Innmind\TimeWarp\Halt;
 use Innmind\Stream\Watch;
-use Innmind\Immutable\Maybe;
 
 /**
  * @internal
@@ -83,7 +81,7 @@ final class Unix
             $start,
             $this->command->toBeRunInBackground(),
             $this->command->timeout(),
-            $this->input(),
+            $this->command->input(),
         );
     }
 
@@ -118,17 +116,5 @@ final class Unix
                     return $pairs;
                 },
             );
-    }
-
-    /**
-     * @return Maybe<Content>
-     */
-    private function input(): Maybe
-    {
-        /** @var Maybe<Content> */
-        return $this
-            ->command
-            ->input()
-            ->map(static fn($stream) => Content\OfStream::of($stream));
     }
 }

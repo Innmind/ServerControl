@@ -11,6 +11,7 @@ use Innmind\Server\Control\{
     ProcessFailed,
     ProcessTimedOut,
 };
+use Innmind\Filesystem\File\Content;
 use Innmind\TimeContinuum\Earth\{
     Clock,
     ElapsedPeriod,
@@ -203,7 +204,9 @@ class UnixTest extends TestCase
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
             new Second(1),
-            Command::foreground('cat')->withInput(Stream::of(\fopen('fixtures/symfony.log', 'r'))),
+            Command::foreground('cat')->withInput(Content\OfStream::of(
+                Stream::of(\fopen('fixtures/symfony.log', 'r')),
+            )),
         );
         $output = '';
 
@@ -226,7 +229,9 @@ class UnixTest extends TestCase
             new Usleep,
             new Second(1),
             Command::foreground('cat')
-                ->withInput(Stream::of(\fopen('fixtures/symfony.log', 'r')))
+                ->withInput(Content\OfStream::of(
+                    Stream::of(\fopen('fixtures/symfony.log', 'r')),
+                ))
                 ->overwrite(Path::of('test.log')),
         );
 
