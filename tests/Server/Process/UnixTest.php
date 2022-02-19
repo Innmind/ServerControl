@@ -35,11 +35,6 @@ class UnixTest extends TestCase
 
     public function testSimpleOutput()
     {
-        // for some reason this test doesn't work on the CI but works locally
-        if (\getenv('CI')) {
-            $this->markTestSkipped();
-        }
-
         $cat = new Unix(
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
@@ -62,11 +57,6 @@ class UnixTest extends TestCase
 
     public function testOutput()
     {
-        // for some reason this test doesn't work on the CI but works locally
-        if (\getenv('CI')) {
-            $this->markTestSkipped();
-        }
-
         $this
             ->forAll(
                 Set\Strings::madeOf(Set\Chars::ascii()->filter(static fn($char) => $char !== '\\'))
