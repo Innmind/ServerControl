@@ -189,7 +189,7 @@ final class Command
      * multiple times over it (behaviour is always the same)
      *
      * By calling this method the output will be streamed once meaning if you
-     * iterate over the output twice the second time it will do nothing.
+     * iterate over the output twice the second time it will fail.
      *
      * This is useful in the case you need to access the output but can't fit it
      * in memory like streaming large files.
