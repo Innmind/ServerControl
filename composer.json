@@ -16,10 +16,12 @@
     "require": {
         "php": "~8.1",
         "innmind/immutable": "^4.1.1",
-        "symfony/process": "~6.0",
         "innmind/stream": "~3.0",
         "innmind/url": "~4.0",
-        "psr/log": "~3.0"
+        "psr/log": "~3.0",
+        "innmind/time-continuum": "^3.0",
+        "innmind/filesystem": "^5.0",
+        "innmind/time-warp": "^3.0"
     },
     "autoload": {
         "psr-4": {
@@ -33,8 +35,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5.13",
-        "vimeo/psalm": "~4.11",
-        "innmind/black-box": "^4.12",
+        "vimeo/psalm": "~4.17",
+        "innmind/black-box": "^4.17",
         "innmind/coding-standard": "~2.0"
     }
 }

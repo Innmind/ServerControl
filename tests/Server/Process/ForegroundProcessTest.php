@@ -5,37 +5,55 @@ namespace Tests\Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\{
     Server\Process\ForegroundProcess,
+    Server\Process\Unix,
     Server\Process as ProcessInterface,
     Server\Process\Pid,
-    Server\Process\ExitCode,
     Server\Process\Output,
     Server\Process\Output\Type,
+    Server\Command,
     ProcessFailed,
 };
+use Innmind\TimeContinuum\Earth\{
+    Clock,
+    ElapsedPeriod,
+    Period\Second,
+};
+use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\Stream\Watch\Select;
 use Innmind\Immutable\{
     Str,
     SideEffect,
 };
-use Symfony\Component\Process\Process as SfProcess;
 use PHPUnit\Framework\TestCase;
 
 class ForegroundProcessTest extends TestCase
 {
     public function testInterface()
     {
+        $ps = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::foreground('ps'),
+        );
+
         $this->assertInstanceOf(
             ProcessInterface::class,
-            new ForegroundProcess(
-                SfProcess::fromShellCommandline('ps'),
-            ),
+            new ForegroundProcess($ps()),
         );
     }
 
     public function testPid()
     {
-        $ps = SfProcess::fromShellCommandline('ps');
-        $ps->start();
-        $process = new ForegroundProcess($ps);
+        $ps = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::foreground('ps'),
+        );
+        $process = new ForegroundProcess($ps());
 
         $this->assertGreaterThanOrEqual(
             2,
@@ -48,9 +66,14 @@ class ForegroundProcessTest extends TestCase
 
     public function testOutput()
     {
-        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
-        $slow->start();
-        $process = new ForegroundProcess($slow);
+        $slow = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::foreground('php fixtures/slow.php'),
+        );
+        $process = new ForegroundProcess($slow());
 
         $this->assertInstanceOf(Output::class, $process->output());
         $start = \time();
@@ -66,14 +89,20 @@ class ForegroundProcessTest extends TestCase
                 $this->assertTrue((\time() - $start) >= (1 + $count));
                 ++$count;
             });
+        $this->assertSame("0\n1\n2\n3\n4\n5\n", $process->output()->toString());
         $this->assertSame(6, $count);
     }
 
     public function testExitCodeForFailingProcess()
     {
-        $slow = SfProcess::fromShellCommandline('php fixtures/fails.php');
-        $slow->start();
-        $process = new ForegroundProcess($slow);
+        $fail = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::foreground('php fixtures/fails.php'),
+        );
+        $process = new ForegroundProcess($fail());
 
         \sleep(1);
 
@@ -97,16 +126,21 @@ class ForegroundProcessTest extends TestCase
 
     public function testWait()
     {
-        $slow = SfProcess::fromShellCommandline('php fixtures/slow.php');
-        $slow->start();
-        $process = new ForegroundProcess($slow);
+        $slow = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::foreground('php fixtures/slow.php'),
+        );
+        $process = new ForegroundProcess($slow());
         $this->assertInstanceOf(
             SideEffect::class,
             $process
                 ->wait()
                 ->match(
                     static fn($sideEffect) => $sideEffect,
-                    static fn($e) => $e,
+                    static fn() => null,
                 ),
         );
     }
