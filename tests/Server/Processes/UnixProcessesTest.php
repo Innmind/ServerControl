@@ -64,6 +64,8 @@ class UnixProcessesTest extends TestCase
 
         $this->assertInstanceOf(BackgroundProcess::class, $process);
         $this->assertLessThan(2, \time() - $start);
+        \exec('ps -eo '.(\PHP_OS === 'Linux' ? 'cmd' : 'command'), $commands);
+        $this->assertContains('php fixtures/slow.php', $commands);
     }
 
     public function testExecuteWithInput()
