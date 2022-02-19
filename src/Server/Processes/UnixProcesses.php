@@ -53,6 +53,8 @@ final class UnixProcesses implements Processes
         Halt $halt,
         Period $grace = null,
     ): self {
+        // we do not use a timeout when watching for stream otherwise we would
+        // wait when writing each chunk of input to the process stream
         return new self(
             $clock,
             $watch(new Earth\ElapsedPeriod(0)),
