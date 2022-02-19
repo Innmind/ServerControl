@@ -6,6 +6,8 @@
 
 Give access to giving instructions to the server.
 
+**Important**: to correctly use this library you must validate your code with [`vimeo/psalm`](https://packagist.org/packages/vimeo/psalm)
+
 ## Installation
 
 ```sh
