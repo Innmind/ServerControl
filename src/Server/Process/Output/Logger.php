@@ -11,6 +11,7 @@ use Innmind\Immutable\{
     Map,
     Str,
     SideEffect,
+    Sequence,
 };
 use Psr\Log\LoggerInterface;
 
@@ -85,5 +86,10 @@ final class Logger implements Output
     public function toString(): string
     {
         return $this->output->toString();
+    }
+
+    public function chunks(): Sequence
+    {
+        return $this->output->chunks();
     }
 }

@@ -149,4 +149,13 @@ class OutputTest extends TestCase
 
         $this->assertSame('012', $output->toString());
     }
+
+    public function testChunks()
+    {
+        $output = new Output(
+            $chunks = Sequence::of(),
+        );
+
+        $this->assertSame($chunks, $output->chunks());
+    }
 }

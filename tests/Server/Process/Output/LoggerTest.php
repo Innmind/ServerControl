@@ -13,6 +13,7 @@ use Innmind\Immutable\{
     Map,
     Str,
     SideEffect,
+    Sequence,
 };
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -152,5 +153,20 @@ class LoggerTest extends TestCase
             ->willReturn('foo');
 
         $this->assertSame('foo', $output->toString());
+    }
+
+    public function testChunks()
+    {
+        $output = Logger::psr(
+            $inner = $this->createMock(Output::class),
+            Command::foreground('echo'),
+            $this->createMock(LoggerInterface::class),
+        );
+        $inner
+            ->expects($this->once())
+            ->method('chunks')
+            ->willReturn($chunks = Sequence::of());
+
+        $this->assertSame($chunks, $output->chunks());
     }
 }

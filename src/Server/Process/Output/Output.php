@@ -119,4 +119,9 @@ final class Output implements OutputInterface
 
         return Str::of('')->join($bits)->toString();
     }
+
+    public function chunks(): Sequence
+    {
+        return $this->output;
+    }
 }

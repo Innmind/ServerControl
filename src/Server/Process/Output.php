@@ -8,6 +8,7 @@ use Innmind\Immutable\{
     Map,
     Str,
     SideEffect,
+    Sequence,
 };
 
 /**
@@ -51,4 +52,9 @@ interface Output
      */
     public function partition(callable $predicate): Map;
     public function toString(): string;
+
+    /**
+     * @return Sequence<array{0: Str, 1: Type}>
+     */
+    public function chunks(): Sequence;
 }
