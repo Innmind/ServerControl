@@ -21,7 +21,9 @@ final class ForegroundProcess implements ProcessInterface
         $this->process = $process;
 
         if ($streamOutput) {
-            $output = Sequence::lazy($process->output(...));
+            $output = Sequence::lazy(static function() use ($process) {
+                yield from $process->output();
+            });
         } else {
             $output = Sequence::defer($process->output());
         }

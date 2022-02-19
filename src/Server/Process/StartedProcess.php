@@ -112,7 +112,11 @@ final class StartedProcess
      */
     public function wait(): Either
     {
-        $output = $this->output();
+        // we don't need to keep the output read while writing to the input
+        // stream as this data will never be exposed to caller, so by discarding
+        // this data we prevent ourself from reaching a possible "out of memory"
+        // error
+        $output = $this->output(false);
 
         foreach ($output as $_) {
             // do nothing with the output
@@ -144,7 +148,7 @@ final class StartedProcess
     /**
      * @return \Generator<int, array{0: Str, 1: Type}, mixed, Status|ProcessTimedOut>
      */
-    public function output(): \Generator
+    public function output(bool $keepOutputWhileWriting = true): \Generator
     {
         $this->ensureExecuteOnce();
 
@@ -153,7 +157,7 @@ final class StartedProcess
             $this->error,
         );
 
-        [$watch, $chunks] = $this->writeInputAndRead($watch);
+        [$watch, $chunks] = $this->writeInputAndRead($watch, $keepOutputWhileWriting);
 
         foreach ($chunks->toList() as $value) {
             yield $value;
@@ -202,8 +206,10 @@ final class StartedProcess
      *
      * @return array{0: Watch, 1: Sequence<array{0: Str, 1: Type}>}
      */
-    private function writeInputAndRead(Watch $watch): array
-    {
+    private function writeInputAndRead(
+        Watch $watch,
+        bool $keepOutputWhileWriting,
+    ): array {
         return $this
             ->content
             ->map(static fn($content) => (new Chunk)($content))
@@ -219,6 +225,7 @@ final class StartedProcess
                     $this->input,
                     $chunks,
                     Sequence::of(),
+                    $keepOutputWhileWriting,
                 ),
                 static fn() => [$watch, Sequence::of()],
             );
@@ -235,12 +242,13 @@ final class StartedProcess
         Writable\Stream $stream,
         Sequence $chunks,
         Sequence $output,
+        bool $keepOutputWhileWriting,
     ): array {
         [$watch, $output, $stream] = $chunks
             ->map(static fn($chunk) => $chunk->toEncoding('ASCII'))
             ->reduce(
                 [$watch, $output, $stream],
-                function($state, $chunk) {
+                function($state, $chunk) use ($keepOutputWhileWriting) {
                     /**
                      * @var Watch $watch
                      * @var Sequence<array{0: Str, 1: Type}> $output
@@ -266,7 +274,11 @@ final class StartedProcess
                         );
                     [$watch, $read] = $this->readOnce($watch);
 
-                    return [$watch, $output->append($read), $stream];
+                    if ($keepOutputWhileWriting) {
+                        $output = $output->append($read);
+                    }
+
+                    return [$watch, $output, $stream];
                 },
             );
         $this->closeInput($stream);
