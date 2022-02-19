@@ -6,7 +6,6 @@ namespace Innmind\Server\Control\Servers;
 use Innmind\Server\Control\{
     Server,
     Server\Processes,
-    Server\Processes\LoggerProcesses,
     Server\Volumes,
 };
 use Innmind\Immutable\Either;
@@ -21,7 +20,7 @@ final class Logger implements Server
         Server $server,
         LoggerInterface $logger,
     ) {
-        $this->processes = LoggerProcesses::psr(
+        $this->processes = Processes\Logger::psr(
             $server->processes(),
             $logger,
         );

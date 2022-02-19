@@ -39,7 +39,7 @@ final class Unix
         $this->command = $command;
     }
 
-    public function __invoke(): StartedProcess
+    public function __invoke(): Started
     {
         $command = $this->command();
         $cwd = $this->workingDirectory();
@@ -73,7 +73,7 @@ final class Unix
             return [$process, $pipes];
         };
 
-        return new StartedProcess(
+        return new Started(
             $this->clock,
             $this->watch,
             $this->halt,

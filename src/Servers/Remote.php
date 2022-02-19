@@ -6,7 +6,6 @@ namespace Innmind\Server\Control\Servers;
 use Innmind\Server\Control\{
     Server,
     Server\Processes,
-    Server\Processes\RemoteProcesses,
     Server\Volumes,
 };
 use Innmind\Url\Authority\{
@@ -27,7 +26,7 @@ final class Remote implements Server
         Host $host,
         Port $port = null,
     ) {
-        $this->processes = new RemoteProcesses(
+        $this->processes = new Processes\Remote(
             $server->processes(),
             $user,
             $host,

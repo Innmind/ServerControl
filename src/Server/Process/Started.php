@@ -45,7 +45,7 @@ use Innmind\Immutable\{
  *         exitcode: int<0, 255>,
  * }
  */
-final class StartedProcess
+final class Started
 {
     private Clock $clock;
     private Watch $watch;

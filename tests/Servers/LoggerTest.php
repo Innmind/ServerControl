@@ -7,7 +7,6 @@ use Innmind\Server\Control\{
     Servers\Logger,
     Server,
     Server\Processes,
-    Server\Processes\LoggerProcesses,
     Server\Process,
     Server\Process\ExitCode,
     Server\Command,
@@ -56,7 +55,7 @@ class LoggerTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            LoggerProcesses::class,
+            Processes\Logger::class,
             $logger->processes(),
         );
         $logger->processes()->execute(Command::foreground('ls'));

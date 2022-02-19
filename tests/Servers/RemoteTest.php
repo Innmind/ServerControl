@@ -7,7 +7,6 @@ use Innmind\Server\Control\{
     Servers\Remote,
     Server,
     Server\Processes,
-    Server\Processes\RemoteProcesses,
     Server\Process,
     Server\Process\ExitCode,
     Server\Command,
@@ -59,7 +58,7 @@ class RemoteTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            RemoteProcesses::class,
+            Processes\Remote::class,
             $remote->processes(),
         );
         $remote->processes()->execute(Command::foreground('ls'));
@@ -87,7 +86,7 @@ class RemoteTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            RemoteProcesses::class,
+            Processes\Remote::class,
             $remote->processes(),
         );
         $remote->processes()->execute(Command::foreground('ls'));

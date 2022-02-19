@@ -4,12 +4,12 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server\Processes;
 
 use Innmind\Server\Control\{
-    Server\Processes\UnixProcesses,
+    Server\Processes\Unix,
     Server\Processes,
     Server\Command,
     Server\Second,
-    Server\Process\ForegroundProcess,
-    Server\Process\BackgroundProcess,
+    Server\Process\Foreground,
+    Server\Process\Background,
     Server\Process\TimedOut,
     Server\Signal,
 };
@@ -23,11 +23,11 @@ use Innmind\Stream\{
 use Innmind\Immutable\SideEffect;
 use PHPUnit\Framework\TestCase;
 
-class UnixProcessesTest extends TestCase
+class UnixTest extends TestCase
 {
     public function testInterface()
     {
-        $this->assertInstanceOf(Processes::class, UnixProcesses::of(
+        $this->assertInstanceOf(Processes::class, Unix::of(
             new Clock,
             Select::timeoutAfter(...),
             new Usleep,
@@ -36,7 +36,7 @@ class UnixProcessesTest extends TestCase
 
     public function testExecute()
     {
-        $processes = UnixProcesses::of(
+        $processes = Unix::of(
             new Clock,
             Select::timeoutAfter(...),
             new Usleep,
@@ -46,14 +46,14 @@ class UnixProcessesTest extends TestCase
             Command::foreground('php')->withArgument('fixtures/slow.php'),
         );
 
-        $this->assertInstanceOf(ForegroundProcess::class, $process);
+        $this->assertInstanceOf(Foreground::class, $process);
         $process->wait();
         $this->assertTrue((\time() - $start) >= 6);
     }
 
     public function testExecuteInBackground()
     {
-        $processes = UnixProcesses::of(
+        $processes = Unix::of(
             new Clock,
             Select::timeoutAfter(...),
             new Usleep,
@@ -63,7 +63,7 @@ class UnixProcessesTest extends TestCase
             Command::background('php')->withArgument('fixtures/slow.php'),
         );
 
-        $this->assertInstanceOf(BackgroundProcess::class, $process);
+        $this->assertInstanceOf(Background::class, $process);
         $this->assertLessThan(2, \time() - $start);
         \exec('ps -eo '.(\PHP_OS === 'Linux' ? 'cmd' : 'command'), $commands);
         $this->assertContains('php fixtures/slow.php', $commands);
@@ -71,7 +71,7 @@ class UnixProcessesTest extends TestCase
 
     public function testExecuteWithInput()
     {
-        $processes = UnixProcesses::of(
+        $processes = Unix::of(
             new Clock,
             Select::timeoutAfter(...),
             new Usleep,
@@ -98,7 +98,7 @@ class UnixProcessesTest extends TestCase
             $this->markTestSkipped();
         }
 
-        $processes = UnixProcesses::of(
+        $processes = Unix::of(
             new Clock,
             Select::timeoutAfter(...),
             new Usleep,
@@ -127,7 +127,7 @@ class UnixProcessesTest extends TestCase
 
     public function testTimeout()
     {
-        $processes = UnixProcesses::of(
+        $processes = Unix::of(
             new Clock,
             Select::timeoutAfter(...),
             new Usleep,
@@ -153,7 +153,7 @@ class UnixProcessesTest extends TestCase
     public function testStreamOutput()
     {
         $called = false;
-        $processes = UnixProcesses::of(
+        $processes = Unix::of(
             new Clock,
             Select::timeoutAfter(...),
             new Usleep,
@@ -175,7 +175,7 @@ class UnixProcessesTest extends TestCase
     public function testSecondCallToStreamedOutputThrowsAnError()
     {
         $called = false;
-        $processes = UnixProcesses::of(
+        $processes = Unix::of(
             new Clock,
             Select::timeoutAfter(...),
             new Usleep,
@@ -196,7 +196,7 @@ class UnixProcessesTest extends TestCase
     public function testOutputIsNotLostByDefault()
     {
         $called = false;
-        $processes = UnixProcesses::of(
+        $processes = Unix::of(
             new Clock,
             Select::timeoutAfter(...),
             new Usleep,

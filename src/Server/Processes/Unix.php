@@ -8,9 +8,8 @@ use Innmind\Server\Control\{
     Server\Command,
     Server\Process,
     Server\Process\Pid,
-    Server\Process\ForegroundProcess,
-    Server\Process\BackgroundProcess,
-    Server\Process\Unix,
+    Server\Process\Foreground,
+    Server\Process\Background,
     Server\Signal,
     ScriptFailed,
 };
@@ -25,7 +24,7 @@ use Innmind\TimeWarp\Halt;
 use Innmind\Stream\Watch;
 use Innmind\Immutable\Either;
 
-final class UnixProcesses implements Processes
+final class Unix implements Processes
 {
     private Clock $clock;
     private Watch $watch;
@@ -65,7 +64,7 @@ final class UnixProcesses implements Processes
 
     public function execute(Command $command): Process
     {
-        $process = new Unix(
+        $process = new Process\Unix(
             $this->clock,
             $this->watch,
             $this->halt,
@@ -74,10 +73,10 @@ final class UnixProcesses implements Processes
         );
 
         if ($command->toBeRunInBackground()) {
-            return new BackgroundProcess($process());
+            return new Background($process());
         }
 
-        return new ForegroundProcess($process(), $command->outputToBeStreamed());
+        return new Foreground($process(), $command->outputToBeStreamed());
     }
 
     public function kill(Pid $pid, Signal $signal): Either

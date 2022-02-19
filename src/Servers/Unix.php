@@ -6,7 +6,6 @@ namespace Innmind\Server\Control\Servers;
 use Innmind\Server\Control\{
     Server,
     Server\Processes,
-    Server\Processes\UnixProcesses,
     Server\Volumes,
 };
 use Innmind\TimeContinuum\{
@@ -32,7 +31,7 @@ final class Unix implements Server
         Halt $halt,
         Period $grace = null,
     ) {
-        $this->processes = UnixProcesses::of(
+        $this->processes = Processes\Unix::of(
             $clock,
             $watch,
             $halt,

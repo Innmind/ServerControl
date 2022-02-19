@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server\Processes;
 
 use Innmind\Server\Control\Server\{
-    Processes\LoggerProcesses,
+    Processes\Logger,
     Processes,
     Process,
     Command,
@@ -19,13 +19,13 @@ use Innmind\Immutable\{
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 
-class LoggerProcessesTest extends TestCase
+class LoggerTest extends TestCase
 {
     public function testInterface()
     {
         $this->assertInstanceOf(
             Processes::class,
-            LoggerProcesses::psr(
+            Logger::psr(
                 $this->createMock(Processes::class),
                 $this->createMock(LoggerInterface::class),
             ),
@@ -34,7 +34,7 @@ class LoggerProcessesTest extends TestCase
 
     public function testExecute()
     {
-        $logger = LoggerProcesses::psr(
+        $logger = Logger::psr(
             $processes = $this->createMock(Processes::class),
             $log = $this->createMock(LoggerInterface::class),
         );
@@ -57,7 +57,7 @@ class LoggerProcessesTest extends TestCase
             );
 
         $this->assertInstanceOf(
-            Process\LoggerProcess::class,
+            Process\Logger::class,
             $logger->execute(
                 Command::foreground('ls')->withShortOption('l'),
             ),
@@ -66,7 +66,7 @@ class LoggerProcessesTest extends TestCase
 
     public function testExecuteWithWorkingDirectory()
     {
-        $logger = LoggerProcesses::psr(
+        $logger = Logger::psr(
             $processes = $this->createMock(Processes::class),
             $log = $this->createMock(LoggerInterface::class),
         );
@@ -89,7 +89,7 @@ class LoggerProcessesTest extends TestCase
             );
 
         $this->assertInstanceOf(
-            Process\LoggerProcess::class,
+            Process\Logger::class,
             $logger->execute(
                 Command::foreground('ls')
                     ->withShortOption('l')
@@ -100,7 +100,7 @@ class LoggerProcessesTest extends TestCase
 
     public function testKill()
     {
-        $logger = LoggerProcesses::psr(
+        $logger = Logger::psr(
             $processes = $this->createMock(Processes::class),
             $log = $this->createMock(LoggerInterface::class),
         );

@@ -13,7 +13,7 @@ use Innmind\Immutable\{
 };
 use Psr\Log\LoggerInterface;
 
-final class LoggerProcess implements Process
+final class Logger implements Process
 {
     private Process $process;
     private Command $command;

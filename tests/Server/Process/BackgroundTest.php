@@ -4,9 +4,9 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\Server\{
-    Process\BackgroundProcess,
+    Process\Background,
     Process\Unix,
-    Process as ProcessInterface,
+    Process,
     Process\Output\Output,
     Command,
 };
@@ -20,7 +20,7 @@ use Innmind\Stream\Watch\Select;
 use Innmind\Immutable\SideEffect;
 use PHPUnit\Framework\TestCase;
 
-class BackgroundProcessTest extends TestCase
+class BackgroundTest extends TestCase
 {
     public function testInterface()
     {
@@ -33,8 +33,8 @@ class BackgroundProcessTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            ProcessInterface::class,
-            new BackgroundProcess($process()),
+            Process::class,
+            new Background($process()),
         );
     }
 
@@ -47,7 +47,7 @@ class BackgroundProcessTest extends TestCase
             new Second(1),
             Command::background('ps'),
         );
-        $process = new BackgroundProcess($ps());
+        $process = new Background($ps());
 
         $this->assertFalse($process->pid()->match(
             static fn() => true,
@@ -64,7 +64,7 @@ class BackgroundProcessTest extends TestCase
             new Second(1),
             Command::background('php fixtures/slow.php'),
         );
-        $process = new BackgroundProcess($slow());
+        $process = new Background($slow());
 
         $this->assertInstanceOf(Output::class, $process->output());
         $start = \time();
@@ -81,7 +81,7 @@ class BackgroundProcessTest extends TestCase
             new Second(1),
             Command::background('php fixtures/slow.php'),
         );
-        $process = new BackgroundProcess($slow());
+        $process = new Background($slow());
 
         $this->assertInstanceOf(
             SideEffect::class,

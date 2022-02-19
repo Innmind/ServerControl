@@ -13,7 +13,7 @@ use Innmind\Server\Control\Server\{
 use Innmind\Immutable\Either;
 use Psr\Log\LoggerInterface;
 
-final class LoggerProcesses implements Processes
+final class Logger implements Processes
 {
     private Processes $processes;
     private LoggerInterface $logger;
@@ -41,7 +41,7 @@ final class LoggerProcesses implements Processes
             ),
         ]);
 
-        return Process\LoggerProcess::psr(
+        return Process\Logger::psr(
             $this->processes->execute($command),
             $command,
             $this->logger,

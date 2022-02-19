@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\Server\Process as ProcessInterface;
+use Innmind\Server\Control\Server\Process;
 use Innmind\Immutable\{
     Sequence,
     Str,
@@ -11,12 +11,12 @@ use Innmind\Immutable\{
     Either,
 };
 
-final class ForegroundProcess implements ProcessInterface
+final class Foreground implements Process
 {
-    private StartedProcess $process;
+    private Started $process;
     private Output $output;
 
-    public function __construct(StartedProcess $process, bool $streamOutput = false)
+    public function __construct(Started $process, bool $streamOutput = false)
     {
         $this->process = $process;
 

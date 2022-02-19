@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server\Processes;
 
 use Innmind\Server\Control\Server\{
-    Processes\RemoteProcesses,
+    Processes\Remote,
     Processes,
     Process,
     Command,
@@ -24,13 +24,13 @@ use Innmind\Immutable\{
 };
 use PHPUnit\Framework\TestCase;
 
-class RemoteProcessesTest extends TestCase
+class RemoteTest extends TestCase
 {
     public function testInterface()
     {
         $this->assertInstanceOf(
             Processes::class,
-            new RemoteProcesses(
+            new Remote(
                 $this->createMock(Processes::class),
                 User::none(),
                 Host::of('example.com'),
@@ -40,7 +40,7 @@ class RemoteProcessesTest extends TestCase
 
     public function testExecute()
     {
-        $remote = new RemoteProcesses(
+        $remote = new Remote(
             $processes = $this->createMock(Processes::class),
             User::of('foo'),
             Host::of('example.com'),
@@ -63,7 +63,7 @@ class RemoteProcessesTest extends TestCase
 
     public function testExecuteViaSpecificPort()
     {
-        $remote = new RemoteProcesses(
+        $remote = new Remote(
             $processes = $this->createMock(Processes::class),
             User::of('foo'),
             Host::of('example.com'),
@@ -87,7 +87,7 @@ class RemoteProcessesTest extends TestCase
 
     public function testExecuteWithWorkingDirectory()
     {
-        $remote = new RemoteProcesses(
+        $remote = new Remote(
             $processes = $this->createMock(Processes::class),
             User::of('foo'),
             Host::of('example.com'),
@@ -112,7 +112,7 @@ class RemoteProcessesTest extends TestCase
 
     public function testKill()
     {
-        $remote = new RemoteProcesses(
+        $remote = new Remote(
             $processes = $this->createMock(Processes::class),
             User::of('foo'),
             Host::of('example.com'),
@@ -140,7 +140,7 @@ class RemoteProcessesTest extends TestCase
 
     public function testKillViaSpecificPort()
     {
-        $remote = new RemoteProcesses(
+        $remote = new Remote(
             $processes = $this->createMock(Processes::class),
             User::of('foo'),
             Host::of('example.com'),

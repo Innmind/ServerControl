@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\Server\Process as ProcessInterface;
+use Innmind\Server\Control\Server\Process;
 use Innmind\Immutable\{
     Sequence,
     Str,
@@ -12,11 +12,11 @@ use Innmind\Immutable\{
     SideEffect,
 };
 
-final class BackgroundProcess implements ProcessInterface
+final class Background implements Process
 {
     private Output $output;
 
-    public function __construct(StartedProcess $process)
+    public function __construct(Started $process)
     {
         // wait for the process to be started in the background otherwise the
         // process will be killed

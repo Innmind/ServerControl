@@ -4,9 +4,9 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\Server\{
-    Process\ForegroundProcess,
+    Process\Foreground,
     Process\Unix,
-    Process as ProcessInterface,
+    Process,
     Process\Pid,
     Process\Output,
     Process\Output\Type,
@@ -26,7 +26,7 @@ use Innmind\Immutable\{
 };
 use PHPUnit\Framework\TestCase;
 
-class ForegroundProcessTest extends TestCase
+class ForegroundTest extends TestCase
 {
     public function testInterface()
     {
@@ -39,8 +39,8 @@ class ForegroundProcessTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            ProcessInterface::class,
-            new ForegroundProcess($ps()),
+            Process::class,
+            new Foreground($ps()),
         );
     }
 
@@ -53,7 +53,7 @@ class ForegroundProcessTest extends TestCase
             new Second(1),
             Command::foreground('ps'),
         );
-        $process = new ForegroundProcess($ps());
+        $process = new Foreground($ps());
 
         $this->assertGreaterThanOrEqual(
             2,
@@ -73,7 +73,7 @@ class ForegroundProcessTest extends TestCase
             new Second(1),
             Command::foreground('php fixtures/slow.php'),
         );
-        $process = new ForegroundProcess($slow());
+        $process = new Foreground($slow());
 
         $this->assertInstanceOf(Output::class, $process->output());
         $start = \time();
@@ -102,7 +102,7 @@ class ForegroundProcessTest extends TestCase
             new Second(1),
             Command::foreground('php fixtures/fails.php'),
         );
-        $process = new ForegroundProcess($fail());
+        $process = new Foreground($fail());
 
         \sleep(1);
 
@@ -133,7 +133,7 @@ class ForegroundProcessTest extends TestCase
             new Second(1),
             Command::foreground('php fixtures/slow.php'),
         );
-        $process = new ForegroundProcess($slow());
+        $process = new Foreground($slow());
         $this->assertInstanceOf(
             SideEffect::class,
             $process

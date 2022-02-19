@@ -18,7 +18,7 @@ use Innmind\Url\Authority\{
 };
 use Innmind\Immutable\Either;
 
-final class RemoteProcesses implements Processes
+final class Remote implements Processes
 {
     private Processes $processes;
     private Command $command;
