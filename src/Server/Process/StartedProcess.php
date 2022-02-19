@@ -54,6 +54,7 @@ final class StartedProcess
     private Watch $watch;
     private Halt $halt;
     private Period $grace;
+    private bool $background;
     private PointInTime $startedAt;
     /** @var resource */
     private $process;
@@ -78,6 +79,7 @@ final class StartedProcess
         Halt $halt,
         Period $grace,
         callable $start,
+        bool $background,
         Maybe $timeout,
         Maybe $content,
     ) {
@@ -85,6 +87,7 @@ final class StartedProcess
         $this->watch = $watch;
         $this->halt = $halt;
         $this->grace = $grace;
+        $this->background = $background;
         $this->startedAt = $clock->now();
         // we defer the start of the process here instead of starting it in Unix
         // to better control the property startedAt in case it needs to be moved
@@ -180,7 +183,24 @@ final class StartedProcess
             }
 
             $status = $this->status();
-        } while ($status['running'] || $this->outputStillOpen());
+        } while ($status['running']);
+
+        // we don't read the remaining data in the streams for background
+        // processes because it will hang until the concrete process is really
+        // finished, thus defeating the purpose of launching the process in the
+        // background
+        while (!$this->background && $this->outputStillOpen()) {
+            // even though the process is no longer running there might stil be
+            // data to be read in the streams
+            [$watch, $chunks] = $this->readOnce($watch);
+
+            foreach ($chunks->toList() as $value) {
+                yield $value;
+            }
+
+            // no need to check for timeouts here since the process is no longer
+            // running
+        }
 
         $this->close();
 

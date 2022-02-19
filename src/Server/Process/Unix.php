@@ -81,6 +81,7 @@ final class Unix
             $this->halt,
             $this->grace,
             $start,
+            $this->command->toBeRunInBackground(),
             $this->command->timeout(),
             $this->input(),
         );
