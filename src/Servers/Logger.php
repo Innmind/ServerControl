@@ -6,9 +6,9 @@ namespace Innmind\Server\Control\Servers;
 use Innmind\Server\Control\{
     Server,
     Server\Processes,
-    Server\Processes\LoggerProcesses,
     Server\Volumes,
 };
+use Innmind\Immutable\Either;
 use Psr\Log\LoggerInterface;
 
 final class Logger implements Server
@@ -16,15 +16,20 @@ final class Logger implements Server
     private Processes $processes;
     private Volumes $volumes;
 
-    public function __construct(
+    private function __construct(
         Server $server,
-        LoggerInterface $logger
+        LoggerInterface $logger,
     ) {
-        $this->processes = new LoggerProcesses(
+        $this->processes = Processes\Logger::psr(
             $server->processes(),
             $logger,
         );
         $this->volumes = new Volumes\Unix($this->processes);
+    }
+
+    public static function psr(Server $server, LoggerInterface $logger): self
+    {
+        return new self($server, $logger);
     }
 
     public function processes(): Processes
@@ -37,13 +42,13 @@ final class Logger implements Server
         return $this->volumes;
     }
 
-    public function reboot(): void
+    public function reboot(): Either
     {
-        Server\Script::of('sudo shutdown -r now')($this);
+        return Server\Script::of('sudo shutdown -r now')($this);
     }
 
-    public function shutdown(): void
+    public function shutdown(): Either
     {
-        Server\Script::of('sudo shutdown -h now')($this);
+        return Server\Script::of('sudo shutdown -h now')($this);
     }
 }

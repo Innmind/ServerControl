@@ -1,26 +1,30 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Server\Control\Exception;
+namespace Innmind\Server\Control;
 
 use Innmind\Server\Control\Server\{
     Command,
     Process,
 };
 
-final class ScriptFailed extends RuntimeException
+final class ScriptFailed
 {
     private Command $command;
     private Process $process;
+    private Process\Failed|Process\TimedOut|Process\Signaled $reason;
 
+    /**
+     * @internal
+     */
     public function __construct(
         Command $command,
         Process $process,
-        \Throwable $previous = null
+        Process\Failed|Process\TimedOut|Process\Signaled $reason,
     ) {
-        parent::__construct($command->toString(), $process->exitCode()->toInt(), $previous);
         $this->command = $command;
         $this->process = $process;
+        $this->reason = $reason;
     }
 
     public function command(): Command
@@ -31,5 +35,10 @@ final class ScriptFailed extends RuntimeException
     public function process(): Process
     {
         return $this->process;
+    }
+
+    public function reason(): Process\Failed|Process\TimedOut|Process\Signaled
+    {
+        return $this->reason;
     }
 }

@@ -7,14 +7,19 @@ use Innmind\Server\Control\Server\Process\Output\Type;
 use Innmind\Immutable\{
     Map,
     Str,
+    SideEffect,
+    Sequence,
 };
 
+/**
+ * @psalm-immutable
+ */
 interface Output
 {
     /**
      * @param callable(Str, Type): void $function
      */
-    public function foreach(callable $function): void;
+    public function foreach(callable $function): SideEffect;
 
     /**
      * @template C
@@ -47,4 +52,9 @@ interface Output
      */
     public function partition(callable $predicate): Map;
     public function toString(): string;
+
+    /**
+     * @return Sequence<array{0: Str, 1: Type}>
+     */
+    public function chunks(): Sequence;
 }

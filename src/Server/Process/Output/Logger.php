@@ -10,29 +10,45 @@ use Innmind\Server\Control\Server\{
 use Innmind\Immutable\{
     Map,
     Str,
+    SideEffect,
+    Sequence,
 };
 use Psr\Log\LoggerInterface;
 
+/**
+ * @psalm-immutable
+ */
 final class Logger implements Output
 {
     private Output $output;
     private Command $command;
     private LoggerInterface $logger;
 
-    public function __construct(
+    private function __construct(
         Output $output,
         Command $command,
-        LoggerInterface $logger
+        LoggerInterface $logger,
     ) {
         $this->output = $output;
         $this->command = $command;
         $this->logger = $logger;
     }
 
-    public function foreach(callable $function): void
+    public static function psr(
+        Output $output,
+        Command $command,
+        LoggerInterface $logger,
+    ): self {
+        return new self($output, $command, $logger);
+    }
+
+    public function foreach(callable $function): SideEffect
     {
-        $this->output->foreach(function(Str $output, Type $type) use ($function): void {
-            $method = ($type === Type::output()) ? 'debug' : 'warning';
+        return $this->output->foreach(function(Str $output, Type $type) use ($function): void {
+            $method = match ($type) {
+                Type::output => 'debug',
+                Type::error => 'warning',
+            };
             $this->logger->$method('Command {command} output', [
                 'command' => $this->command->toString(),
                 'output' => $output->toString(),
@@ -70,5 +86,10 @@ final class Logger implements Output
     public function toString(): string
     {
         return $this->output->toString();
+    }
+
+    public function chunks(): Sequence
+    {
+        return $this->output->chunks();
     }
 }

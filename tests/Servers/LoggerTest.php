@@ -7,11 +7,14 @@ use Innmind\Server\Control\{
     Servers\Logger,
     Server,
     Server\Processes,
-    Server\Processes\LoggerProcesses,
     Server\Process,
     Server\Process\ExitCode,
     Server\Command,
     Server\Volumes,
+};
+use Innmind\Immutable\{
+    Either,
+    SideEffect,
 };
 use Psr\Log\{
     LoggerInterface,
@@ -25,10 +28,10 @@ class LoggerTest extends TestCase
     {
         $this->assertInstanceOf(
             Server::class,
-            new Logger(
+            Logger::psr(
                 $this->createMock(Server::class),
-                $this->createMock(LoggerInterface::class)
-            )
+                $this->createMock(LoggerInterface::class),
+            ),
         );
     }
 
@@ -46,14 +49,14 @@ class LoggerTest extends TestCase
                 return $command->toString() === 'ls';
             }));
 
-        $logger = new Logger(
+        $logger = Logger::psr(
             $server,
-            new NullLogger
+            new NullLogger,
         );
 
         $this->assertInstanceOf(
-            LoggerProcesses::class,
-            $logger->processes()
+            Processes\Logger::class,
+            $logger->processes(),
         );
         $logger->processes()->execute(Command::foreground('ls'));
     }
@@ -68,13 +71,13 @@ class LoggerTest extends TestCase
         $which1 = $this->createMock(Process::class);
         $which1
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $which2 = $this->createMock(Process::class);
         $which2
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -88,7 +91,7 @@ class LoggerTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which1, $which2));
 
-        $logger = new Logger(
+        $logger = Logger::psr(
             $server,
             $log = $this->createMock(LoggerInterface::class),
         );
@@ -105,7 +108,7 @@ class LoggerTest extends TestCase
 
         $this->assertInstanceOf(
             Volumes::class,
-            $logger->volumes()
+            $logger->volumes(),
         );
         $logger->volumes()->unmount(new Volumes\Name('/dev'));
     }
@@ -126,10 +129,10 @@ class LoggerTest extends TestCase
             ->willReturn($shutdown = $this->createMock(Process::class));
         $shutdown
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
 
-        $logger = new Logger(
+        $logger = Logger::psr(
             $server,
             $log = $this->createMock(LoggerInterface::class),
         );
@@ -144,7 +147,13 @@ class LoggerTest extends TestCase
                 ],
             );
 
-        $this->assertNull($logger->reboot());
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $logger->reboot()->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testShutdown()
@@ -163,10 +172,10 @@ class LoggerTest extends TestCase
             ->willReturn($shutdown = $this->createMock(Process::class));
         $shutdown
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
 
-        $logger = new Logger(
+        $logger = Logger::psr(
             $server,
             $log = $this->createMock(LoggerInterface::class),
         );
@@ -181,6 +190,12 @@ class LoggerTest extends TestCase
                 ],
             );
 
-        $this->assertNull($logger->shutdown());
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $logger->shutdown()->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 }

@@ -10,19 +10,11 @@ class TypeTest extends TestCase
 {
     public function testOutput()
     {
-        $output = Type::output();
-
-        $this->assertInstanceOf(Type::class, $output);
-        $this->assertSame(Type::OUTPUT, $output->toString());
-        $this->assertSame($output, Type::output());
+        $this->assertSame('stdout', Type::output->toString());
     }
 
     public function testError()
     {
-        $error = Type::error();
-
-        $this->assertInstanceOf(Type::class, $error);
-        $this->assertSame(Type::ERROR, $error->toString());
-        $this->assertSame($error, Type::error());
+        $this->assertSame('stderr', Type::error->toString());
     }
 }

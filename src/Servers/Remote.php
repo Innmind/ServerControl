@@ -6,7 +6,6 @@ namespace Innmind\Server\Control\Servers;
 use Innmind\Server\Control\{
     Server,
     Server\Processes,
-    Server\Processes\RemoteProcesses,
     Server\Volumes,
 };
 use Innmind\Url\Authority\{
@@ -14,6 +13,7 @@ use Innmind\Url\Authority\{
     Port,
     UserInformation\User,
 };
+use Innmind\Immutable\Either;
 
 final class Remote implements Server
 {
@@ -24,9 +24,9 @@ final class Remote implements Server
         Server $server,
         User $user,
         Host $host,
-        Port $port = null
+        Port $port = null,
     ) {
-        $this->processes = new RemoteProcesses(
+        $this->processes = new Processes\Remote(
             $server->processes(),
             $user,
             $host,
@@ -45,13 +45,13 @@ final class Remote implements Server
         return $this->volumes;
     }
 
-    public function reboot(): void
+    public function reboot(): Either
     {
-        Server\Script::of('sudo shutdown -r now')($this);
+        return Server\Script::of('sudo shutdown -r now')($this);
     }
 
-    public function shutdown(): void
+    public function shutdown(): Either
     {
-        Server\Script::of('sudo shutdown -h now')($this);
+        return Server\Script::of('sudo shutdown -h now')($this);
     }
 }

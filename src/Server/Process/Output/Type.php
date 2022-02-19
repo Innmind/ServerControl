@@ -3,33 +3,19 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process\Output;
 
-final class Type
+/**
+ * @psalm-immutable
+ */
+enum Type
 {
-    public const OUTPUT = 'stdout';
-    public const ERROR = 'stderr';
-
-    private static ?self $output = null;
-    private static ?self $error = null;
-
-    private string $value;
-
-    private function __construct(string $type)
-    {
-        $this->value = $type;
-    }
-
-    public static function output(): self
-    {
-        return self::$output ??= new self(self::OUTPUT);
-    }
-
-    public static function error(): self
-    {
-        return self::$error ??=  new self(self::ERROR);
-    }
+    case output;
+    case error;
 
     public function toString(): string
     {
-        return $this->value;
+        return match ($this) {
+            self::output => 'stdout',
+            self::error => 'stderr',
+        };
     }
 }
