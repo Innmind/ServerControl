@@ -4,7 +4,9 @@
 [![codecov](https://codecov.io/gh/innmind/servercontrol/branch/develop/graph/badge.svg)](https://codecov.io/gh/innmind/servercontrol)
 [![Type Coverage](https://shepherd.dev/github/innmind/servercontrol/coverage.svg)](https://shepherd.dev/github/innmind/servercontrol)
 
-Give access to giev instructions to the server.
+Give access to giving instructions to the server.
+
+**Important**: to correctly use this library you must validate your code with [`vimeo/psalm`](https://packagist.org/packages/vimeo/psalm)
 
 ## Installation
 
@@ -23,10 +25,17 @@ use Innmind\Server\Control\{
     Server\Signal,
     Server\Volumes\Name,
 };
+use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\Stream\Watch\Select;
 use Innmind\Url\Path;
 use Innmind\Immutable\Str;
 
-$server = ServerFactory::build();
+$server = ServerFactory::build(
+    new Clock,
+    Select::timeoutAfter(...),
+    new Usleep,
+);
 $server
     ->processes()
     ->execute(
@@ -35,7 +44,10 @@ $server
     )
     ->output()
     ->foreach(static function(Str $data, Type $type): void {
-        $type = $type === Type::error() ? 'ERR : ' : 'OUT : ';
+        $type = match ($type) {
+            Type::error => 'ERR : ',
+            Type::output => 'OUT : ',
+        };
 
         echo $type.$data->toString();
     });
@@ -43,7 +55,7 @@ $server
     ->processes()
     ->kill(
         new Pid(42),
-        Signal::kill()
+        Signal::kill,
     );
 $server->volumes()->mount(new Name('/dev/disk2s1'), Path::of('/somewhere')); // the path is only interpreted for linux
 $server->volumes()->unmount(new Name('/dev/disk2s1'));
@@ -79,11 +91,11 @@ use Innmind\Url\Authority\{
 
 $server = new Remote(
     $server,
-    new User('john'),
-    new Host('example.com'),
-    new Port(42),
+    User::of('john'),
+    Host::of('example.com'),
+    Port::of(42),
 );
-$server->processes()->execute(new Command('ls'));
+$server->processes()->execute(Command::foreground('ls'));
 ```
 
 This will run `ssh -p 42 john@example.com ls`.
@@ -96,5 +108,5 @@ This will run `ssh -p 42 john@example.com ls`.
 use Innmind\Server\Control\Servers\Logger;
 use Psr\Log\LoggerInterface;
 
-$server = new Logger($server, /** an instance of LoggerInterface */);
+$server = Logger::psr($server, /** an instance of LoggerInterface */);
 ```

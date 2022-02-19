@@ -7,9 +7,13 @@ use Innmind\Server\Control\{
     Server\Volumes,
     Server\Processes,
     Server\Command,
-    Exception\ScriptFailed,
+    ScriptFailed,
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\{
+    Either,
+    SideEffect,
+};
 
 final class Unix implements Volumes
 {
@@ -20,58 +24,58 @@ final class Unix implements Volumes
         $this->processes = $processes;
     }
 
-    public function mount(Name $name, Path $mountpoint): void
+    public function mount(Name $name, Path $mountpoint): Either
     {
         if ($this->isOSX()) {
-            $this->run(
+            return $this->run(
                 Command::foreground('diskutil')
                     ->withArgument('mount')
                     ->withArgument($name->toString()),
             );
-
-            return;
         }
 
-        $this->run(
+        return $this->run(
             Command::foreground('mount')
                 ->withArgument($name->toString())
                 ->withArgument($mountpoint->toString()),
         );
     }
 
-    public function unmount(Name $name): void
+    public function unmount(Name $name): Either
     {
         if ($this->isOSX()) {
-            $this->run(
+            return $this->run(
                 Command::foreground('diskutil')
                     ->withArgument('unmount')
                     ->withArgument($name->toString()),
             );
-
-            return;
         }
 
-        $this->run(
+        return $this->run(
             Command::foreground('umount')
                 ->withArgument($name->toString()),
         );
     }
 
-    private function run(Command $command): void
+    /**
+     * @return Either<ScriptFailed, SideEffect>
+     */
+    private function run(Command $command): Either
     {
         $process = $this->processes->execute($command);
-        $process->wait();
 
-        if (!$process->exitCode()->successful()) {
-            throw new ScriptFailed($command, $process);
-        }
+        return $process
+            ->wait()
+            ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
     }
 
     private function isOSX(): bool
     {
-        $isOSX = $this->processes->execute(Command::foreground('which diskutil'));
-        $isOSX->wait();
-
-        return $isOSX->exitCode()->successful();
+        return $this
+            ->run(Command::foreground('which diskutil'))
+            ->match(
+                static fn() => true,
+                static fn() => false,
+            );
     }
 }

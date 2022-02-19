@@ -3,25 +3,29 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\{
-    Server\Process\LoggerProcess,
-    Server\Process\Pid,
-    Server\Process\ExitCode,
-    Server\Process\Output,
-    Server\Process,
-    Server\Command,
-    Exception\ProcessTimedOut,
+use Innmind\Server\Control\Server\{
+    Process\Logger,
+    Process\Pid,
+    Process\ExitCode,
+    Process\Output,
+    Process,
+    Command,
+};
+use Innmind\Immutable\{
+    Maybe,
+    Either,
+    SideEffect,
 };
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 
-class LoggerProcessTest extends TestCase
+class LoggerTest extends TestCase
 {
     public function testInterface()
     {
         $this->assertInstanceOf(
             Process::class,
-            new LoggerProcess(
+            Logger::psr(
                 $this->createMock(Process::class),
                 Command::foreground('echo'),
                 $this->createMock(LoggerInterface::class),
@@ -31,7 +35,7 @@ class LoggerProcessTest extends TestCase
 
     public function testPid()
     {
-        $process = new LoggerProcess(
+        $process = Logger::psr(
             $inner = $this->createMock(Process::class),
             Command::foreground('echo'),
             $logger = $this->createMock(LoggerInterface::class),
@@ -42,14 +46,14 @@ class LoggerProcessTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('pid')
-            ->willReturn($pid = new Pid(2));
+            ->willReturn($pid = Maybe::just(new Pid(2)));
 
-        $this->assertSame($pid, $process->pid());
+        $this->assertEquals($pid, $process->pid());
     }
 
     public function testExitCode()
     {
-        $process = new LoggerProcess(
+        $process = Logger::psr(
             $inner = $this->createMock(Process::class),
             Command::foreground('echo'),
             $logger = $this->createMock(LoggerInterface::class),
@@ -59,73 +63,72 @@ class LoggerProcessTest extends TestCase
             ->method('debug');
         $inner
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn($exitCode = new ExitCode(0));
+            ->method('wait')
+            ->willReturn($expected = Either::right(new SideEffect));
 
-        $this->assertSame($exitCode, $process->exitCode());
+        $this->assertEquals($expected, $process->wait());
     }
 
-    public function testIsRunning()
+    public function testWarnFailure()
     {
-        $process = new LoggerProcess(
+        $process = Logger::psr(
             $inner = $this->createMock(Process::class),
             Command::foreground('echo'),
             $logger = $this->createMock(LoggerInterface::class),
         );
         $logger
             ->expects($this->once())
-            ->method('debug');
+            ->method('warning')
+            ->with('Command {command} failed with {exitCode}');
         $inner
             ->expects($this->once())
-            ->method('isRunning')
-            ->willReturn(true);
+            ->method('wait')
+            ->willReturn($expected = Either::left(new Process\Failed(new ExitCode(1))));
 
-        $this->assertTrue($process->isRunning());
-    }
-
-    public function testDoesntLogWhenWaitingWithoutTimeout()
-    {
-        $process = new LoggerProcess(
-            $inner = $this->createMock(Process::class),
-            Command::foreground('echo'),
-            $logger = $this->createMock(LoggerInterface::class),
-        );
-        $logger
-            ->expects($this->never())
-            ->method('warning');
-        $inner
-            ->expects($this->once())
-            ->method('wait');
-
-        $this->assertNull($process->wait());
+        $this->assertEquals($expected, $process->wait());
     }
 
     public function testWarnTimeouts()
     {
-        $process = new LoggerProcess(
+        $process = Logger::psr(
             $inner = $this->createMock(Process::class),
             Command::foreground('echo'),
             $logger = $this->createMock(LoggerInterface::class),
         );
         $logger
             ->expects($this->once())
-            ->method('warning');
+            ->method('warning')
+            ->with('Command {command} timed out');
         $inner
             ->expects($this->once())
             ->method('wait')
-            ->will($this->throwException($expected = new ProcessTimedOut));
+            ->willReturn($expected = Either::left(new Process\TimedOut));
 
-        try {
-            $process->wait();
-            $this->fail('it should throw');
-        } catch (\Exception $e) {
-            $this->assertSame($expected, $e);
-        }
+        $this->assertEquals($expected, $process->wait());
+    }
+
+    public function testWarnSignals()
+    {
+        $process = Logger::psr(
+            $inner = $this->createMock(Process::class),
+            Command::foreground('echo'),
+            $logger = $this->createMock(LoggerInterface::class),
+        );
+        $logger
+            ->expects($this->once())
+            ->method('warning')
+            ->with('Command {command} stopped due to external signal');
+        $inner
+            ->expects($this->once())
+            ->method('wait')
+            ->willReturn($expected = Either::left(new Process\Signaled));
+
+        $this->assertEquals($expected, $process->wait());
     }
 
     public function testOutput()
     {
-        $process = new LoggerProcess(
+        $process = Logger::psr(
             $this->createMock(Process::class),
             Command::foreground('echo'),
             $this->createMock(LoggerInterface::class),

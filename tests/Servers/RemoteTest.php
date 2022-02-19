@@ -7,7 +7,6 @@ use Innmind\Server\Control\{
     Servers\Remote,
     Server,
     Server\Processes,
-    Server\Processes\RemoteProcesses,
     Server\Process,
     Server\Process\ExitCode,
     Server\Command,
@@ -17,6 +16,10 @@ use Innmind\Url\Authority\{
     Host,
     Port,
     UserInformation\User
+};
+use Innmind\Immutable\{
+    Either,
+    SideEffect,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -55,8 +58,8 @@ class RemoteTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            RemoteProcesses::class,
-            $remote->processes()
+            Processes\Remote::class,
+            $remote->processes(),
         );
         $remote->processes()->execute(Command::foreground('ls'));
     }
@@ -83,8 +86,8 @@ class RemoteTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            RemoteProcesses::class,
-            $remote->processes()
+            Processes\Remote::class,
+            $remote->processes(),
         );
         $remote->processes()->execute(Command::foreground('ls'));
     }
@@ -99,13 +102,13 @@ class RemoteTest extends TestCase
         $which1 = $this->createMock(Process::class);
         $which1
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $which2 = $this->createMock(Process::class);
         $which2
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -127,7 +130,7 @@ class RemoteTest extends TestCase
 
         $this->assertInstanceOf(
             Volumes::class,
-            $remote->volumes()
+            $remote->volumes(),
         );
         $remote->volumes()->unmount(new Volumes\Name('/dev'));
     }
@@ -148,8 +151,8 @@ class RemoteTest extends TestCase
             ->willReturn($shutdown = $this->createMock(Process::class));
         $shutdown
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
 
         $remote = new Remote(
             $server,
@@ -157,7 +160,13 @@ class RemoteTest extends TestCase
             Host::of('example.com'),
         );
 
-        $this->assertNull($remote->reboot());
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $remote->reboot()->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testShutdown()
@@ -176,8 +185,8 @@ class RemoteTest extends TestCase
             ->willReturn($shutdown = $this->createMock(Process::class));
         $shutdown
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
 
         $remote = new Remote(
             $server,
@@ -185,6 +194,12 @@ class RemoteTest extends TestCase
             Host::of('example.com'),
         );
 
-        $this->assertNull($remote->shutdown());
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $remote->shutdown()->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 }

@@ -8,12 +8,12 @@ use Innmind\Immutable\{
     Map,
     Sequence,
     Str,
-};
-use function Innmind\Immutable\{
-    join,
-    assertSequence,
+    SideEffect,
 };
 
+/**
+ * @psalm-immutable
+ */
 final class Output implements OutputInterface
 {
     /** @var Sequence<array{0: Str, 1: Type}> */
@@ -24,19 +24,18 @@ final class Output implements OutputInterface
      */
     public function __construct(Sequence $output)
     {
-        assertSequence('array', $output, 1);
-
         $this->output = $output;
     }
 
     /**
      * @param callable(Str, Type): void $function
      */
-    public function foreach(callable $function): void
+    public function foreach(callable $function): SideEffect
     {
-        $this->output->foreach(static function(array $output) use ($function): void {
-            $function($output[0], $output[1]);
-        });
+        return $this->output->foreach(static fn(array $output) => $function(
+            $output[0],
+            $output[1],
+        ));
     }
 
     /**
@@ -55,9 +54,11 @@ final class Output implements OutputInterface
          */
         return $this->output->reduce(
             $carry,
-            static function($carry, array $output) use ($reducer) {
-                return $reducer($carry, $output[0], $output[1]);
-            },
+            static fn($carry, array $output) => $reducer(
+                $carry,
+                $output[0],
+                $output[1],
+            ),
         );
     }
 
@@ -67,9 +68,7 @@ final class Output implements OutputInterface
     public function filter(callable $predicate): OutputInterface
     {
         return new self($this->output->filter(
-            static function(array $output) use ($predicate): bool {
-                return $predicate($output[0], $output[1]);
-            },
+            static fn(array $output) => $predicate($output[0], $output[1]),
         ));
     }
 
@@ -82,18 +81,17 @@ final class Output implements OutputInterface
      */
     public function groupBy(callable $discriminator): Map
     {
-        $groups = $this->output->groupBy(static function(array $output) use ($discriminator) {
-            return $discriminator($output[0], $output[1]);
-        });
-
-        /** @var Map<G, OutputInterface> */
-        return $groups->toMapOf(
-            $groups->keyType(),
-            OutputInterface::class,
-            static function($key, Sequence $discriminated): \Generator {
-                yield $key => new self($discriminated);
-            },
-        );
+        /**
+         * @psalm-suppress MissingClosureParamType
+         * @var Map<G, OutputInterface>
+         */
+        return $this
+            ->output
+            ->groupBy(static fn(array $output) => $discriminator(
+                $output[0],
+                $output[1],
+            ))
+            ->map(static fn($_, $discriminated) => new self($discriminated));
     }
 
     /**
@@ -103,27 +101,27 @@ final class Output implements OutputInterface
      */
     public function partition(callable $predicate): Map
     {
-        $partitions = $this->output->partition(static function(array $output) use ($predicate): bool {
-            return $predicate($output[0], $output[1]);
-        });
-
         /** @var Map<bool, OutputInterface> */
-        return $partitions->toMapOf(
-            'bool',
-            OutputInterface::class,
-            static function(bool $bool, Sequence $output): \Generator {
-                yield $bool => new self($output);
-            },
-        );
+        return $this
+            ->output
+            ->partition(static fn(array $output) => $predicate(
+                $output[0],
+                $output[1],
+            ))
+            ->map(static fn($_, $output) => new self($output));
     }
 
     public function toString(): string
     {
-        $bits = $this->output->mapTo(
-            'string',
+        $bits = $this->output->map(
             static fn(array $output): string => $output[0]->toString(),
         );
 
-        return join('', $bits)->toString();
+        return Str::of('')->join($bits)->toString();
+    }
+
+    public function chunks(): Sequence
+    {
+        return $this->output;
     }
 }

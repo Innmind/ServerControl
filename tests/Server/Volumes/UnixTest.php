@@ -10,9 +10,13 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Process,
     Server\Process\ExitCode,
-    Exception\ScriptFailed,
+    ScriptFailed,
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\{
+    Either,
+    SideEffect,
+};
 use PHPUnit\Framework\TestCase;
 
 class UnixTest extends TestCase
@@ -35,16 +39,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -58,10 +59,16 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->assertNull($volumes->mount(
-            new Name('/dev/disk1s2'),
-            Path::of('/somewhere'),
-        ));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $volumes->mount(
+                new Name('/dev/disk1s2'),
+                Path::of('/somewhere'),
+            )->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testThrowWhenFailToMountOSXVolume()
@@ -72,16 +79,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -95,11 +99,15 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->expectException(ScriptFailed::class);
-
-        $volumes->mount(
-            new Name('/dev/disk1s2'),
-            Path::of('/somewhere'),
+        $this->assertInstanceOf(
+            ScriptFailed::class,
+            $volumes->mount(
+                new Name('/dev/disk1s2'),
+                Path::of('/somewhere'),
+            )->match(
+                static fn() => null,
+                static fn($e) => $e,
+            ),
         );
     }
 
@@ -111,16 +119,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -134,12 +139,16 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->assertNull($volumes->unmount(
-            new Name('/dev/disk1s2'),
-        ));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $volumes->unmount(new Name('/dev/disk1s2'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
-    public function testThrowWhenFailToUnmountOSXVolume()
+    public function testReturnErrorWhenFailToUnmountOSXVolume()
     {
         $volumes = new Unix(
             $processes = $this->createMock(Processes::class),
@@ -147,16 +156,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -170,10 +176,12 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->expectException(ScriptFailed::class);
-
-        $volumes->unmount(
-            new Name('/dev/disk1s2'),
+        $this->assertInstanceOf(
+            ScriptFailed::class,
+            $volumes->unmount(new Name('/dev/disk1s2'))->match(
+                static fn() => null,
+                static fn($e) => $e,
+            ),
         );
     }
 
@@ -185,16 +193,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -208,13 +213,19 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->assertNull($volumes->mount(
-            new Name('/dev/disk1s2'),
-            Path::of('/somewhere'),
-        ));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $volumes->mount(
+                new Name('/dev/disk1s2'),
+                Path::of('/somewhere'),
+            )->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
-    public function testThrowWhenFailToMountLinuxVolume()
+    public function testReturnErrorWhenFailToMountLinuxVolume()
     {
         $volumes = new Unix(
             $processes = $this->createMock(Processes::class),
@@ -222,16 +233,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -245,11 +253,15 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->expectException(ScriptFailed::class);
-
-        $volumes->mount(
-            new Name('/dev/disk1s2'),
-            Path::of('/somewhere'),
+        $this->assertInstanceOf(
+            ScriptFailed::class,
+            $volumes->mount(
+                new Name('/dev/disk1s2'),
+                Path::of('/somewhere'),
+            )->match(
+                static fn() => null,
+                static fn($e) => $e,
+            ),
         );
     }
 
@@ -261,16 +273,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -284,12 +293,16 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->assertNull($volumes->unmount(
-            new Name('/dev/disk1s2'),
-        ));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $volumes->unmount(new Name('/dev/disk1s2'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
-    public function testThrowWhenFailToUnmountLinuxVolume()
+    public function testReturnErrorWhenFailToUnmountLinuxVolume()
     {
         $volumes = new Unix(
             $processes = $this->createMock(Processes::class),
@@ -297,16 +310,13 @@ class UnixTest extends TestCase
         $which = $this->createMock(Process::class);
         $which
             ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
         $mount = $this->createMock(Process::class);
         $mount
             ->expects($this->once())
-            ->method('wait');
-        $mount
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -320,10 +330,12 @@ class UnixTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($which, $mount));
 
-        $this->expectException(ScriptFailed::class);
-
-        $volumes->unmount(
-            new Name('/dev/disk1s2'),
+        $this->assertInstanceOf(
+            ScriptFailed::class,
+            $volumes->unmount(new Name('/dev/disk1s2'))->match(
+                static fn() => null,
+                static fn($e) => $e,
+            ),
         );
     }
 }

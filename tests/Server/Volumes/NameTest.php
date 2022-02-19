@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Volumes;
 
-use Innmind\Server\Control\{
-    Server\Volumes\Name,
-    Exception\DomainException,
-};
+use Innmind\Server\Control\Server\Volumes\Name;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -24,12 +21,5 @@ class NameTest extends TestCase
             ->then(function($name) {
                 $this->assertSame($name, (new Name($name))->toString());
             });
-    }
-
-    public function testThrowWhenEmpty()
-    {
-        $this->expectException(DomainException::class);
-
-        new Name('');
     }
 }

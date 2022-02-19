@@ -10,41 +10,51 @@ use Innmind\Server\Control\Server\{
     Process,
     Process\Pid,
 };
+use Innmind\Immutable\Either;
 use Psr\Log\LoggerInterface;
 
-final class LoggerProcesses implements Processes
+final class Logger implements Processes
 {
     private Processes $processes;
     private LoggerInterface $logger;
 
-    public function __construct(
+    private function __construct(
         Processes $processes,
-        LoggerInterface $logger
+        LoggerInterface $logger,
     ) {
         $this->processes = $processes;
         $this->logger = $logger;
+    }
+
+    public static function psr(Processes $processes, LoggerInterface $logger): self
+    {
+        return new self($processes, $logger);
     }
 
     public function execute(Command $command): Process
     {
         $this->logger->info('About to execute a command', [
             'command' => $command->toString(),
-            'workingDirectory' => $command->hasWorkingDirectory() ? $command->workingDirectory()->toString() : null,
+            'workingDirectory' => $command->workingDirectory()->match(
+                static fn($path) => $path->toString(),
+                static fn() => null,
+            ),
         ]);
 
-        return new Process\LoggerProcess(
+        return Process\Logger::psr(
             $this->processes->execute($command),
             $command,
             $this->logger,
         );
     }
 
-    public function kill(Pid $pid, Signal $signal): void
+    public function kill(Pid $pid, Signal $signal): Either
     {
         $this->logger->info('About to kill a process', [
             'pid' => $pid->toInt(),
             'signal' => $signal->toInt(),
         ]);
-        $this->processes->kill($pid, $signal);
+
+        return $this->processes->kill($pid, $signal);
     }
 }

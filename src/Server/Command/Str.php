@@ -5,6 +5,10 @@ namespace Innmind\Server\Control\Server\Command;
 
 use Innmind\Immutable\Str as S;
 
+/**
+ * @psalm-immutable
+ * @internal
+ */
 final class Str
 {
     private string $value;
@@ -24,33 +28,9 @@ final class Str
      */
     private function escape(S $string): S
     {
-        if ('\\' !== \DIRECTORY_SEPARATOR) {
-            return $string
-                ->replace("'", "'\\''")
-                ->prepend("'")
-                ->append("'");
-        }
-
-        if ($string->length() === 0) {
-            return S::of('""');
-        }
-
-        if ($string->contains("\0")) {
-            $string = $string->replace("\0", '?');
-        }
-
-        if (!$string->matches('/[\/()%!^"<>&|\s]/')) {
-            return $string;
-        }
-
         return $string
-            ->pregReplace('/(\\\\+)$/', '$1$1')
-            ->replace('"', '""')
-            ->replace('^', '"^^"')
-            ->replace('%', '"^%"')
-            ->replace('!', '"^!"')
-            ->replace("\n", '!LF!')
-            ->prepend('"')
-            ->append('"');
+            ->replace("'", "'\\''")
+            ->prepend("'")
+            ->append("'");
     }
 }

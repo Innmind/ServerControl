@@ -12,6 +12,8 @@ use Innmind\Server\Control\Server\{
 use Innmind\Immutable\{
     Map,
     Str,
+    SideEffect,
+    Sequence,
 };
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -22,7 +24,7 @@ class LoggerTest extends TestCase
     {
         $this->assertInstanceOf(
             Output::class,
-            new Logger(
+            Logger::psr(
                 $this->createMock(Output::class),
                 Command::foreground('echo'),
                 $this->createMock(LoggerInterface::class),
@@ -32,7 +34,7 @@ class LoggerTest extends TestCase
 
     public function testLogOutput()
     {
-        $output = new Logger(
+        $output = Logger::psr(
             $inner = $this->createMock(Output::class),
             Command::foreground('echo'),
             $logger = $this->createMock(LoggerInterface::class),
@@ -44,17 +46,21 @@ class LoggerTest extends TestCase
             ->expects($this->once())
             ->method('foreach')
             ->with($this->callback(static function($callback) {
-                $callback(Str::of(''), Type::output());
+                $callback(Str::of(''), Type::output);
 
                 return true;
-            }));
+            }))
+            ->willReturn(new SideEffect);
 
-        $this->assertNull($output->foreach(static fn() => null));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $output->foreach(static fn() => null),
+        );
     }
 
     public function testWarnErrors()
     {
-        $output = new Logger(
+        $output = Logger::psr(
             $inner = $this->createMock(Output::class),
             Command::foreground('echo'),
             $logger = $this->createMock(LoggerInterface::class),
@@ -66,17 +72,21 @@ class LoggerTest extends TestCase
             ->expects($this->once())
             ->method('foreach')
             ->with($this->callback(static function($callback) {
-                $callback(Str::of(''), Type::error());
+                $callback(Str::of(''), Type::error);
 
                 return true;
-            }));
+            }))
+            ->willReturn(new SideEffect);
 
-        $this->assertNull($output->foreach(static fn() => null));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $output->foreach(static fn() => null),
+        );
     }
 
     public function testReduce()
     {
-        $output = new Logger(
+        $output = Logger::psr(
             $inner = $this->createMock(Output::class),
             Command::foreground('echo'),
             $this->createMock(LoggerInterface::class),
@@ -91,7 +101,7 @@ class LoggerTest extends TestCase
 
     public function testFilterStillLogs()
     {
-        $output = new Logger(
+        $output = Logger::psr(
             $this->createMock(Output::class),
             Command::foreground('echo'),
             $this->createMock(LoggerInterface::class),
@@ -102,7 +112,7 @@ class LoggerTest extends TestCase
 
     public function testGroupBy()
     {
-        $output = new Logger(
+        $output = Logger::psr(
             $inner = $this->createMock(Output::class),
             Command::foreground('echo'),
             $this->createMock(LoggerInterface::class),
@@ -110,14 +120,14 @@ class LoggerTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('groupBy')
-            ->willReturn($map = Map::of('string', Output::class));
+            ->willReturn($map = Map::of());
 
         $this->assertSame($map, $output->groupBy(static fn() => ''));
     }
 
     public function testPartition()
     {
-        $output = new Logger(
+        $output = Logger::psr(
             $inner = $this->createMock(Output::class),
             Command::foreground('echo'),
             $this->createMock(LoggerInterface::class),
@@ -125,14 +135,14 @@ class LoggerTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('partition')
-            ->willReturn($map = Map::of('string', Output::class));
+            ->willReturn($map = Map::of());
 
         $this->assertSame($map, $output->partition(static fn() => true));
     }
 
     public function testToString()
     {
-        $output = new Logger(
+        $output = Logger::psr(
             $inner = $this->createMock(Output::class),
             Command::foreground('echo'),
             $this->createMock(LoggerInterface::class),
@@ -143,5 +153,20 @@ class LoggerTest extends TestCase
             ->willReturn('foo');
 
         $this->assertSame('foo', $output->toString());
+    }
+
+    public function testChunks()
+    {
+        $output = Logger::psr(
+            $inner = $this->createMock(Output::class),
+            Command::foreground('echo'),
+            $this->createMock(LoggerInterface::class),
+        );
+        $inner
+            ->expects($this->once())
+            ->method('chunks')
+            ->willReturn($chunks = Sequence::of());
+
+        $this->assertSame($chunks, $output->chunks());
     }
 }

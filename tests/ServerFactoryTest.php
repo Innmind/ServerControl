@@ -8,6 +8,9 @@ use Innmind\Server\Control\{
     Server,
     Exception\UnsupportedOperatingSystem
 };
+use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\Stream\Watch\Select;
 use PHPUnit\Framework\TestCase;
 
 class ServerFactoryTest extends TestCase
@@ -18,8 +21,11 @@ class ServerFactoryTest extends TestCase
             $this->markTestSkipped();
         }
 
-        $this->assertInstanceOf(Server::class, (new ServerFactory)());
-        $this->assertInstanceOf(Server::class, ServerFactory::build());
+        $this->assertInstanceOf(Server::class, ServerFactory::build(
+            new Clock,
+            Select::timeoutAfter(...),
+            new Usleep,
+        ));
     }
 
     public function testThrowWhenUnsupportedOperatingSystem()
@@ -30,6 +36,10 @@ class ServerFactoryTest extends TestCase
 
         $this->expectException(UnsupportedOperatingSystem::class);
 
-        (new ServerFactory)();
+        ServerFactory::build(
+            new Clock,
+            Select::timeoutAfter(...),
+            new Usleep,
+        );
     }
 }

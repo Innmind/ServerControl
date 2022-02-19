@@ -10,8 +10,11 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Process,
     Server\Process\ExitCode,
-    Exception\ScriptFailed,
-    Exception\ProcessTimedOut,
+    ScriptFailed,
+};
+use Innmind\Immutable\{
+    Either,
+    SideEffect,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -21,7 +24,7 @@ class ScriptTest extends TestCase
     {
         $script = new Script(
             $command1 = Command::foreground('ls'),
-            $command2 = Command::foreground('ls')
+            $command2 = Command::foreground('ls'),
         );
         $server = $this->createMock(Server::class);
         $server
@@ -40,13 +43,15 @@ class ScriptTest extends TestCase
         $process
             ->expects($this->any())
             ->method('wait')
-            ->will($this->returnSelf());
-        $process
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->willReturn(Either::right(new SideEffect));
 
-        $this->assertNull($script($server));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $script($server)->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn($e) => $e,
+            ),
+        );
     }
 
     public function testThrowOnFailure()
@@ -54,7 +59,7 @@ class ScriptTest extends TestCase
         $script = new Script(
             $command1 = Command::foreground('ls'),
             $command2 = Command::foreground('ls'),
-            $command3 = Command::foreground('ls')
+            $command3 = Command::foreground('ls'),
         );
         $server = $this->createMock(Server::class);
         $server
@@ -65,20 +70,12 @@ class ScriptTest extends TestCase
         $process1
             ->expects($this->any())
             ->method('wait')
-            ->will($this->returnSelf());
-        $process1
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->willReturn(Either::right(new SideEffect));
         $process2 = $this->createMock(Process::class);
         $process2
             ->expects($this->any())
             ->method('wait')
-            ->will($this->returnSelf());
-        $process2
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -88,13 +85,13 @@ class ScriptTest extends TestCase
             )
             ->will($this->onConsecutiveCalls($process1, $process2));
 
-        try {
-            $script($server);
-            $this->fail('it should throw');
-        } catch (ScriptFailed $e) {
-            $this->assertSame($process2, $e->process());
-            $this->assertSame($command2, $e->command());
-        }
+        $e = $script($server)->match(
+            static fn() => null,
+            static fn($e) => $e,
+        );
+        $this->assertInstanceOf(ScriptFailed::class, $e);
+        $this->assertSame($process2, $e->process());
+        $this->assertSame($command2, $e->command());
     }
 
     public function testOf()
@@ -112,18 +109,20 @@ class ScriptTest extends TestCase
         $process
             ->expects($this->any())
             ->method('wait')
-            ->will($this->returnSelf());
-        $process
-            ->expects($this->any())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->willReturn(Either::right(new SideEffect));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
             ->with(Command::foreground('ls'))
             ->willReturn($process);
 
-        $this->assertNull($script($server));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $script($server)->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn($e) => $e,
+            ),
+        );
     }
 
     public function testFailDueToTimeout()
@@ -144,19 +143,16 @@ class ScriptTest extends TestCase
         $process
             ->expects($this->once())
             ->method('wait')
-            ->will($this->throwException($expected = new ProcessTimedOut));
-        $process
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(143));
+            ->willReturn(Either::left($expected = new Process\TimedOut));
 
-        try {
-            $script($server);
-            $this->fail('it should throw');
-        } catch (ScriptFailed $e) {
-            $this->assertSame($process, $e->process());
-            $this->assertSame($command, $e->command());
-            $this->assertSame($expected, $e->getPrevious());
-        }
+        $e = $script($server)->match(
+            static fn() => null,
+            static fn($e) => $e,
+        );
+
+        $this->assertInstanceOf(ScriptFailed::class, $e);
+        $this->assertSame($process, $e->process());
+        $this->assertSame($command, $e->command());
+        $this->assertSame($expected, $e->reason());
     }
 }

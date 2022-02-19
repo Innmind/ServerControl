@@ -5,47 +5,51 @@ namespace Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\{
     Server,
-    Exception\ScriptFailed,
-    Exception\ProcessTimedOut,
+    ScriptFailed,
 };
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    Either,
+    SideEffect,
+};
 
 final class Script
 {
     /** @var Sequence<Command> */
     private Sequence $commands;
 
+    /**
+     * @no-named-arguments
+     */
     public function __construct(Command ...$commands)
     {
-        $this->commands = Sequence::of(Command::class, ...$commands);
+        $this->commands = Sequence::of(...$commands);
     }
 
-    public function __invoke(Server $server): void
+    /**
+     * @return Either<ScriptFailed, SideEffect>
+     */
+    public function __invoke(Server $server): Either
     {
         $processes = $server->processes();
 
-        $this->commands->reduce(
-            $processes,
-            static function(Processes $processes, Command $command): Processes {
+        /** @var Either<ScriptFailed, SideEffect> */
+        return $this->commands->reduce(
+            Either::right(new SideEffect),
+            static fn(Either $success, $command) => $success->flatMap(static function() use ($command, $processes) {
                 $process = $processes->execute($command);
 
-                try {
-                    $process->wait();
-                } catch (ProcessTimedOut $e) {
-                    throw new ScriptFailed($command, $process, $e);
-                }
-
-                $exitCode = $process->exitCode();
-
-                if (!$exitCode->successful()) {
-                    throw new ScriptFailed($command, $process);
-                }
-
-                return $processes;
-            },
+                return $process
+                    ->wait()
+                    ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
+            }),
         );
     }
 
+    /**
+     * @no-named-arguments
+     * @param non-empty-string $commands
+     */
     public static function of(string ...$commands): self
     {
         return new self(...\array_map(

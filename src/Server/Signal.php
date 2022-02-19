@@ -3,65 +3,37 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server;
 
-final class Signal
+/**
+ * @psalm-immutable
+ */
+enum Signal
 {
-    private const HANG_UP = \SIGHUP;
-    private const INTERRUPT = \SIGINT;
-    private const QUIT = \SIGQUIT;
-    private const ABORT = \SIGABRT;
-    private const KILL = \SIGKILL;
-    private const ALARM = \SIGALRM;
-    private const TERMINATE = \SIGTERM;
-
-    private int $value;
-
-    private function __construct(int $value)
-    {
-        $this->value = $value;
-    }
-
-    public static function hangUp(): self
-    {
-        return new self(self::HANG_UP);
-    }
-
-    public static function interrupt(): self
-    {
-        return new self(self::INTERRUPT);
-    }
-
-    public static function quit(): self
-    {
-        return new self(self::QUIT);
-    }
-
-    public static function abort(): self
-    {
-        return new self(self::ABORT);
-    }
-
-    public static function kill(): self
-    {
-        return new self(self::KILL);
-    }
-
-    public static function alarm(): self
-    {
-        return new self(self::ALARM);
-    }
-
-    public static function terminate(): self
-    {
-        return new self(self::TERMINATE);
-    }
+    case hangUp;
+    case interrupt;
+    case quit;
+    case abort;
+    case kill;
+    case alarm;
+    case terminate;
 
     public function toInt(): int
     {
-        return $this->value;
+        return match ($this) {
+            self::hangUp => \SIGHUP,
+            self::interrupt => \SIGINT,
+            self::quit => \SIGQUIT,
+            self::abort => \SIGABRT,
+            self::kill => \SIGKILL,
+            self::alarm => \SIGALRM,
+            self::terminate => \SIGTERM,
+        };
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function toString(): string
     {
-        return (string) $this->value;
+        return (string) $this->toInt();
     }
 }

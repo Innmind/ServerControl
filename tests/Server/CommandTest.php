@@ -6,10 +6,8 @@ namespace Tests\Innmind\Server\Control\Server;
 use Innmind\Server\Control\{
     Server\Command,
     Server\Second,
-    Exception\EmptyExecutableNotAllowed,
-    Exception\EmptyOptionNotAllowed,
 };
-use Innmind\Stream\Readable;
+use Innmind\Filesystem\File\Content;
 use Innmind\Url\Path;
 use Innmind\Immutable\Map;
 use PHPUnit\Framework\TestCase;
@@ -20,8 +18,14 @@ class CommandTest extends TestCase
     {
         $command = Command::foreground('ps');
 
-        $this->assertFalse($command->hasWorkingDirectory());
-        $this->assertFalse($command->hasInput());
+        $this->assertFalse($command->workingDirectory()->match(
+            static fn() => true,
+            static fn() => false,
+        ));
+        $this->assertFalse($command->input()->match(
+            static fn() => true,
+            static fn() => false,
+        ));
         $this->assertFalse($command->toBeRunInBackground());
         $this->assertSame('ps', $command->toString());
     }
@@ -40,13 +44,6 @@ class CommandTest extends TestCase
         $this->assertFalse($command->toBeRunInBackground());
     }
 
-    public function testThrowWhenEmptyForegroundExecutable()
-    {
-        $this->expectException(EmptyExecutableNotAllowed::class);
-
-        Command::foreground('');
-    }
-
     public function testWithArgument()
     {
         $command = Command::foreground('echo')
@@ -60,7 +57,7 @@ class CommandTest extends TestCase
     {
         $this->assertSame(
             "echo ''",
-            Command::foreground('echo')->withArgument('')->toString()
+            Command::foreground('echo')->withArgument('')->toString(),
         );
     }
 
@@ -73,13 +70,6 @@ class CommandTest extends TestCase
         $this->assertSame("bin/console '--env=prod'", $command->toString());
     }
 
-    public function testThrowWhenEmptyOption()
-    {
-        $this->expectException(EmptyOptionNotAllowed::class);
-
-        Command::foreground('bin/console')->withOption('');
-    }
-
     public function testWithShortOption()
     {
         $command = Command::foreground('bin/console')
@@ -87,13 +77,6 @@ class CommandTest extends TestCase
 
         $this->assertInstanceOf(Command::class, $command);
         $this->assertSame("bin/console '-e' 'prod'", $command->toString());
-    }
-
-    public function testThrowWhenEmptyShortOption()
-    {
-        $this->expectException(EmptyOptionNotAllowed::class);
-
-        Command::foreground('bin/console')->withShortOption('');
     }
 
     public function testWithEnvironment()
@@ -104,10 +87,11 @@ class CommandTest extends TestCase
         $this->assertInstanceOf(Command::class, $command);
         $this->assertSame('bin/console', $command->toString());
         $this->assertInstanceOf(Map::class, $command->environment());
-        $this->assertSame('string', (string) $command->environment()->keyType());
-        $this->assertSame('string', (string) $command->environment()->valueType());
         $this->assertCount(1, $command->environment());
-        $this->assertSame('prod', $command->environment()->get('SYMFONY_ENV'));
+        $this->assertSame('prod', $command->environment()->get('SYMFONY_ENV')->match(
+            static fn($env) => $env,
+            static fn() => null,
+        ));
     }
 
     public function testWithWorkingDirectory()
@@ -116,21 +100,25 @@ class CommandTest extends TestCase
             ->withWorkingDirectory(Path::of('/var/www/app'));
 
         $this->assertInstanceOf(Command::class, $command);
-        $this->assertTrue($command->hasWorkingDirectory());
         $this->assertSame('bin/console', $command->toString());
-        $this->assertSame('/var/www/app', $command->workingDirectory()->toString());
+        $this->assertSame('/var/www/app', $command->workingDirectory()->match(
+            static fn($path) => $path->toString(),
+            static fn() => null,
+        ));
     }
 
     public function testWithInput()
     {
         $command = Command::foreground('bin/console')
             ->withInput(
-                $input = $this->createMock(Readable::class)
+                $input = $this->createMock(Content::class),
             );
 
         $this->assertInstanceOf(Command::class, $command);
-        $this->assertTrue($command->hasInput());
-        $this->assertSame($input, $command->input());
+        $this->assertSame($input, $command->input()->match(
+            static fn($input) => $input,
+            static fn() => null,
+        ));
     }
 
     public function testOverwrite()
@@ -169,7 +157,7 @@ class CommandTest extends TestCase
         $this->assertSame("wc > 'count.txt'", $commandC->toString());
         $this->assertSame(
             "echo 'bar' >> 'foo.txt' | 'cat' 'foo.txt' | 'wc' > 'count.txt'",
-            $command->toString()
+            $command->toString(),
         );
     }
 
@@ -178,8 +166,13 @@ class CommandTest extends TestCase
         $commandA = Command::foreground('echo');
         $commandB = $commandA->timeoutAfter($timeout = new Second(1));
 
-        $this->assertFalse($commandA->shouldTimeout());
-        $this->assertTrue($commandB->shouldTimeout());
-        $this->assertSame($timeout, $commandB->timeout());
+        $this->assertFalse($commandA->timeout()->match(
+            static fn() => true,
+            static fn() => false,
+        ));
+        $this->assertSame($timeout, $commandB->timeout()->match(
+            static fn($timeout) => $timeout,
+            static fn() => null,
+        ));
     }
 }
