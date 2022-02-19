@@ -89,6 +89,7 @@ class ForegroundProcessTest extends TestCase
                 $this->assertTrue((\time() - $start) >= (1 + $count));
                 ++$count;
             });
+        $this->assertSame("0\n1\n2\n3\n4\n5\n", $process->output()->toString());
         $this->assertSame(6, $count);
     }
 
