@@ -180,7 +180,7 @@ final class StartedProcess
             }
 
             $status = $this->status();
-        } while ($status['running']);
+        } while ($status['running'] || $this->outputStillOpen());
 
         $this->close();
 
@@ -406,5 +406,18 @@ final class StartedProcess
         $this->close();
 
         return new ProcessTimedOut;
+    }
+
+    private function outputStillOpen(): bool
+    {
+        if (!$this->output->end() && !$this->output->closed()) {
+            return true;
+        }
+
+        if (!$this->error->end() && !$this->error->closed()) {
+            return true;
+        }
+
+        return false;
     }
 }
