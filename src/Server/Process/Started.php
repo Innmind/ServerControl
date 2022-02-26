@@ -195,6 +195,12 @@ final class Started
                 yield $value;
             }
 
+            if ($chunks->empty()) {
+                // do not try to continue reading the streams when no output
+                // otherwise for commands like "tail -f" it will run forever
+                break;
+            }
+
             // no need to check for timeouts here since the process is no longer
             // running
         }
