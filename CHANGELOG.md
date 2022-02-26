@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.0.1 - 2022-02-26
+
+### Fixed
+
+- Some processes hanging forever once killed
+
 ## 4.0.0 - 2022-02-19
 
 ### Added

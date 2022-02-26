@@ -215,4 +215,31 @@ class UnixTest extends TestCase
 
         $this->assertTrue($called);
     }
+
+    public function testStopProcessEvenWhenPipesAreStillOpenAfterTheProcessBeingKilled()
+    {
+        @\unlink('/tmp/test-file');
+        \touch('/tmp/test-file');
+        $processes = Unix::of(
+            new Clock,
+            Select::timeoutAfter(...),
+            new Usleep,
+        );
+        $tail = $processes->execute(
+            Command::foreground('tail')
+                ->withShortOption('f')
+                ->withArgument('/tmp/test-file'),
+        );
+        $processes->execute(
+            Command::background('sleep 2 && kill')
+                ->withArgument($tail->pid()->match(
+                    static fn($pid) => $pid->toString(),
+                    static fn() => null,
+                )),
+        );
+
+        $tail->output()->foreach(static fn() => null);
+        // when done correctly then the foreach above would run forever
+        $this->assertTrue(true);
+    }
 }
