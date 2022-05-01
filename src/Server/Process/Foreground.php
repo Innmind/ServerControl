@@ -9,23 +9,33 @@ use Innmind\Immutable\{
     Str,
     Maybe,
     Either,
+    SideEffect,
 };
 
 final class Foreground implements Process
 {
     private Started $process;
     private Output $output;
+    /** @var ?Either<Failed|Signaled|TimedOut, SideEffect> */
+    private ?Either $status = null;
 
     public function __construct(Started $process, bool $streamOutput = false)
     {
         $this->process = $process;
+        $yieldOutput = function() use ($process): \Generator {
+            $output = $process->output();
+
+            foreach ($output as $chunk) {
+                yield $chunk;
+            }
+
+            $this->status = $output->getReturn();
+        };
 
         if ($streamOutput) {
-            $output = Sequence::lazy(static function() use ($process) {
-                yield from $process->output();
-            });
+            $output = Sequence::lazy($yieldOutput);
         } else {
-            $output = Sequence::defer($process->output());
+            $output = Sequence::defer($yieldOutput());
         }
 
         $this->output = new Output\Output($output);
@@ -43,6 +53,16 @@ final class Foreground implements Process
 
     public function wait(): Either
     {
-        return $this->process->wait();
+        if (\is_null($this->status)) {
+            // we iterate over the output here to keep it in memory (when not
+            // streamed) so it is available when calling output() after wait()
+            // the exit status will be set on this process when done iterating
+            // over the output (@see __construct)
+            $_ = $this->output->foreach(static fn() => null);
+        }
+
+        // the status should always be set here because we iterated over the
+        // output above but we stil coalesce to the wait() call to please psalm
+        return $this->status ??= $this->process->wait();
     }
 }
