@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.1.1 - 2022-05-01
+
+### Fixed
+
+- `Command::foreground` and `Command::background` are now declared pure
+
 ## 4.1.0 - 2022-05-01
 
 ### Changed
