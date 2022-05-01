@@ -122,31 +122,11 @@ final class Started
             // do nothing with the output
         }
 
-        $status = $output->getReturn();
-
-        if ($status instanceof TimedOut) {
-            /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
-            return Either::left($status);
-        }
-
-        if ($status['signaled'] || $status['stopped']) {
-            /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
-            return Either::left(new Signaled);
-        }
-
-        $exitCode = new ExitCode($status['exitcode']);
-
-        if (!$exitCode->successful()) {
-            /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
-            return Either::left(new Failed($exitCode));
-        }
-
-        /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
-        return Either::right(new SideEffect);
+        return $output->getReturn();
     }
 
     /**
-     * @return \Generator<int, array{0: Str, 1: Type}, mixed, Status|TimedOut>
+     * @return \Generator<int, array{0: Str, 1: Type}, mixed, Either<Failed|Signaled|TimedOut, SideEffect>>
      */
     public function output(bool $keepOutputWhileWriting = true): \Generator
     {
@@ -176,7 +156,8 @@ final class Started
             );
 
             if ($timedOut) {
-                return $this->abort();
+                /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
+                return Either::left($this->abort());
             }
 
             $status = $this->status();
@@ -207,7 +188,20 @@ final class Started
 
         $this->close();
 
-        return $status;
+        if ($status['signaled'] || $status['stopped']) {
+            /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
+            return Either::left(new Signaled);
+        }
+
+        $exitCode = new ExitCode($status['exitcode']);
+
+        if (!$exitCode->successful()) {
+            /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
+            return Either::left(new Failed($exitCode));
+        }
+
+        /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
+        return Either::right(new SideEffect);
     }
 
     /**

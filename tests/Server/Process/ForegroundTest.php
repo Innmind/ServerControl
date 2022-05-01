@@ -144,4 +144,66 @@ class ForegroundTest extends TestCase
                 ),
         );
     }
+
+    public function testExitStatusIsKeptInMemory()
+    {
+        $slow = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::foreground('php fixtures/slow.php'),
+        );
+        $process = new Foreground($slow());
+
+        $this->assertSame(
+            $process->wait(),
+            $process->wait(),
+        );
+    }
+
+    public function testExitStatusIsAvailableAfterIteratingOverTheOutput()
+    {
+        $slow = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::foreground('php fixtures/slow.php'),
+        );
+        $process = new Foreground($slow());
+        $process->output()->toString();
+
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $process
+                ->wait()
+                ->match(
+                    static fn($sideEffect) => $sideEffect,
+                    static fn() => null,
+                ),
+        );
+    }
+
+    public function testOutputIsAvailableAfterWaitingForExitStatus()
+    {
+        $slow = new Unix(
+            new Clock,
+            Select::timeoutAfter(new ElapsedPeriod(0)),
+            new Usleep,
+            new Second(1),
+            Command::foreground('php fixtures/slow.php'),
+        );
+        $process = new Foreground($slow());
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $process
+                ->wait()
+                ->match(
+                    static fn($sideEffect) => $sideEffect,
+                    static fn() => null,
+                ),
+        );
+        $this->assertSame("0\n1\n2\n3\n4\n5\n", $process->output()->toString());
+    }
 }

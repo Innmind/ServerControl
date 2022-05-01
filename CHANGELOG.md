@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.1.0 - 2022-05-01
+
+### Changed
+
+- It is now allowed to call `output()` and `wait()` on the same foreground process
+
 ## 4.0.1 - 2022-02-26
 
 ### Fixed
