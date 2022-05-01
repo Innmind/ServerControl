@@ -69,6 +69,8 @@ final class Command
      * You will not have access to the process output nor if the process is
      * still running
      *
+     * @psalm-pure
+     *
      * @param non-empty-string $executable
      */
     public static function background(string $executable): self
@@ -79,6 +81,8 @@ final class Command
     /**
      * Will run the command in a non blocking way but will be killed when the
      * current process ends
+     *
+     * @psalm-pure
      *
      * @param non-empty-string $executable
      */
