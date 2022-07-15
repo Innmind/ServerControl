@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `Command::withEnvironments` to define multiple variables at once
+
 ## 4.1.1 - 2022-05-01
 
 ### Fixed
