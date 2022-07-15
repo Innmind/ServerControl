@@ -132,6 +132,17 @@ final class Command
         return $self;
     }
 
+    /**
+     * @param Map<non-empty-string, string> $values
+     */
+    public function withEnvironments(Map $values): self
+    {
+        $self = clone $this;
+        $self->environment = $this->environment->merge($values);
+
+        return $self;
+    }
+
     public function withWorkingDirectory(Path $path): self
     {
         $self = clone $this;

@@ -94,6 +94,30 @@ class CommandTest extends TestCase
         ));
     }
 
+    public function testWithEnvironments()
+    {
+        $command = Command::foreground('bin/console')
+            ->withEnvironment('SYMFONY_ENV', 'prod')
+            ->withEnvironments(Map::of(['HOME', '/home/foo'], ['USER', 'foo']));
+
+        $this->assertInstanceOf(Command::class, $command);
+        $this->assertSame('bin/console', $command->toString());
+        $this->assertInstanceOf(Map::class, $command->environment());
+        $this->assertCount(3, $command->environment());
+        $this->assertSame('prod', $command->environment()->get('SYMFONY_ENV')->match(
+            static fn($env) => $env,
+            static fn() => null,
+        ));
+        $this->assertSame('/home/foo', $command->environment()->get('HOME')->match(
+            static fn($env) => $env,
+            static fn() => null,
+        ));
+        $this->assertSame('foo', $command->environment()->get('USER')->match(
+            static fn($env) => $env,
+            static fn() => null,
+        ));
+    }
+
     public function testWithWorkingDirectory()
     {
         $command = Command::foreground('bin/console')
