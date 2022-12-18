@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.3.0 - 2022-12-18
+
+### Added
+
+- Support for `innmind/filesystem:~6.0`
+
 ## 4.2.0 - 2022-07-15
 
 ### Added

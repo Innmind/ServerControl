@@ -71,7 +71,8 @@ class ForegroundTest extends TestCase
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
             new Second(1),
-            Command::foreground('php fixtures/slow.php'),
+            Command::foreground('php fixtures/slow.php')
+                ->withEnvironment('PATH', $_SERVER['PATH']),
         );
         $process = new Foreground($slow());
 
@@ -100,7 +101,8 @@ class ForegroundTest extends TestCase
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
             new Second(1),
-            Command::foreground('php fixtures/fails.php'),
+            Command::foreground('php fixtures/fails.php')
+                ->withEnvironment('PATH', $_SERVER['PATH']),
         );
         $process = new Foreground($fail());
 
@@ -131,7 +133,8 @@ class ForegroundTest extends TestCase
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
             new Second(1),
-            Command::foreground('php fixtures/slow.php'),
+            Command::foreground('php fixtures/slow.php')
+                ->withEnvironment('PATH', $_SERVER['PATH']),
         );
         $process = new Foreground($slow());
         $this->assertInstanceOf(
@@ -152,7 +155,8 @@ class ForegroundTest extends TestCase
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
             new Second(1),
-            Command::foreground('php fixtures/slow.php'),
+            Command::foreground('php fixtures/slow.php')
+                ->withEnvironment('PATH', $_SERVER['PATH']),
         );
         $process = new Foreground($slow());
 
@@ -169,7 +173,8 @@ class ForegroundTest extends TestCase
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
             new Second(1),
-            Command::foreground('php fixtures/slow.php'),
+            Command::foreground('php fixtures/slow.php')
+                ->withEnvironment('PATH', $_SERVER['PATH']),
         );
         $process = new Foreground($slow());
         $process->output()->toString();
@@ -192,7 +197,8 @@ class ForegroundTest extends TestCase
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
             new Second(1),
-            Command::foreground('php fixtures/slow.php'),
+            Command::foreground('php fixtures/slow.php')
+                ->withEnvironment('PATH', $_SERVER['PATH']),
         );
         $process = new Foreground($slow());
         $this->assertInstanceOf(

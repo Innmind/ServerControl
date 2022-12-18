@@ -20,7 +20,7 @@
         "innmind/url": "~4.0",
         "psr/log": "~3.0",
         "innmind/time-continuum": "^3.0",
-        "innmind/filesystem": "^5.0",
+        "innmind/filesystem": "^5.2|~6.0",
         "innmind/time-warp": "^3.0"
     },
     "autoload": {

@@ -43,7 +43,9 @@ class UnixTest extends TestCase
         );
         $start = \time();
         $process = $processes->execute(
-            Command::foreground('php')->withArgument('fixtures/slow.php'),
+            Command::foreground('php')
+                ->withArgument('fixtures/slow.php')
+                ->withEnvironment('PATH', $_SERVER['PATH']),
         );
 
         $this->assertInstanceOf(Foreground::class, $process);
@@ -60,7 +62,9 @@ class UnixTest extends TestCase
         );
         $start = \time();
         $process = $processes->execute(
-            Command::background('php')->withArgument('fixtures/slow.php'),
+            Command::background('php')
+                ->withArgument('fixtures/slow.php')
+                ->withEnvironment('PATH', $_SERVER['PATH']),
         );
 
         $this->assertInstanceOf(Background::class, $process);
@@ -105,7 +109,9 @@ class UnixTest extends TestCase
         );
         $start = \time();
         $process = $processes->execute(
-            Command::foreground('php')->withArgument('fixtures/slow.php'),
+            Command::foreground('php')
+                ->withArgument('fixtures/slow.php')
+                ->withEnvironment('PATH', $_SERVER['PATH']),
         );
 
         $pid = $process->pid()->match(
