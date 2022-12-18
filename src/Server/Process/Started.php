@@ -11,7 +11,7 @@ use Innmind\Server\Control\{
 };
 use Innmind\Filesystem\{
     File\Content,
-    Adapter\Chunk,
+    Chunk,
 };
 use Innmind\TimeContinuum\{
     Clock,
