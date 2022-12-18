@@ -90,7 +90,9 @@ class UnixTest extends TestCase
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
             new Second(1),
-            Command::foreground('php')->withArgument('fixtures/slow.php'),
+            Command::foreground('php')
+                ->withArgument('fixtures/slow.php')
+                ->withEnvironment('PATH', $_SERVER['PATH']),
         );
         $process = $slow();
         $count = 0;
@@ -116,7 +118,8 @@ class UnixTest extends TestCase
             new Second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
-                ->timeoutAfter(new Timeout(2)),
+                ->timeoutAfter(new Timeout(2))
+                ->withEnvironment('PATH', $_SERVER['PATH']),
         );
         $process = $slow();
         $count = 0;
@@ -145,7 +148,8 @@ class UnixTest extends TestCase
             new Second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
-                ->timeoutAfter(new Timeout(2)),
+                ->timeoutAfter(new Timeout(2))
+                ->withEnvironment('PATH', $_SERVER['PATH']),
         );
         $process = $slow();
         $started = \microtime(true);
@@ -185,7 +189,9 @@ class UnixTest extends TestCase
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
             new Second(1),
-            Command::foreground('php')->withArgument('fixtures/fails.php'),
+            Command::foreground('php')
+                ->withArgument('fixtures/fails.php')
+                ->withEnvironment('PATH', $_SERVER['PATH']),
         );
 
         $value = $cat()->wait()->match(
