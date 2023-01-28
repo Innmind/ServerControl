@@ -23,8 +23,9 @@ use Innmind\TimeWarp\Halt;
 use Innmind\Stream\{
     Readable,
     Writable,
+    Stream,
     Watch,
-    Selectable,
+    Capabilities,
 };
 use Innmind\Immutable\{
     Maybe,
@@ -57,7 +58,7 @@ final class Started
     private $process;
     private Readable\NonBlocking $output;
     private Readable\NonBlocking $error;
-    private Writable\Stream $input;
+    private Writable $input;
     /** @var Maybe<Second> */
     private Maybe $timeout;
     /** @var Maybe<Content> */
@@ -74,6 +75,7 @@ final class Started
         Clock $clock,
         Watch $watch,
         Halt $halt,
+        Capabilities $capabilities,
         Period $grace,
         callable $start,
         bool $background,
@@ -91,12 +93,12 @@ final class Started
         // after the process is really started
         [$this->process, $pipes] = $start();
         $this->output = Readable\NonBlocking::of(
-            Readable\Stream::of($pipes[1]),
+            $capabilities->readable()->acquire($pipes[1]),
         );
         $this->error = Readable\NonBlocking::of(
-            Readable\Stream::of($pipes[2]),
+            $capabilities->readable()->acquire($pipes[2]),
         );
-        $this->input = Writable\Stream::of($pipes[0]);
+        $this->input = $capabilities->writable()->acquire($pipes[0]);
         $this->timeout = $timeout;
         $this->content = $content;
         $this->pid = new Pid($this->status()['pid']);
@@ -256,7 +258,7 @@ final class Started
      */
     private function writeAndRead(
         Watch $watch,
-        Writable\Stream $stream,
+        Writable $stream,
         Sequence $chunks,
         Sequence $output,
         bool $keepOutputWhileWriting,
@@ -269,7 +271,7 @@ final class Started
                     /**
                      * @var Watch $watch
                      * @var Sequence<array{0: Str, 1: Type}> $output
-                     * @var Writable\Stream $stream
+                     * @var Writable $stream
                      * @psalm-suppress MixedAssignment
                      * @psalm-suppress MixedArrayAccess
                      */
@@ -303,12 +305,12 @@ final class Started
         return [$watch, $output];
     }
 
-    private function waitAvailable(Writable\Stream $stream): Writable
+    private function waitAvailable(Writable $stream): Writable
     {
         $watch = $this->watch->forWrite($stream);
 
         do {
-            /** @var Set<Selectable> */
+            /** @var Set<Writable> */
             $toWrite = $watch()->match(
                 static fn($ready) => $ready->toWrite(),
                 static fn() => Set::of(),
@@ -346,7 +348,7 @@ final class Started
         $this->executed = true;
     }
 
-    private function maybeUnwatch(Watch $watch, Selectable $stream): Watch
+    private function maybeUnwatch(Watch $watch, Stream $stream): Watch
     {
         if ($stream->end() || $stream->closed()) {
             $watch = $watch->unwatch($stream);
@@ -368,7 +370,7 @@ final class Started
      */
     private function readOnce(Watch $watch): array
     {
-        /** @var Set<Selectable&Readable> */
+        /** @var Set<Readable> */
         $toRead = $watch()->match(
             static fn($ready) => $ready->toRead(),
             static fn() => Set::of(),

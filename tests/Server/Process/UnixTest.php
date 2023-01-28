@@ -22,6 +22,7 @@ use Innmind\Url\Path;
 use Innmind\Stream\{
     Readable\Stream,
     Watch\Select,
+    Streams,
 };
 use Innmind\Immutable\SideEffect;
 use PHPUnit\Framework\TestCase;
@@ -40,6 +41,7 @@ class UnixTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('echo')->withArgument('hello'),
         );
@@ -68,6 +70,7 @@ class UnixTest extends TestCase
                     new Clock,
                     Select::timeoutAfter(new ElapsedPeriod(0)),
                     new Usleep,
+                    Streams::fromAmbientAuthority(),
                     new Second(1),
                     Command::foreground('echo')->withArgument($echo),
                 );
@@ -89,6 +92,7 @@ class UnixTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
@@ -115,6 +119,7 @@ class UnixTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
@@ -145,6 +150,7 @@ class UnixTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
@@ -170,6 +176,7 @@ class UnixTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('echo')->withArgument('hello'),
         );
@@ -188,6 +195,7 @@ class UnixTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/fails.php')
@@ -209,6 +217,7 @@ class UnixTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('cat')->withInput(Content\OfStream::of(
                 Stream::of(\fopen('fixtures/symfony.log', 'r')),
@@ -233,6 +242,7 @@ class UnixTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('cat')
                 ->withInput(Content\OfStream::of(

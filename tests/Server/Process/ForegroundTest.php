@@ -19,7 +19,10 @@ use Innmind\TimeContinuum\Earth\{
     Period\Second,
 };
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Watch\Select;
+use Innmind\Stream\{
+    Watch\Select,
+    Streams,
+};
 use Innmind\Immutable\{
     Str,
     SideEffect,
@@ -34,6 +37,7 @@ class ForegroundTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('ps'),
         );
@@ -50,6 +54,7 @@ class ForegroundTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('ps'),
         );
@@ -70,6 +75,7 @@ class ForegroundTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
@@ -100,6 +106,7 @@ class ForegroundTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('php fixtures/fails.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
@@ -132,6 +139,7 @@ class ForegroundTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
@@ -154,6 +162,7 @@ class ForegroundTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
@@ -172,6 +181,7 @@ class ForegroundTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
@@ -196,6 +206,7 @@ class ForegroundTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),

@@ -16,7 +16,10 @@ use Innmind\TimeContinuum\Earth\{
     Period\Second,
 };
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Watch\Select;
+use Innmind\Stream\{
+    Watch\Select,
+    Streams,
+};
 use Innmind\Immutable\SideEffect;
 use PHPUnit\Framework\TestCase;
 
@@ -28,6 +31,7 @@ class BackgroundTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::background('ps'),
         );
@@ -44,6 +48,7 @@ class BackgroundTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::background('ps'),
         );
@@ -61,6 +66,7 @@ class BackgroundTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::background('php fixtures/slow.php'),
         );
@@ -78,6 +84,7 @@ class BackgroundTest extends TestCase
             new Clock,
             Select::timeoutAfter(new ElapsedPeriod(0)),
             new Usleep,
+            Streams::fromAmbientAuthority(),
             new Second(1),
             Command::background('php fixtures/slow.php'),
         );

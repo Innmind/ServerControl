@@ -12,7 +12,10 @@ use Innmind\TimeContinuum\{
     Period,
 };
 use Innmind\TimeWarp\Halt;
-use Innmind\Stream\Watch;
+use Innmind\Stream\{
+    Capabilities,
+    Watch,
+};
 
 /**
  * @internal
@@ -22,6 +25,7 @@ final class Unix
     private Clock $clock;
     private Watch $watch;
     private Halt $halt;
+    private Capabilities $capabilities;
     private Period $grace;
     private Command $command;
 
@@ -29,12 +33,14 @@ final class Unix
         Clock $clock,
         Watch $watch,
         Halt $halt,
+        Capabilities $capabilities,
         Period $grace,
         Command $command,
     ) {
         $this->clock = $clock;
         $this->watch = $watch;
         $this->halt = $halt;
+        $this->capabilities = $capabilities;
         $this->grace = $grace;
         $this->command = $command;
     }
@@ -77,6 +83,7 @@ final class Unix
             $this->clock,
             $this->watch,
             $this->halt,
+            $this->capabilities,
             $this->grace,
             $start,
             $this->command->toBeRunInBackground(),
