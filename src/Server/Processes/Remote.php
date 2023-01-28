@@ -16,7 +16,10 @@ use Innmind\Url\Authority\{
     Port,
     UserInformation\User,
 };
-use Innmind\Immutable\Either;
+use Innmind\Immutable\{
+    Either,
+    SideEffect,
+};
 
 final class Remote implements Processes
 {
@@ -75,6 +78,7 @@ final class Remote implements Processes
 
         return $process
             ->wait()
+            ->map(static fn() => new SideEffect)
             ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
     }
 }

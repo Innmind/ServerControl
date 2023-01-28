@@ -6,8 +6,7 @@ namespace Tests\Innmind\Server\Control\Server\Process;
 use Innmind\Server\Control\{
     Server\Process\Unix,
     Server\Process\Output\Type,
-    Server\Process\Failed,
-    Server\Process\TimedOut,
+    Server\Process\ExitCode,
     Server\Command,
     Server\Second as Timeout,
 };
@@ -158,7 +157,7 @@ class UnixTest extends TestCase
             static fn() => null,
             static fn($e) => $e,
         );
-        $this->assertInstanceOf(TimedOut::class, $e);
+        $this->assertSame('timed-out', $e);
         // 3 because of the grace period
         $this->assertEqualsWithDelta(3, \microtime(true) - $started, 0.5);
     }
@@ -198,8 +197,8 @@ class UnixTest extends TestCase
             static fn($e) => $e,
         );
 
-        $this->assertInstanceOf(Failed::class, $value);
-        $this->assertSame(1, $value->exitCode()->toInt());
+        $this->assertInstanceOf(ExitCode::class, $value);
+        $this->assertSame(1, $value->toInt());
     }
 
     public function testWithInput()

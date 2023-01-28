@@ -10,6 +10,7 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Process,
     Server\Process\ExitCode,
+    Server\Process\Output,
     ScriptFailed,
 };
 use Innmind\Immutable\{
@@ -75,7 +76,10 @@ class ScriptTest extends TestCase
         $process2
             ->expects($this->any())
             ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
+            ->willReturn(Either::left(new Process\Failed(
+                new ExitCode(1),
+                $this->createMock(Output::class),
+            )));
         $processes
             ->expects($this->exactly(2))
             ->method('execute')
@@ -143,7 +147,9 @@ class ScriptTest extends TestCase
         $process
             ->expects($this->once())
             ->method('wait')
-            ->willReturn(Either::left($expected = new Process\TimedOut));
+            ->willReturn(Either::left($expected = new Process\TimedOut(
+                $this->createMock(Output::class),
+            )));
 
         $e = $script($server)->match(
             static fn() => null,

@@ -113,7 +113,7 @@ final class Started
     }
 
     /**
-     * @return Either<Failed|Signaled|TimedOut, SideEffect>
+     * @return Either<ExitCode|'signaled'|'timed-out', SideEffect>
      */
     public function wait(): Either
     {
@@ -131,7 +131,7 @@ final class Started
     }
 
     /**
-     * @return \Generator<int, array{0: Str, 1: Type}, mixed, Either<Failed|Signaled|TimedOut, SideEffect>>
+     * @return \Generator<int, array{0: Str, 1: Type}, mixed, Either<ExitCode|'signaled'|'timed-out', SideEffect>>
      */
     public function output(bool $keepOutputWhileWriting = true): \Generator
     {
@@ -161,7 +161,7 @@ final class Started
             );
 
             if ($timedOut) {
-                /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
+                /** @var Either<ExitCode|'signaled'|'timed-out', SideEffect> */
                 return Either::left($this->abort());
             }
 
@@ -194,18 +194,18 @@ final class Started
         $this->close();
 
         if ($status['signaled'] || $status['stopped']) {
-            /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
-            return Either::left(new Signaled);
+            /** @var Either<ExitCode|'signaled'|'timed-out', SideEffect> */
+            return Either::left('signaled');
         }
 
         $exitCode = new ExitCode($status['exitcode']);
 
         if (!$exitCode->successful()) {
-            /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
-            return Either::left(new Failed($exitCode));
+            /** @var Either<ExitCode|'signaled'|'timed-out', SideEffect> */
+            return Either::left($exitCode);
         }
 
-        /** @var Either<Failed|Signaled|TimedOut, SideEffect> */
+        /** @var Either<ExitCode|'signaled'|'timed-out', SideEffect> */
         return Either::right(new SideEffect);
     }
 
@@ -397,7 +397,7 @@ final class Started
     }
 
     /**
-     * @return Maybe<TimedOut>
+     * @return Maybe<'timed-out'>
      */
     private function checkTimeout(): Maybe
     {
@@ -413,10 +413,13 @@ final class Started
                     ->elapsedSince($this->startedAt)
                     ->longerThan($threshold),
             )
-            ->map(static fn() => new TimedOut);
+            ->map(static fn() => 'timed-out');
     }
 
-    private function abort(): TimedOut
+    /**
+     * @return 'timed-out'
+     */
+    private function abort(): string
     {
         @\proc_terminate($this->process);
         ($this->halt)($this->grace);
@@ -427,7 +430,7 @@ final class Started
 
         $this->close();
 
-        return new TimedOut;
+        return 'timed-out';
     }
 
     private function outputStillOpen(): bool

@@ -22,7 +22,10 @@ use Innmind\TimeContinuum\{
 };
 use Innmind\TimeWarp\Halt;
 use Innmind\Stream\Capabilities;
-use Innmind\Immutable\Either;
+use Innmind\Immutable\{
+    Either,
+    SideEffect,
+};
 
 final class Unix implements Processes
 {
@@ -84,6 +87,7 @@ final class Unix implements Processes
 
         return $process
             ->wait()
+            ->map(static fn() => new SideEffect)
             ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
     }
 }

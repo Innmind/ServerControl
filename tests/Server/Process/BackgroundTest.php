@@ -6,6 +6,7 @@ namespace Tests\Innmind\Server\Control\Server\Process;
 use Innmind\Server\Control\Server\{
     Process\Background,
     Process\Unix,
+    Process\Success,
     Process,
     Process\Output\Output,
     Command,
@@ -20,7 +21,6 @@ use Innmind\Stream\{
     Watch\Select,
     Streams,
 };
-use Innmind\Immutable\SideEffect;
 use PHPUnit\Framework\TestCase;
 
 class BackgroundTest extends TestCase
@@ -87,11 +87,11 @@ class BackgroundTest extends TestCase
         $process = new Background($slow());
 
         $this->assertInstanceOf(
-            SideEffect::class,
+            Success::class,
             $process
                 ->wait()
                 ->match(
-                    static fn($sideEffect) => $sideEffect,
+                    static fn($success) => $success,
                     static fn() => null,
                 ),
         );
