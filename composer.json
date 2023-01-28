@@ -19,7 +19,7 @@
         "innmind/stream": "dev-capabilities",
         "innmind/url": "~4.0",
         "psr/log": "~3.0",
-        "innmind/time-continuum": "^3.0",
+        "innmind/time-continuum": "^3.1",
         "innmind/filesystem": "dev-capabilities",
         "innmind/time-warp": "^3.0"
     },
