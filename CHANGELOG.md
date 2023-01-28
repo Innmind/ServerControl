@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- `Innmind\Server\Control\ServerFactory::build()` second argument now expect `Innmind\Stream\Capabilities`
+
 ## 4.3.0 - 2022-12-18
 
 ### Added

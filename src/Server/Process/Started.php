@@ -73,7 +73,6 @@ final class Started
      */
     public function __construct(
         Clock $clock,
-        Watch $watch,
         Halt $halt,
         Capabilities $capabilities,
         Period $grace,
@@ -83,7 +82,11 @@ final class Started
         Maybe $content,
     ) {
         $this->clock = $clock;
-        $this->watch = $watch;
+        // we do not use a timeout when watching for stream otherwise we would
+        // wait when writing each chunk of input to the process stream
+        $this->watch = $capabilities
+            ->watch()
+            ->timeoutAfter(ElapsedPeriod::of(0));
         $this->halt = $halt;
         $this->grace = $grace;
         $this->background = $background;

@@ -29,9 +29,8 @@ class BackgroundTest extends TestCase
     {
         $process = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
-            new Usleep,
             Streams::fromAmbientAuthority(),
+            new Usleep,
             new Second(1),
             Command::background('ps'),
         );
@@ -46,9 +45,8 @@ class BackgroundTest extends TestCase
     {
         $ps = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
-            new Usleep,
             Streams::fromAmbientAuthority(),
+            new Usleep,
             new Second(1),
             Command::background('ps'),
         );
@@ -64,9 +62,8 @@ class BackgroundTest extends TestCase
     {
         $slow = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
-            new Usleep,
             Streams::fromAmbientAuthority(),
+            new Usleep,
             new Second(1),
             Command::background('php fixtures/slow.php'),
         );
@@ -82,9 +79,8 @@ class BackgroundTest extends TestCase
     {
         $slow = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
-            new Usleep,
             Streams::fromAmbientAuthority(),
+            new Usleep,
             new Second(1),
             Command::background('php fixtures/slow.php'),
         );
