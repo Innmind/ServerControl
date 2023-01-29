@@ -13,25 +13,23 @@ use Innmind\TimeContinuum\{
     Period,
 };
 use Innmind\TimeWarp\Halt;
-use Innmind\Stream\Watch;
+use Innmind\Stream\Capabilities;
 
 final class ServerFactory
 {
     /**
-     * @param callable(ElapsedPeriod): Watch $watch
-     *
      * @throws UnsupportedOperatingSystem For windows system
      */
     public static function build(
         Clock $clock,
-        callable $watch,
+        Capabilities $capabilities,
         Halt $halt,
         Period $grace = null,
     ): Server {
         switch (\PHP_OS) {
             case 'Darwin':
             case 'Linux':
-                return Unix::of($clock, $watch, $halt, $grace);
+                return Unix::of($clock, $capabilities, $halt, $grace);
         }
 
         throw new UnsupportedOperatingSystem;

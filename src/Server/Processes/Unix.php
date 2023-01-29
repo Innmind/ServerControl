@@ -21,42 +21,40 @@ use Innmind\TimeContinuum\{
     Earth\Period\Second,
 };
 use Innmind\TimeWarp\Halt;
-use Innmind\Stream\Watch;
-use Innmind\Immutable\Either;
+use Innmind\Stream\Capabilities;
+use Innmind\Immutable\{
+    Either,
+    SideEffect,
+};
 
 final class Unix implements Processes
 {
     private Clock $clock;
-    private Watch $watch;
     private Halt $halt;
+    private Capabilities $capabilities;
     private Period $grace;
 
     private function __construct(
         Clock $clock,
-        Watch $watch,
+        Capabilities $capabilities,
         Halt $halt,
         Period $grace,
     ) {
         $this->clock = $clock;
-        $this->watch = $watch;
+        $this->capabilities = $capabilities;
         $this->halt = $halt;
         $this->grace = $grace;
     }
 
-    /**
-     * @param callable(ElapsedPeriod): Watch $watch
-     */
     public static function of(
         Clock $clock,
-        callable $watch,
+        Capabilities $capabilities,
         Halt $halt,
         Period $grace = null,
     ): self {
-        // we do not use a timeout when watching for stream otherwise we would
-        // wait when writing each chunk of input to the process stream
         return new self(
             $clock,
-            $watch(new Earth\ElapsedPeriod(0)),
+            $capabilities,
             $halt,
             $grace ?? new Second(1),
         );
@@ -66,7 +64,7 @@ final class Unix implements Processes
     {
         $process = new Process\Unix(
             $this->clock,
-            $this->watch,
+            $this->capabilities,
             $this->halt,
             $this->grace,
             $command,
@@ -89,6 +87,7 @@ final class Unix implements Processes
 
         return $process
             ->wait()
+            ->map(static fn() => new SideEffect)
             ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
     }
 }

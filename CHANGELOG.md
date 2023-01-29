@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `Innmind\Server\Control\Server\Process\Success`
+- `Innmind\Server\Control\Server\Process\Failed::output()`
+- `Innmind\Server\Control\Server\Process\TimedOut::output()`
+- `Innmind\Server\Control\Server\Process\Signaled::output()`
+
+### Changed
+
+- `Innmind\Server\Control\ServerFactory::build()` second argument now expect `Innmind\Stream\Capabilities`
+- `Innmind\Server\Control\Server\Process::wait()` right side of the returned `Either` is now `Innmind\Server\Control\Server\Process\Success` instead of `Innmind\Immutable\SideEffect`
+
 ## 4.3.0 - 2022-12-18
 
 ### Added

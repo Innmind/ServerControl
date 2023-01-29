@@ -6,22 +6,20 @@ namespace Tests\Innmind\Server\Control\Server\Process;
 use Innmind\Server\Control\{
     Server\Process\Unix,
     Server\Process\Output\Type,
-    Server\Process\Failed,
-    Server\Process\TimedOut,
+    Server\Process\ExitCode,
     Server\Command,
     Server\Second as Timeout,
 };
 use Innmind\Filesystem\File\Content;
 use Innmind\TimeContinuum\Earth\{
     Clock,
-    ElapsedPeriod,
     Period\Second,
 };
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Url\Path;
 use Innmind\Stream\{
     Readable\Stream,
-    Watch\Select,
+    Streams,
 };
 use Innmind\Immutable\SideEffect;
 use PHPUnit\Framework\TestCase;
@@ -38,7 +36,7 @@ class UnixTest extends TestCase
     {
         $cat = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('echo')->withArgument('hello'),
@@ -66,7 +64,7 @@ class UnixTest extends TestCase
             ->then(function($echo) {
                 $cat = new Unix(
                     new Clock,
-                    Select::timeoutAfter(new ElapsedPeriod(0)),
+                    Streams::fromAmbientAuthority(),
                     new Usleep,
                     new Second(1),
                     Command::foreground('echo')->withArgument($echo),
@@ -87,7 +85,7 @@ class UnixTest extends TestCase
     {
         $slow = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('php')
@@ -113,7 +111,7 @@ class UnixTest extends TestCase
     {
         $slow = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('php')
@@ -143,7 +141,7 @@ class UnixTest extends TestCase
     {
         $slow = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('php')
@@ -159,7 +157,7 @@ class UnixTest extends TestCase
             static fn() => null,
             static fn($e) => $e,
         );
-        $this->assertInstanceOf(TimedOut::class, $e);
+        $this->assertSame('timed-out', $e);
         // 3 because of the grace period
         $this->assertEqualsWithDelta(3, \microtime(true) - $started, 0.5);
     }
@@ -168,7 +166,7 @@ class UnixTest extends TestCase
     {
         $cat = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('echo')->withArgument('hello'),
@@ -186,7 +184,7 @@ class UnixTest extends TestCase
     {
         $cat = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('php')
@@ -199,15 +197,15 @@ class UnixTest extends TestCase
             static fn($e) => $e,
         );
 
-        $this->assertInstanceOf(Failed::class, $value);
-        $this->assertSame(1, $value->exitCode()->toInt());
+        $this->assertInstanceOf(ExitCode::class, $value);
+        $this->assertSame(1, $value->toInt());
     }
 
     public function testWithInput()
     {
         $cat = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('cat')->withInput(Content\OfStream::of(
@@ -231,7 +229,7 @@ class UnixTest extends TestCase
         @\unlink('test.log');
         $cat = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('cat')

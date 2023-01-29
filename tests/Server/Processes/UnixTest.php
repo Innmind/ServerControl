@@ -18,7 +18,7 @@ use Innmind\TimeContinuum\Earth\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Stream\{
     Readable\Stream,
-    Watch\Select,
+    Streams,
 };
 use Innmind\Immutable\SideEffect;
 use PHPUnit\Framework\TestCase;
@@ -29,7 +29,7 @@ class UnixTest extends TestCase
     {
         $this->assertInstanceOf(Processes::class, Unix::of(
             new Clock,
-            Select::timeoutAfter(...),
+            Streams::fromAmbientAuthority(),
             new Usleep,
         ));
     }
@@ -38,7 +38,7 @@ class UnixTest extends TestCase
     {
         $processes = Unix::of(
             new Clock,
-            Select::timeoutAfter(...),
+            Streams::fromAmbientAuthority(),
             new Usleep,
         );
         $start = \time();
@@ -57,7 +57,7 @@ class UnixTest extends TestCase
     {
         $processes = Unix::of(
             new Clock,
-            Select::timeoutAfter(...),
+            Streams::fromAmbientAuthority(),
             new Usleep,
         );
         $start = \time();
@@ -77,7 +77,7 @@ class UnixTest extends TestCase
     {
         $processes = Unix::of(
             new Clock,
-            Select::timeoutAfter(...),
+            Streams::fromAmbientAuthority(),
             new Usleep,
         );
         $process = $processes->execute(
@@ -104,7 +104,7 @@ class UnixTest extends TestCase
 
         $processes = Unix::of(
             new Clock,
-            Select::timeoutAfter(...),
+            Streams::fromAmbientAuthority(),
             new Usleep,
         );
         $start = \time();
@@ -135,7 +135,7 @@ class UnixTest extends TestCase
     {
         $processes = Unix::of(
             new Clock,
-            Select::timeoutAfter(...),
+            Streams::fromAmbientAuthority(),
             new Usleep,
         );
         $start = \time();
@@ -161,7 +161,7 @@ class UnixTest extends TestCase
         $called = false;
         $processes = Unix::of(
             new Clock,
-            Select::timeoutAfter(...),
+            Streams::fromAmbientAuthority(),
             new Usleep,
         );
         $processes
@@ -183,7 +183,7 @@ class UnixTest extends TestCase
         $called = false;
         $processes = Unix::of(
             new Clock,
-            Select::timeoutAfter(...),
+            Streams::fromAmbientAuthority(),
             new Usleep,
         );
         $process = $processes
@@ -204,7 +204,7 @@ class UnixTest extends TestCase
         $called = false;
         $processes = Unix::of(
             new Clock,
-            Select::timeoutAfter(...),
+            Streams::fromAmbientAuthority(),
             new Usleep,
         );
         $process = $processes
@@ -228,7 +228,7 @@ class UnixTest extends TestCase
         \touch('/tmp/test-file');
         $processes = Unix::of(
             new Clock,
-            Select::timeoutAfter(...),
+            Streams::fromAmbientAuthority(),
             new Usleep,
         );
         $tail = $processes->execute(
