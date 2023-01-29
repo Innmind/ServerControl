@@ -5,10 +5,18 @@ namespace Innmind\Server\Control\Server\Process;
 
 final class TimedOut
 {
+    private Output $output;
+
     /**
      * @internal
      */
-    public function __construct()
+    public function __construct(Output $output)
     {
+        $this->output = $output;
+    }
+
+    public function output(): Output
+    {
+        return $this->output;
     }
 }

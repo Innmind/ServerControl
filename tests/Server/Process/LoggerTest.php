@@ -83,7 +83,10 @@ class LoggerTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('wait')
-            ->willReturn($expected = Either::left(new Process\Failed(new ExitCode(1))));
+            ->willReturn($expected = Either::left(new Process\Failed(
+                new ExitCode(1),
+                $this->createMock(Output::class),
+            )));
 
         $this->assertEquals($expected, $process->wait());
     }
@@ -102,7 +105,9 @@ class LoggerTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('wait')
-            ->willReturn($expected = Either::left(new Process\TimedOut));
+            ->willReturn($expected = Either::left(new Process\TimedOut(
+                $this->createMock(Output::class),
+            )));
 
         $this->assertEquals($expected, $process->wait());
     }
@@ -121,7 +126,9 @@ class LoggerTest extends TestCase
         $inner
             ->expects($this->once())
             ->method('wait')
-            ->willReturn($expected = Either::left(new Process\Signaled));
+            ->willReturn($expected = Either::left(new Process\Signaled(
+                $this->createMock(Output::class),
+            )));
 
         $this->assertEquals($expected, $process->wait());
     }

@@ -10,7 +10,7 @@ use Innmind\Server\Control\{
 };
 use Innmind\TimeContinuum\Earth\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Watch\Select;
+use Innmind\Stream\Streams;
 use PHPUnit\Framework\TestCase;
 
 class ServerFactoryTest extends TestCase
@@ -23,7 +23,7 @@ class ServerFactoryTest extends TestCase
 
         $this->assertInstanceOf(Server::class, ServerFactory::build(
             new Clock,
-            Select::timeoutAfter(...),
+            Streams::fromAmbientAuthority(),
             new Usleep,
         ));
     }
@@ -38,7 +38,7 @@ class ServerFactoryTest extends TestCase
 
         ServerFactory::build(
             new Clock,
-            Select::timeoutAfter(...),
+            Streams::fromAmbientAuthority(),
             new Usleep,
         );
     }

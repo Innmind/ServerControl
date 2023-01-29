@@ -9,7 +9,6 @@ use Innmind\Immutable\{
     Str,
     Maybe,
     Either,
-    SideEffect,
 };
 
 final class Background implements Process
@@ -48,6 +47,6 @@ final class Background implements Process
 
     public function wait(): Either
     {
-        return Either::right(new SideEffect);
+        return Either::right(new Success($this->output));
     }
 }

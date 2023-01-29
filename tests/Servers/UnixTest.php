@@ -11,7 +11,7 @@ use Innmind\Server\Control\{
 };
 use Innmind\TimeContinuum\Earth\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Watch\Select;
+use Innmind\Stream\Streams;
 use PHPUnit\Framework\TestCase;
 
 class UnixTest extends TestCase
@@ -20,7 +20,7 @@ class UnixTest extends TestCase
     {
         $this->assertInstanceOf(Server::class, Unix::of(
             new Clock,
-            Select::timeoutAfter(...),
+            Streams::fromAmbientAuthority(),
             new Usleep,
         ));
     }
@@ -29,7 +29,7 @@ class UnixTest extends TestCase
     {
         $this->assertInstanceOf(Processes::class, Unix::of(
             new Clock,
-            Select::timeoutAfter(...),
+            Streams::fromAmbientAuthority(),
             new Usleep,
         )->processes());
     }
@@ -38,7 +38,7 @@ class UnixTest extends TestCase
     {
         $this->assertInstanceOf(Volumes::class, Unix::of(
             new Clock,
-            Select::timeoutAfter(...),
+            Streams::fromAmbientAuthority(),
             new Usleep,
         )->volumes());
     }

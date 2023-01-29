@@ -11,6 +11,7 @@ use Innmind\Server\Control\Server\{
     Process\Output,
     Process\Output\Type,
     Process\Failed,
+    Process\Success,
     Command,
 };
 use Innmind\TimeContinuum\Earth\{
@@ -19,11 +20,11 @@ use Innmind\TimeContinuum\Earth\{
     Period\Second,
 };
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Watch\Select;
-use Innmind\Immutable\{
-    Str,
-    SideEffect,
+use Innmind\Stream\{
+    Watch\Select,
+    Streams,
 };
+use Innmind\Immutable\Str;
 use PHPUnit\Framework\TestCase;
 
 class ForegroundTest extends TestCase
@@ -32,7 +33,7 @@ class ForegroundTest extends TestCase
     {
         $ps = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('ps'),
@@ -48,7 +49,7 @@ class ForegroundTest extends TestCase
     {
         $ps = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('ps'),
@@ -68,7 +69,7 @@ class ForegroundTest extends TestCase
     {
         $slow = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('php fixtures/slow.php')
@@ -98,7 +99,7 @@ class ForegroundTest extends TestCase
     {
         $fail = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('php fixtures/fails.php')
@@ -113,15 +114,22 @@ class ForegroundTest extends TestCase
         $this->assertInstanceOf(
             Failed::class,
             $return->match(
-                static fn($sideEffect) => null,
+                static fn($success) => null,
                 static fn($e) => $e,
             ),
         );
         $this->assertSame(
             1,
             $return->match(
-                static fn($sideEffect) => null,
+                static fn($success) => null,
                 static fn($e) => $e->exitCode()->toInt(),
+            ),
+        );
+        $this->assertSame(
+            $process->output(),
+            $return->match(
+                static fn($success) => null,
+                static fn($e) => $e->output(),
             ),
         );
     }
@@ -130,21 +138,28 @@ class ForegroundTest extends TestCase
     {
         $slow = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
         $process = new Foreground($slow());
+        $return = $process->wait();
+
         $this->assertInstanceOf(
-            SideEffect::class,
-            $process
-                ->wait()
-                ->match(
-                    static fn($sideEffect) => $sideEffect,
-                    static fn() => null,
-                ),
+            Success::class,
+            $return->match(
+                static fn($success) => $success,
+                static fn() => null,
+            ),
+        );
+        $this->assertSame(
+            $process->output(),
+            $return->match(
+                static fn($success) => $success->output(),
+                static fn() => null,
+            ),
         );
     }
 
@@ -152,7 +167,7 @@ class ForegroundTest extends TestCase
     {
         $slow = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('php fixtures/slow.php')
@@ -170,7 +185,7 @@ class ForegroundTest extends TestCase
     {
         $slow = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('php fixtures/slow.php')
@@ -180,11 +195,11 @@ class ForegroundTest extends TestCase
         $process->output()->toString();
 
         $this->assertInstanceOf(
-            SideEffect::class,
+            Success::class,
             $process
                 ->wait()
                 ->match(
-                    static fn($sideEffect) => $sideEffect,
+                    static fn($success) => $success,
                     static fn() => null,
                 ),
         );
@@ -194,7 +209,7 @@ class ForegroundTest extends TestCase
     {
         $slow = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::foreground('php fixtures/slow.php')
@@ -202,11 +217,11 @@ class ForegroundTest extends TestCase
         );
         $process = new Foreground($slow());
         $this->assertInstanceOf(
-            SideEffect::class,
+            Success::class,
             $process
                 ->wait()
                 ->match(
-                    static fn($sideEffect) => $sideEffect,
+                    static fn($success) => $success,
                     static fn() => null,
                 ),
         );

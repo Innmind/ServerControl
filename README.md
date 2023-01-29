@@ -27,13 +27,13 @@ use Innmind\Server\Control\{
 };
 use Innmind\TimeContinuum\Earth\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Watch\Select;
+use Innmind\Stream\Streams;
 use Innmind\Url\Path;
 use Innmind\Immutable\Str;
 
 $server = ServerFactory::build(
     new Clock,
-    Select::timeoutAfter(...),
+    Streams::fromAmbientAuthority(),
     new Usleep,
 );
 $server

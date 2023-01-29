@@ -6,6 +6,7 @@ namespace Tests\Innmind\Server\Control\Server\Process;
 use Innmind\Server\Control\Server\{
     Process\Background,
     Process\Unix,
+    Process\Success,
     Process,
     Process\Output\Output,
     Command,
@@ -16,8 +17,10 @@ use Innmind\TimeContinuum\Earth\{
     Period\Second,
 };
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Watch\Select;
-use Innmind\Immutable\SideEffect;
+use Innmind\Stream\{
+    Watch\Select,
+    Streams,
+};
 use PHPUnit\Framework\TestCase;
 
 class BackgroundTest extends TestCase
@@ -26,7 +29,7 @@ class BackgroundTest extends TestCase
     {
         $process = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::background('ps'),
@@ -42,7 +45,7 @@ class BackgroundTest extends TestCase
     {
         $ps = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::background('ps'),
@@ -59,7 +62,7 @@ class BackgroundTest extends TestCase
     {
         $slow = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::background('php fixtures/slow.php'),
@@ -76,7 +79,7 @@ class BackgroundTest extends TestCase
     {
         $slow = new Unix(
             new Clock,
-            Select::timeoutAfter(new ElapsedPeriod(0)),
+            Streams::fromAmbientAuthority(),
             new Usleep,
             new Second(1),
             Command::background('php fixtures/slow.php'),
@@ -84,11 +87,11 @@ class BackgroundTest extends TestCase
         $process = new Background($slow());
 
         $this->assertInstanceOf(
-            SideEffect::class,
+            Success::class,
             $process
                 ->wait()
                 ->match(
-                    static fn($sideEffect) => $sideEffect,
+                    static fn($success) => $success,
                     static fn() => null,
                 ),
         );

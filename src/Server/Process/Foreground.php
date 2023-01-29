@@ -9,14 +9,13 @@ use Innmind\Immutable\{
     Str,
     Maybe,
     Either,
-    SideEffect,
 };
 
 final class Foreground implements Process
 {
     private Started $process;
     private Output $output;
-    /** @var ?Either<Failed|Signaled|TimedOut, SideEffect> */
+    /** @var ?Either<Failed|Signaled|TimedOut, Success> */
     private ?Either $status = null;
 
     public function __construct(Started $process, bool $streamOutput = false)
@@ -29,7 +28,14 @@ final class Foreground implements Process
                 yield $chunk;
             }
 
-            $this->status = $output->getReturn();
+            $this->status = $output
+                ->getReturn()
+                ->map(fn() => new Success($this->output))
+                ->leftMap(fn($error) => match ($error) {
+                    'timed-out' => new TimedOut($this->output),
+                    'signaled' => new Signaled($this->output),
+                    default => new Failed($error, $this->output),
+                });
         };
 
         if ($streamOutput) {
@@ -63,6 +69,14 @@ final class Foreground implements Process
 
         // the status should always be set here because we iterated over the
         // output above but we stil coalesce to the wait() call to please psalm
-        return $this->status ??= $this->process->wait();
+        return $this->status ??= $this
+            ->process
+            ->wait()
+            ->map(fn() => new Success($this->output))
+            ->leftMap(fn($error) => match ($error) {
+                'timed-out' => new TimedOut($this->output),
+                'signaled' => new Signaled($this->output),
+                default => new Failed($error, $this->output),
+            });
     }
 }

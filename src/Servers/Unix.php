@@ -14,7 +14,7 @@ use Innmind\TimeContinuum\{
     Period,
 };
 use Innmind\TimeWarp\Halt;
-use Innmind\Stream\Watch;
+use Innmind\Stream\Capabilities;
 use Innmind\Immutable\Either;
 
 final class Unix implements Server
@@ -22,34 +22,28 @@ final class Unix implements Server
     private Processes $processes;
     private Volumes $volumes;
 
-    /**
-     * @param callable(ElapsedPeriod): Watch $watch
-     */
     private function __construct(
         Clock $clock,
-        callable $watch,
+        Capabilities $capabilities,
         Halt $halt,
         Period $grace = null,
     ) {
         $this->processes = Processes\Unix::of(
             $clock,
-            $watch,
+            $capabilities,
             $halt,
             $grace,
         );
         $this->volumes = new Volumes\Unix($this->processes);
     }
 
-    /**
-     * @param callable(ElapsedPeriod): Watch $watch
-     */
     public static function of(
         Clock $clock,
-        callable $watch,
+        Capabilities $capabilities,
         Halt $halt,
         Period $grace = null,
     ): self {
-        return new self($clock, $watch, $halt, $grace);
+        return new self($clock, $capabilities, $halt, $grace);
     }
 
     public function processes(): Processes
