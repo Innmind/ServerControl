@@ -214,6 +214,7 @@ final class Started
      */
     private function status(): array
     {
+        /** @var Status */
         return \proc_get_status($this->process);
     }
 
@@ -272,9 +273,6 @@ final class Started
                 [$watch, $output, $stream],
                 function($state, $chunk) use ($keepOutputWhileWriting) {
                     /**
-                     * @var Watch $watch
-                     * @var Sequence<array{0: Str, 1: Type}> $output
-                     * @var Writable $stream
                      * @psalm-suppress MixedAssignment
                      * @psalm-suppress MixedArrayAccess
                      */
