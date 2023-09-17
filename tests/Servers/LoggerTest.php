@@ -79,32 +79,45 @@ class LoggerTest extends TestCase
             ->method('wait')
             ->willReturn(Either::right(new SideEffect));
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [$this->callback(static function(Command $command): bool {
-                    return $command->toString() === 'which diskutil';
-                })],
-                [$this->callback(static function(Command $command): bool {
-                    return $command->toString() === "diskutil 'unmount' '/dev'";
-                })],
-            )
-            ->will($this->onConsecutiveCalls($which1, $which2));
+            ->willReturnCallback(function(Command $command) use ($matcher, $which1, $which2) {
+                match ($matcher->numberOfInvocations()) {
+                    1 => $this->assertSame(
+                        'which diskutil',
+                        $command->toString(),
+                    ),
+                    2 => $this->assertSame(
+                        "diskutil 'unmount' '/dev'",
+                        $command->toString(),
+                    ),
+                };
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $which1,
+                    2 => $which2,
+                };
+            });
 
         $logger = Logger::psr(
             $server,
             $log = $this->createMock(LoggerInterface::class),
         );
         $log
-            ->expects($this->atLeast(1))
+            ->expects($matcher = $this->atLeast(1))
             ->method('info')
-            ->withConsecutive([
-                'About to execute a command',
-                [
-                    'command' => 'which diskutil',
-                    'workingDirectory' => null,
-                ],
-            ]);
+            ->willReturnCallback(function($message, $context) use ($matcher) {
+                if ($matcher->numberOfInvocations() === 1) {
+                    $this->assertSame('About to execute a command', $message);
+                    $this->assertSame(
+                        [
+                            'command' => 'which diskutil',
+                            'workingDirectory' => null,
+                        ],
+                        $context,
+                    );
+                }
+            });
 
         $this->assertInstanceOf(
             Volumes::class,

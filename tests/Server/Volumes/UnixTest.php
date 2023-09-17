@@ -48,17 +48,25 @@ class UnixTest extends TestCase
             ->method('wait')
             ->willReturn(Either::right(new SideEffect));
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === 'which diskutil';
-                })],
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === "diskutil 'mount' '/dev/disk1s2'";
-                })],
-            )
-            ->will($this->onConsecutiveCalls($which, $mount));
+            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
+                match ($matcher->numberOfInvocations()) {
+                    1 => $this->assertSame(
+                        'which diskutil',
+                        $command->toString(),
+                    ),
+                    2 => $this->assertSame(
+                        "diskutil 'mount' '/dev/disk1s2'",
+                        $command->toString(),
+                    ),
+                };
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $which,
+                    2 => $mount,
+                };
+            });
 
         $this->assertInstanceOf(
             SideEffect::class,
@@ -91,17 +99,25 @@ class UnixTest extends TestCase
                 $this->createMock(Output::class),
             )));
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === 'which diskutil';
-                })],
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === "diskutil 'mount' '/dev/disk1s2'";
-                })],
-            )
-            ->will($this->onConsecutiveCalls($which, $mount));
+            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
+                match ($matcher->numberOfInvocations()) {
+                    1 => $this->assertSame(
+                        'which diskutil',
+                        $command->toString(),
+                    ),
+                    2 => $this->assertSame(
+                        "diskutil 'mount' '/dev/disk1s2'",
+                        $command->toString(),
+                    ),
+                };
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $which,
+                    2 => $mount,
+                };
+            });
 
         $this->assertInstanceOf(
             ScriptFailed::class,
@@ -131,17 +147,25 @@ class UnixTest extends TestCase
             ->method('wait')
             ->willReturn(Either::right(new SideEffect));
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === 'which diskutil';
-                })],
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === "diskutil 'unmount' '/dev/disk1s2'";
-                })],
-            )
-            ->will($this->onConsecutiveCalls($which, $mount));
+            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
+                match ($matcher->numberOfInvocations()) {
+                    1 => $this->assertSame(
+                        'which diskutil',
+                        $command->toString(),
+                    ),
+                    2 => $this->assertSame(
+                        "diskutil 'unmount' '/dev/disk1s2'",
+                        $command->toString(),
+                    ),
+                };
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $which,
+                    2 => $mount,
+                };
+            });
 
         $this->assertInstanceOf(
             SideEffect::class,
@@ -171,17 +195,25 @@ class UnixTest extends TestCase
                 $this->createMock(Output::class),
             )));
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === 'which diskutil';
-                })],
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === "diskutil 'unmount' '/dev/disk1s2'";
-                })],
-            )
-            ->will($this->onConsecutiveCalls($which, $mount));
+            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
+                match ($matcher->numberOfInvocations()) {
+                    1 => $this->assertSame(
+                        'which diskutil',
+                        $command->toString(),
+                    ),
+                    2 => $this->assertSame(
+                        "diskutil 'unmount' '/dev/disk1s2'",
+                        $command->toString(),
+                    ),
+                };
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $which,
+                    2 => $mount,
+                };
+            });
 
         $this->assertInstanceOf(
             ScriptFailed::class,
@@ -211,17 +243,25 @@ class UnixTest extends TestCase
             ->method('wait')
             ->willReturn(Either::right(new SideEffect));
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === 'which diskutil';
-                })],
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === "mount '/dev/disk1s2' '/somewhere'";
-                })],
-            )
-            ->will($this->onConsecutiveCalls($which, $mount));
+            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
+                match ($matcher->numberOfInvocations()) {
+                    1 => $this->assertSame(
+                        'which diskutil',
+                        $command->toString(),
+                    ),
+                    2 => $this->assertSame(
+                        "mount '/dev/disk1s2' '/somewhere'",
+                        $command->toString(),
+                    ),
+                };
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $which,
+                    2 => $mount,
+                };
+            });
 
         $this->assertInstanceOf(
             SideEffect::class,
@@ -257,17 +297,25 @@ class UnixTest extends TestCase
                 $this->createMock(Output::class),
             )));
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === 'which diskutil';
-                })],
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === "mount '/dev/disk1s2' '/somewhere'";
-                })],
-            )
-            ->will($this->onConsecutiveCalls($which, $mount));
+            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
+                match ($matcher->numberOfInvocations()) {
+                    1 => $this->assertSame(
+                        'which diskutil',
+                        $command->toString(),
+                    ),
+                    2 => $this->assertSame(
+                        "mount '/dev/disk1s2' '/somewhere'",
+                        $command->toString(),
+                    ),
+                };
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $which,
+                    2 => $mount,
+                };
+            });
 
         $this->assertInstanceOf(
             ScriptFailed::class,
@@ -300,17 +348,25 @@ class UnixTest extends TestCase
             ->method('wait')
             ->willReturn(Either::right(new SideEffect));
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === 'which diskutil';
-                })],
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === "umount '/dev/disk1s2'";
-                })],
-            )
-            ->will($this->onConsecutiveCalls($which, $mount));
+            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
+                match ($matcher->numberOfInvocations()) {
+                    1 => $this->assertSame(
+                        'which diskutil',
+                        $command->toString(),
+                    ),
+                    2 => $this->assertSame(
+                        "umount '/dev/disk1s2'",
+                        $command->toString(),
+                    ),
+                };
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $which,
+                    2 => $mount,
+                };
+            });
 
         $this->assertInstanceOf(
             SideEffect::class,
@@ -343,17 +399,25 @@ class UnixTest extends TestCase
                 $this->createMock(Output::class),
             )));
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === 'which diskutil';
-                })],
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === "umount '/dev/disk1s2'";
-                })],
-            )
-            ->will($this->onConsecutiveCalls($which, $mount));
+            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
+                match ($matcher->numberOfInvocations()) {
+                    1 => $this->assertSame(
+                        'which diskutil',
+                        $command->toString(),
+                    ),
+                    2 => $this->assertSame(
+                        "umount '/dev/disk1s2'",
+                        $command->toString(),
+                    ),
+                };
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $which,
+                    2 => $mount,
+                };
+            });
 
         $this->assertInstanceOf(
             ScriptFailed::class,
