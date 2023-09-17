@@ -16,7 +16,7 @@ class StrTest extends TestCase
         $this->assertSame($expected, (new Str($str))->toString());
     }
 
-    public function cases(): array
+    public static function cases(): array
     {
         return [
             ['a"b%c%', "'a\"b%c%'"],

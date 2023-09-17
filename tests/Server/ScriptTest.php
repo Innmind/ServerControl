@@ -34,13 +34,16 @@ class ScriptTest extends TestCase
             ->willReturn($processes = $this->createMock(Processes::class));
         $process = $this->createMock(Process::class);
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [$command1],
-                [$command2],
-            )
-            ->willReturn($process);
+            ->willReturnCallback(function($command) use ($matcher, $command1, $command2, $process) {
+                match ($matcher->numberOfInvocations()) {
+                    1 => $this->assertSame($command1, $command),
+                    2 => $this->assertSame($command2, $command),
+                };
+
+                return $process;
+            });
         $process
             ->expects($this->any())
             ->method('wait')
@@ -81,13 +84,19 @@ class ScriptTest extends TestCase
                 $this->createMock(Output::class),
             )));
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [$command1],
-                [$command2],
-            )
-            ->will($this->onConsecutiveCalls($process1, $process2));
+            ->willReturnCallback(function($command) use ($matcher, $command1, $command2, $process1, $process2) {
+                match ($matcher->numberOfInvocations()) {
+                    1 => $this->assertSame($command1, $command),
+                    2 => $this->assertSame($command2, $command),
+                };
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $process1,
+                    2 => $process2,
+                };
+            });
 
         $e = $script($server)->match(
             static fn() => null,

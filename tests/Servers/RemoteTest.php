@@ -110,17 +110,25 @@ class RemoteTest extends TestCase
             ->method('wait')
             ->willReturn(Either::right(new SideEffect));
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [$this->callback(static function(Command $command): bool {
-                    return $command->toString() === "ssh 'foo@example.com' 'which diskutil'";
-                })],
-                [$this->callback(static function(Command $command): bool {
-                    return $command->toString() === "ssh 'foo@example.com' 'diskutil '\''unmount'\'' '\''/dev'\'''";
-                })],
-            )
-            ->will($this->onConsecutiveCalls($which1, $which2));
+            ->willReturnCallback(function(Command $command) use ($matcher, $which1, $which2) {
+                match ($matcher->numberOfInvocations()) {
+                    1 => $this->assertSame(
+                        "ssh 'foo@example.com' 'which diskutil'",
+                        $command->toString(),
+                    ),
+                    2 => $this->assertSame(
+                        "ssh 'foo@example.com' 'diskutil '\''unmount'\'' '\''/dev'\'''",
+                        $command->toString(),
+                    ),
+                };
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $which1,
+                    2 => $which2,
+                };
+            });
 
         $remote = new Remote(
             $server,
