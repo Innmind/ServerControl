@@ -268,7 +268,7 @@ final class Started
         bool $keepOutputWhileWriting,
     ): array {
         [$watch, $output, $stream] = $chunks
-            ->map(static fn($chunk) => $chunk->toEncoding('ASCII'))
+            ->map(static fn($chunk) => $chunk->toEncoding(Str\Encoding::ascii))
             ->reduce(
                 [$watch, $output, $stream],
                 function($state, $chunk) use ($keepOutputWhileWriting) {
