@@ -235,7 +235,7 @@ final class Started
     ): array {
         return $this
             ->content
-            ->map(static fn($content) => (new Chunk)($content))
+            ->map(static fn($content) => $content->chunks())
             ->otherwise(function() {
                 $this->closeInput($this->input);
 
