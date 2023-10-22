@@ -135,7 +135,7 @@ class CommandTest extends TestCase
     {
         $command = Command::foreground('bin/console')
             ->withInput(
-                $input = $this->createMock(Content::class),
+                $input = Content::none(),
             );
 
         $this->assertInstanceOf(Command::class, $command);

@@ -16,6 +16,7 @@ use Innmind\Server\Control\{
 use Innmind\Filesystem\File\Content;
 use Innmind\TimeContinuum\Earth\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\IO\IO;
 use Innmind\Stream\{
     Readable\Stream,
     Streams,
@@ -81,8 +82,10 @@ class UnixTest extends TestCase
             new Usleep,
         );
         $process = $processes->execute(
-            Command::foreground('cat')->withInput(Content\OfStream::of(
-                Stream::of(\fopen('fixtures/symfony.log', 'r')),
+            Command::foreground('cat')->withInput(Content::oneShot(
+                IO::of(static fn() => null)->readable()->wrap(
+                    Stream::of(\fopen('fixtures/symfony.log', 'r')),
+                ),
             )),
         );
 
