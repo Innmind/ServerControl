@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Using too much CPU when waiting for processes (due to polling)
+
 ## 5.2.0 - 2023-10-22
 
 ### Changed

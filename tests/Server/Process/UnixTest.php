@@ -134,7 +134,15 @@ class UnixTest extends TestCase
             ++$count;
         }
 
-        $this->assertSame("0\n", $output);
+        // depending on when occur the timeout of the stream_select we may end
+        // up right after the process outputed its second value
+        $this->assertThat(
+            $output,
+            $this->logicalOr(
+                $this->identicalTo("0\n"),
+                $this->identicalTo("0\n1\n"),
+            ),
+        );
         // 3 because of the grace period
         $this->assertEqualsWithDelta(3, \microtime(true) - $started, 0.5);
     }
