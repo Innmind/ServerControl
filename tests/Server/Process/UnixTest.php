@@ -14,7 +14,6 @@ use Innmind\Filesystem\File\Content;
 use Innmind\TimeContinuum\Earth\{
     Clock,
     Period\Second,
-    ElapsedPeriod,
 };
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Url\Path;
@@ -220,7 +219,7 @@ class UnixTest extends TestCase
             new Usleep,
             new Second(1),
             Command::foreground('cat')->withInput(Content::oneShot(
-                IO::of(static fn() => Select::timeoutAfter(ElapsedPeriod::of(0)))->readable()->wrap(
+                IO::of(static fn() => Select::waitForever())->readable()->wrap(
                     Stream::of(\fopen('fixtures/symfony.log', 'r')),
                 ),
             )),
@@ -247,7 +246,7 @@ class UnixTest extends TestCase
             new Second(1),
             Command::foreground('cat')
                 ->withInput(Content::oneShot(
-                    IO::of(static fn() => Select::timeoutAfter(ElapsedPeriod::of(0)))->readable()->wrap(
+                    IO::of(static fn() => Select::waitForever())->readable()->wrap(
                         Stream::of(\fopen('fixtures/symfony.log', 'r')),
                     ),
                 ))
