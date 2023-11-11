@@ -20,6 +20,7 @@ use Innmind\IO\IO;
 use Innmind\Stream\{
     Readable\Stream,
     Streams,
+    Watch\Select,
 };
 use Innmind\Immutable\SideEffect;
 use PHPUnit\Framework\TestCase;
@@ -83,7 +84,7 @@ class UnixTest extends TestCase
         );
         $process = $processes->execute(
             Command::foreground('cat')->withInput(Content::oneShot(
-                IO::of(static fn() => null)->readable()->wrap(
+                IO::of(static fn() => Select::waitForever())->readable()->wrap(
                     Stream::of(\fopen('fixtures/symfony.log', 'r')),
                 ),
             )),

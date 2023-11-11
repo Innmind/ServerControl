@@ -82,11 +82,14 @@ final class Started
         Maybe $content,
     ) {
         $this->clock = $clock;
-        // we do not use a timeout when watching for stream otherwise we would
-        // wait when writing each chunk of input to the process stream
+        // We use a short timeout to watch the streams when there is a timeout
+        // defined on the command to make sure we're as close as possible to the
+        // defined value without using polling.
+        // When simply reading the output we can't wait forever as the tests
+        // hang forever on Linux.
         $this->watch = $capabilities
             ->watch()
-            ->timeoutAfter(ElapsedPeriod::of(0));
+            ->timeoutAfter(ElapsedPeriod::of(100));
         $this->halt = $halt;
         $this->grace = $grace;
         $this->background = $background;
@@ -137,16 +140,21 @@ final class Started
     {
         $this->ensureExecuteOnce();
 
-        $watch = $this->watch->forRead(
-            $this->output,
-            $this->error,
-        );
+        $watch = $this
+            ->watch
+            ->forRead(
+                $this->output,
+                $this->error,
+            )
+            ->forWrite($this->input);
 
         [$watch, $chunks] = $this->writeInputAndRead($watch, $keepOutputWhileWriting);
 
         foreach ($chunks->toList() as $value) {
             yield $value;
         }
+
+        $watch = $watch->unwatch($this->input);
 
         do {
             [$watch, $chunks] = $this->readOnce($watch);
@@ -286,7 +294,7 @@ final class Started
                     // done at this moment for sake of simplicity while the case
                     // has never been encountered
                     $stream = $this
-                        ->waitAvailable($stream)
+                        ->waitAvailable($watch, $stream)
                         ->write($chunk)
                         ->match(
                             static fn($stream) => $stream,
@@ -306,10 +314,8 @@ final class Started
         return [$watch, $output];
     }
 
-    private function waitAvailable(Writable $stream): Writable
+    private function waitAvailable(Watch $watch, Writable $stream): Writable
     {
-        $watch = $this->watch->forWrite($stream);
-
         do {
             /** @var Set<Writable> */
             $toWrite = $watch()->match(

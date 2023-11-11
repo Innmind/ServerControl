@@ -21,6 +21,7 @@ use Innmind\IO\IO;
 use Innmind\Stream\{
     Readable\Stream,
     Streams,
+    Watch\Select,
 };
 use Innmind\Immutable\SideEffect;
 use PHPUnit\Framework\TestCase;
@@ -133,7 +134,15 @@ class UnixTest extends TestCase
             ++$count;
         }
 
-        $this->assertSame("0\n", $output);
+        // depending on when occur the timeout of the stream_select we may end
+        // up right after the process outputed its second value
+        $this->assertThat(
+            $output,
+            $this->logicalOr(
+                $this->identicalTo("0\n"),
+                $this->identicalTo("0\n1\n"),
+            ),
+        );
         // 3 because of the grace period
         $this->assertEqualsWithDelta(3, \microtime(true) - $started, 0.5);
     }
@@ -210,7 +219,7 @@ class UnixTest extends TestCase
             new Usleep,
             new Second(1),
             Command::foreground('cat')->withInput(Content::oneShot(
-                IO::of(static fn() => null)->readable()->wrap(
+                IO::of(static fn() => Select::waitForever())->readable()->wrap(
                     Stream::of(\fopen('fixtures/symfony.log', 'r')),
                 ),
             )),
@@ -237,7 +246,7 @@ class UnixTest extends TestCase
             new Second(1),
             Command::foreground('cat')
                 ->withInput(Content::oneShot(
-                    IO::of(static fn() => null)->readable()->wrap(
+                    IO::of(static fn() => Select::waitForever())->readable()->wrap(
                         Stream::of(\fopen('fixtures/symfony.log', 'r')),
                     ),
                 ))
