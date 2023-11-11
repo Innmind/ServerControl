@@ -84,7 +84,7 @@ class UnixTest extends TestCase
         );
         $process = $processes->execute(
             Command::foreground('cat')->withInput(Content::oneShot(
-                IO::of(static fn() => Select::waitForever())->readable()->wrap(
+                IO::of(static fn() => Select::timeoutAfter(ElapsedPeriod::of(0)))->readable()->wrap(
                     Stream::of(\fopen('fixtures/symfony.log', 'r')),
                 ),
             )),
