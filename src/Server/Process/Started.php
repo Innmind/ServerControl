@@ -294,7 +294,7 @@ final class Started
                     // done at this moment for sake of simplicity while the case
                     // has never been encountered
                     $stream = $this
-                        ->waitAvailable($watch, $stream)
+                        ->waitAvailable($stream)
                         ->write($chunk)
                         ->match(
                             static fn($stream) => $stream,
@@ -314,8 +314,10 @@ final class Started
         return [$watch, $output];
     }
 
-    private function waitAvailable(Watch $watch, Writable $stream): Writable
+    private function waitAvailable(Writable $stream): Writable
     {
+        $watch = $this->watch->forWrite($stream);
+
         do {
             /** @var Set<Writable> */
             $toWrite = $watch()->match(
