@@ -82,14 +82,14 @@ final class Started
         Maybe $content,
     ) {
         $this->clock = $clock;
-        // we use a short timeout to watch the streams when there is a timeout
+        // We use a short timeout to watch the streams when there is a timeout
         // defined on the command to make sure we're as close as possible to the
-        // defined value without using polling
-        $watch = $capabilities->watch();
-        $this->watch = $timeout->match(
-            static fn() => $watch->timeoutAfter(ElapsedPeriod::of(100)),
-            static fn() => $watch->waitForever(),
-        );
+        // defined value without using polling.
+        // When simply reading the output we can't wait forever as the tests
+        // hang forever on Linux.
+        $this->watch = $capabilities
+            ->watch()
+            ->timeoutAfter(ElapsedPeriod::of(100));
         $this->halt = $halt;
         $this->grace = $grace;
         $this->background = $background;
