@@ -6,7 +6,6 @@ namespace Innmind\Server\Control\Server;
 use Innmind\Server\Control\Server\Process\{
     Pid,
     Output,
-    ExitCode,
     TimedOut,
     Failed,
     Signaled,

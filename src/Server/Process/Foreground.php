@@ -6,7 +6,6 @@ namespace Innmind\Server\Control\Server\Process;
 use Innmind\Server\Control\Server\Process;
 use Innmind\Immutable\{
     Sequence,
-    Str,
     Maybe,
     Either,
 };

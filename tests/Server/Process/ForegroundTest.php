@@ -7,7 +7,6 @@ use Innmind\Server\Control\Server\{
     Process\Foreground,
     Process\Unix,
     Process,
-    Process\Pid,
     Process\Output,
     Process\Output\Type,
     Process\Failed,
@@ -16,14 +15,10 @@ use Innmind\Server\Control\Server\{
 };
 use Innmind\TimeContinuum\Earth\{
     Clock,
-    ElapsedPeriod,
     Period\Second,
 };
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\{
-    Watch\Select,
-    Streams,
-};
+use Innmind\Stream\Streams;
 use Innmind\Immutable\Str;
 use PHPUnit\Framework\TestCase;
 
