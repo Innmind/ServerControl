@@ -167,10 +167,15 @@ class UnixTest extends TestCase
         $started = \microtime(true);
 
         $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
-        $e = $process->wait()->match(
-            static fn() => null,
-            static fn($e) => $e,
-        );
+        $e = $process
+            ->output()
+            ->last()
+            ->either()
+            ->flatMap(static fn($result) => $result)
+            ->match(
+                static fn() => null,
+                static fn($e) => $e,
+            );
         $this->assertSame('timed-out', $e);
         // 3 because of the grace period
         $this->assertEqualsWithDelta(3, \microtime(true) - $started, 0.5);
@@ -186,10 +191,15 @@ class UnixTest extends TestCase
             Command::foreground('echo')->withArgument('hello'),
         );
 
-        $value = $cat()->wait()->match(
-            static fn($value) => $value,
-            static fn() => null,
-        );
+        $value = $cat()
+            ->output()
+            ->last()
+            ->either()
+            ->flatMap(static fn($result) => $result)
+            ->match(
+                static fn($value) => $value,
+                static fn() => null,
+            );
 
         $this->assertInstanceOf(SideEffect::class, $value);
     }
@@ -206,10 +216,15 @@ class UnixTest extends TestCase
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
 
-        $value = $cat()->wait()->match(
-            static fn() => null,
-            static fn($e) => $e,
-        );
+        $value = $cat()
+            ->output()
+            ->last()
+            ->either()
+            ->flatMap(static fn($result) => $result)
+            ->match(
+                static fn() => null,
+                static fn($e) => $e,
+            );
 
         $this->assertInstanceOf(ExitCode::class, $value);
         $this->assertSame(1, $value->toInt());
@@ -257,10 +272,15 @@ class UnixTest extends TestCase
                 ->overwrite(Path::of('test.log')),
         );
 
-        $value = $cat()->wait()->match(
-            static fn($value) => $value,
-            static fn() => null,
-        );
+        $value = $cat()
+            ->output()
+            ->last()
+            ->either()
+            ->flatMap(static fn($result) => $result)
+            ->match(
+                static fn($value) => $value,
+                static fn() => null,
+            );
 
         $this->assertInstanceOf(SideEffect::class, $value);
         $this->assertSame(

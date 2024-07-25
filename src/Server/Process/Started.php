@@ -32,7 +32,6 @@ use Innmind\Immutable\{
     Either,
     SideEffect,
     Set,
-    Predicate\Instance,
 };
 
 /**
@@ -117,26 +116,6 @@ final class Started
     public function pid(): Pid
     {
         return $this->pid;
-    }
-
-    /**
-     * @return Either<ExitCode|'signaled'|'timed-out', SideEffect>
-     */
-    public function wait(): Either
-    {
-        // we don't need to keep the output read while writing to the input
-        // stream as this data will never be exposed to caller, so by discarding
-        // this data we prevent ourself from reaching a possible "out of memory"
-        // error
-        /** @var Either<ExitCode|'signaled'|'timed-out', SideEffect> */
-        return $this
-            ->output()
-            ->last()
-            ->keep(Instance::of(Either::class))
-            ->match(
-                static fn($return) => $return,
-                static fn() => throw new RuntimeException('Unable to retrieve process result'),
-            );
     }
 
     /**
