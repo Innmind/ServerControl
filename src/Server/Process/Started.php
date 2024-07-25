@@ -4,15 +4,13 @@ declare(strict_types = 1);
 namespace Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\{
+    Server\Process\Output\Chunk,
     Server\Process\Output\Type,
     Server\Second,
     Server\Signal,
     Exception\RuntimeException,
 };
-use Innmind\Filesystem\{
-    File\Content,
-    Chunk,
-};
+use Innmind\Filesystem\File\Content;
 use Innmind\TimeContinuum\{
     Clock,
     PointInTime,
@@ -82,14 +80,6 @@ final class Started
         Maybe $content,
     ) {
         $this->clock = $clock;
-        // We use a short timeout to watch the streams when there is a timeout
-        // defined on the command to make sure we're as close as possible to the
-        // defined value without using polling.
-        // When simply reading the output we can't wait forever as the tests
-        // hang forever on Linux.
-        $this->watch = $capabilities
-            ->watch()
-            ->timeoutAfter(ElapsedPeriod::of(100));
         $this->halt = $halt;
         $this->grace = $grace;
         $this->background = $background;
@@ -105,6 +95,19 @@ final class Started
             $capabilities->readable()->acquire($pipes[2]),
         );
         $this->input = $capabilities->writable()->acquire($pipes[0]);
+        // We use a short timeout to watch the streams when there is a timeout
+        // defined on the command to make sure we're as close as possible to the
+        // defined value without using polling.
+        // When simply reading the output we can't wait forever as the tests
+        // hang forever on Linux.
+        $this->watch = $capabilities
+            ->watch()
+            ->timeoutAfter(ElapsedPeriod::of(100))
+            ->forRead(
+                $this->output,
+                $this->error,
+            )
+            ->forWrite($this->input);
         $this->timeout = $timeout;
         $this->content = $content;
         $this->pid = new Pid($this->status()['pid']);
@@ -116,105 +119,77 @@ final class Started
     }
 
     /**
-     * @return Either<ExitCode|'signaled'|'timed-out', SideEffect>
+     * @return Sequence<Chunk|Either<ExitCode|'signaled'|'timed-out', SideEffect>>
      */
-    public function wait(): Either
-    {
-        // we don't need to keep the output read while writing to the input
-        // stream as this data will never be exposed to caller, so by discarding
-        // this data we prevent ourself from reaching a possible "out of memory"
-        // error
-        $output = $this->output(false);
-
-        foreach ($output as $_) {
-            // do nothing with the output
-        }
-
-        return $output->getReturn();
-    }
-
-    /**
-     * @return \Generator<int, array{0: Str, 1: Type}, mixed, Either<ExitCode|'signaled'|'timed-out', SideEffect>>
-     */
-    public function output(bool $keepOutputWhileWriting = true): \Generator
+    public function output(): Sequence
     {
         $this->ensureExecuteOnce();
 
-        $watch = $this
-            ->watch
-            ->forRead(
-                $this->output,
-                $this->error,
-            )
-            ->forWrite($this->input);
+        return Sequence::lazy(function() {
+            yield $this->writeInputAndRead();
 
-        [$watch, $chunks] = $this->writeInputAndRead($watch, $keepOutputWhileWriting);
+            $this->watch = $this->watch->unwatch($this->input);
 
-        foreach ($chunks->toList() as $value) {
-            yield $value;
-        }
+            do {
+                yield $this->readOnce();
 
-        $watch = $watch->unwatch($this->input);
+                $timedOut = $this->checkTimeout()->match(
+                    static fn() => true,
+                    static fn() => false,
+                );
 
-        do {
-            [$watch, $chunks] = $this->readOnce($watch);
+                if ($timedOut) {
+                    /** @var Sequence<Either<ExitCode|'signaled'|'timed-out', SideEffect>> */
+                    yield Sequence::of(Either::left($this->abort()));
 
-            foreach ($chunks->toList() as $value) {
-                yield $value;
+                    return;
+                }
+
+                $status = $this->status();
+            } while ($status['running']);
+
+            // we don't read the remaining data in the streams for background
+            // processes because it will hang until the concrete process is really
+            // finished, thus defeating the purpose of launching the process in the
+            // background
+            while (!$this->background && $this->outputStillOpen()) {
+                // even though the process is no longer running there might stil be
+                // data to be read in the streams
+                $chunks = $this->readOnce();
+
+                yield $chunks;
+
+                if ($chunks->empty()) {
+                    // do not try to continue reading the streams when no output
+                    // otherwise for commands like "tail -f" it will run forever
+                    break;
+                }
+
+                // no need to check for timeouts here since the process is no longer
+                // running
             }
 
-            $timedOut = $this->checkTimeout()->match(
-                static fn() => true,
-                static fn() => false,
-            );
+            $this->close();
 
-            if ($timedOut) {
-                /** @var Either<ExitCode|'signaled'|'timed-out', SideEffect> */
-                return Either::left($this->abort());
+            if ($status['signaled'] || $status['stopped']) {
+                /** @var Sequence<Either<ExitCode|'signaled'|'timed-out', SideEffect>> */
+                yield Sequence::of(Either::left('signaled'));
+
+                return;
             }
 
-            $status = $this->status();
-        } while ($status['running']);
+            $exitCode = new ExitCode($status['exitcode']);
 
-        // we don't read the remaining data in the streams for background
-        // processes because it will hang until the concrete process is really
-        // finished, thus defeating the purpose of launching the process in the
-        // background
-        while (!$this->background && $this->outputStillOpen()) {
-            // even though the process is no longer running there might stil be
-            // data to be read in the streams
-            [$watch, $chunks] = $this->readOnce($watch);
+            if (!$exitCode->successful()) {
+                /** @var Sequence<Either<ExitCode|'signaled'|'timed-out', SideEffect>> */
+                yield Sequence::of(Either::left($exitCode));
 
-            foreach ($chunks->toList() as $value) {
-                yield $value;
+                return;
             }
 
-            if ($chunks->empty()) {
-                // do not try to continue reading the streams when no output
-                // otherwise for commands like "tail -f" it will run forever
-                break;
-            }
-
-            // no need to check for timeouts here since the process is no longer
-            // running
-        }
-
-        $this->close();
-
-        if ($status['signaled'] || $status['stopped']) {
-            /** @var Either<ExitCode|'signaled'|'timed-out', SideEffect> */
-            return Either::left('signaled');
-        }
-
-        $exitCode = new ExitCode($status['exitcode']);
-
-        if (!$exitCode->successful()) {
-            /** @var Either<ExitCode|'signaled'|'timed-out', SideEffect> */
-            return Either::left($exitCode);
-        }
-
-        /** @var Either<ExitCode|'signaled'|'timed-out', SideEffect> */
-        return Either::right(new SideEffect);
+            /** @var Sequence<Either<ExitCode|'signaled'|'timed-out', SideEffect>> */
+            yield Sequence::of(Either::right(new SideEffect));
+        })->flatMap(static fn($chunks) => $chunks);
     }
 
     /**
@@ -235,56 +210,41 @@ final class Started
      * this process because the output will be kept in memory before being able
      * to send it back to the caller. This may result in an "out of memory" error
      *
-     * @return array{0: Watch, 1: Sequence<array{0: Str, 1: Type}>}
+     * @return Sequence<Chunk>
      */
-    private function writeInputAndRead(
-        Watch $watch,
-        bool $keepOutputWhileWriting,
-    ): array {
+    private function writeInputAndRead(): Sequence
+    {
         return $this
             ->content
             ->map(static fn($content) => $content->chunks())
             ->otherwise(function() {
-                $this->closeInput($this->input);
+                $this->closeInput();
 
                 /** @var Maybe<Sequence<Str>> */
                 return Maybe::nothing();
             })
             ->match(
                 fn($chunks) => $this->writeAndRead(
-                    $watch,
                     $this->input,
                     $chunks,
-                    Sequence::of(),
-                    $keepOutputWhileWriting,
                 ),
-                static fn() => [$watch, Sequence::of()],
+                static fn() => Sequence::of(),
             );
     }
 
     /**
      * @param Sequence<Str> $chunks
-     * @param Sequence<array{0: Str, 1: Type}> $output
      *
-     * @return array{0: Watch, 1: Sequence<array{0: Str, 1: Type}>}
+     * @return Sequence<Chunk>
      */
     private function writeAndRead(
-        Watch $watch,
         Writable $stream,
         Sequence $chunks,
-        Sequence $output,
-        bool $keepOutputWhileWriting,
-    ): array {
-        [$watch, $output, $stream] = $chunks
-            ->map(static fn($chunk) => $chunk->toEncoding(Str\Encoding::ascii))
-            ->reduce(
-                [$watch, $output, $stream],
-                function($state, $chunk) use ($keepOutputWhileWriting) {
-                    /**
-                     * @psalm-suppress MixedAssignment
-                     * @psalm-suppress MixedArrayAccess
-                     */
-                    [$watch, $output, $stream] = $state;
+    ): Sequence {
+        return Sequence::lazy(function() use ($chunks, $stream) {
+            yield $chunks
+                ->map(static fn($chunk) => $chunk->toEncoding(Str\Encoding::ascii))
+                ->flatMap(function($chunk) use ($stream) {
                     // leave the exception here in case we can't write to the
                     // input stream because for now there is no clear way to
                     // handle this case
@@ -293,32 +253,26 @@ final class Started
                     // the part of the chunk that hasn't be written. This is not
                     // done at this moment for sake of simplicity while the case
                     // has never been encountered
-                    $stream = $this
-                        ->waitAvailable($watch, $stream)
+                    $_ = $this
+                        ->waitAvailable($stream)
                         ->write($chunk)
                         ->match(
                             static fn($stream) => $stream,
                             static fn($e) => throw new RuntimeException($e::class),
                         );
-                    [$watch, $read] = $this->readOnce($watch);
 
-                    if ($keepOutputWhileWriting) {
-                        $output = $output->append($read);
-                    }
-
-                    return [$watch, $output, $stream];
-                },
-            );
-        $this->closeInput($stream);
-
-        return [$watch, $output];
+                    return $this->readOnce();
+                });
+            $this->closeInput();
+        })
+            ->flatMap(static fn($chunks) => $chunks);
     }
 
-    private function waitAvailable(Watch $watch, Writable $stream): Writable
+    private function waitAvailable(Writable $stream): Writable
     {
         do {
             /** @var Set<Writable> */
-            $toWrite = $watch()->match(
+            $toWrite = ($this->watch)()->match(
                 static fn($ready) => $ready->toWrite(),
                 static fn() => Set::of(),
             );
@@ -327,14 +281,14 @@ final class Started
         return $stream;
     }
 
-    private function closeInput(Writable $input): void
+    private function closeInput(): void
     {
         // we crash the app if we fail to close the input stream be cause the
         // underlying process receiving the input may not behave correctly, in
         // some cases this could result on this process hanging forever
         // there is no way to recover safely from unpredictable behaviour so it's
         // better to stop everything
-        $_ = $input->close()->match(
+        $_ = $this->input->close()->match(
             static fn() => null, // closed correctly
             static fn() => throw new RuntimeException('Failed to close input stream'),
         );
@@ -373,31 +327,30 @@ final class Started
     }
 
     /**
-     * @return array{0: Watch, 1: Sequence<array{0: Str, 1: Type}>}
+     * @return Sequence<Chunk>
      */
-    private function readOnce(Watch $watch): array
+    private function readOnce(): Sequence
     {
         /** @var Set<Readable> */
-        $toRead = $watch()->match(
+        $toRead = ($this->watch)()->match(
             static fn($ready) => $ready->toRead(),
             static fn() => Set::of(),
         );
 
-        /** @var list<array{0: Str, 1: Type}> */
         $chunks = $toRead
             ->map(fn($stream) => match ($stream) {
-                $this->output => [$this->read($stream), Type::output],
-                $this->error => [$this->read($stream), Type::error],
+                $this->output => Chunk::of($this->read($stream), Type::output),
+                $this->error => Chunk::of($this->read($stream), Type::error),
             })
-            ->filter(static fn($pair) => !$pair[0]->empty())
+            ->filter(static fn($chunk) => !$chunk->data()->empty())
             ->toList();
 
-        $watch = $toRead->reduce(
-            $watch,
+        $this->watch = $toRead->reduce(
+            $this->watch,
             $this->maybeUnwatch(...),
         );
 
-        return [$watch, Sequence::of(...$chunks)];
+        return Sequence::of(...$chunks);
     }
 
     /**

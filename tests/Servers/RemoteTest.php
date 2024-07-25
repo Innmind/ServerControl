@@ -8,7 +8,6 @@ use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Process,
-    Server\Process\ExitCode,
     Server\Command,
     Server\Volumes,
 };

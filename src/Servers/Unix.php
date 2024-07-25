@@ -10,7 +10,6 @@ use Innmind\Server\Control\{
 };
 use Innmind\TimeContinuum\{
     Clock,
-    ElapsedPeriod,
     Period,
 };
 use Innmind\TimeWarp\Halt;

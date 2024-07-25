@@ -15,9 +15,7 @@ use Innmind\Server\Control\{
 };
 use Innmind\TimeContinuum\{
     Clock,
-    ElapsedPeriod,
     Period,
-    Earth,
     Earth\Period\Second,
 };
 use Innmind\TimeWarp\Halt;

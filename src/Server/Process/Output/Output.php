@@ -28,6 +28,17 @@ final class Output implements OutputInterface
     }
 
     /**
+     * @param Sequence<Chunk> $chunks
+     */
+    public static function of(Sequence $chunks): self
+    {
+        return new self($chunks->map(static fn($chunk) => [
+            $chunk->data(),
+            $chunk->type(),
+        ]));
+    }
+
+    /**
      * @param callable(Str, Type): void $function
      */
     public function foreach(callable $function): SideEffect
