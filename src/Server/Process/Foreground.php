@@ -5,12 +5,14 @@ namespace Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\{
     Server\Process,
+    Server\Process\Output\Chunk,
     Exception\RuntimeException,
 };
 use Innmind\Immutable\{
     Sequence,
     Maybe,
     Either,
+    Predicate\Instance,
 };
 
 final class Foreground implements Process
@@ -39,7 +41,7 @@ final class Foreground implements Process
 
                     return $chunk;
                 })
-                ->filter(\is_array(...));
+                ->keep(Instance::of(Chunk::class));
         };
 
         if ($streamOutput) {
@@ -52,7 +54,7 @@ final class Foreground implements Process
             );
         }
 
-        $this->output = new Output\Output($output);
+        $this->output = Output\Output::of($output);
     }
 
     public function pid(): Maybe

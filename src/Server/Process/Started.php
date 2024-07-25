@@ -4,15 +4,13 @@ declare(strict_types = 1);
 namespace Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\{
+    Server\Process\Output\Chunk,
     Server\Process\Output\Type,
     Server\Second,
     Server\Signal,
     Exception\RuntimeException,
 };
-use Innmind\Filesystem\{
-    File\Content,
-    Chunk,
-};
+use Innmind\Filesystem\File\Content;
 use Innmind\TimeContinuum\{
     Clock,
     PointInTime,
@@ -142,7 +140,7 @@ final class Started
     }
 
     /**
-     * @return Sequence<array{0: Str, 1: Type}|Either<ExitCode|'signaled'|'timed-out', SideEffect>>
+     * @return Sequence<Chunk|Either<ExitCode|'signaled'|'timed-out', SideEffect>>
      */
     public function output(): Sequence
     {
@@ -233,7 +231,7 @@ final class Started
      * this process because the output will be kept in memory before being able
      * to send it back to the caller. This may result in an "out of memory" error
      *
-     * @return Sequence<array{0: Str, 1: Type}>
+     * @return Sequence<Chunk>
      */
     private function writeInputAndRead(): Sequence
     {
@@ -258,7 +256,7 @@ final class Started
     /**
      * @param Sequence<Str> $chunks
      *
-     * @return Sequence<array{0: Str, 1: Type}>
+     * @return Sequence<Chunk>
      */
     private function writeAndRead(
         Writable $stream,
@@ -350,7 +348,7 @@ final class Started
     }
 
     /**
-     * @return Sequence<array{0: Str, 1: Type}>
+     * @return Sequence<Chunk>
      */
     private function readOnce(): Sequence
     {
@@ -360,13 +358,12 @@ final class Started
             static fn() => Set::of(),
         );
 
-        /** @var list<array{0: Str, 1: Type}> */
         $chunks = $toRead
             ->map(fn($stream) => match ($stream) {
-                $this->output => [$this->read($stream), Type::output],
-                $this->error => [$this->read($stream), Type::error],
+                $this->output => Chunk::of($this->read($stream), Type::output),
+                $this->error => Chunk::of($this->read($stream), Type::error),
             })
-            ->filter(static fn($pair) => !$pair[0]->empty())
+            ->filter(static fn($chunk) => !$chunk->data()->empty())
             ->toList();
 
         $this->watch = $toRead->reduce(

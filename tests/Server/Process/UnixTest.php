@@ -5,6 +5,7 @@ namespace Tests\Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\{
     Server\Process\Unix,
+    Server\Process\Output\Chunk,
     Server\Process\Output\Type,
     Server\Process\ExitCode,
     Server\Command,
@@ -23,7 +24,10 @@ use Innmind\Stream\{
     Streams,
     Watch\Select,
 };
-use Innmind\Immutable\SideEffect;
+use Innmind\Immutable\{
+    SideEffect,
+    Predicate\Instance,
+};
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -46,9 +50,9 @@ class UnixTest extends TestCase
         $count = 0;
         $process = $cat();
 
-        foreach ($process->output()->filter(\is_array(...))->toList() as [$value, $type]) {
-            $this->assertSame(Type::output, $type);
-            $this->assertSame("hello\n", $value->toString());
+        foreach ($process->output()->keep(Instance::of(Chunk::class))->toList() as $chunk) {
+            $this->assertSame(Type::output, $chunk->type());
+            $this->assertSame("hello\n", $chunk->data()->toString());
             ++$count;
         }
 
@@ -74,8 +78,8 @@ class UnixTest extends TestCase
                 $process = $cat();
                 $output = '';
 
-                foreach ($process->output()->filter(\is_array(...))->toList() as [$value, $type]) {
-                    $output .= $value->toString();
+                foreach ($process->output()->keep(Instance::of(Chunk::class))->toList() as $chunk) {
+                    $output .= $chunk->data()->toString();
                 }
 
                 $this->assertSame("$echo\n", $output);
@@ -100,9 +104,9 @@ class UnixTest extends TestCase
 
         $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
 
-        foreach ($process->output()->filter(\is_array(...))->toList() as [$chunk, $type]) {
-            $output .= $chunk->toString();
-            $this->assertSame($count % 2 === 0 ? Type::output : Type::error, $type);
+        foreach ($process->output()->keep(Instance::of(Chunk::class))->toList() as $chunk) {
+            $output .= $chunk->data()->toString();
+            $this->assertSame($count % 2 === 0 ? Type::output : Type::error, $chunk->type());
             ++$count;
         }
 
@@ -128,9 +132,9 @@ class UnixTest extends TestCase
 
         $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
 
-        foreach ($process->output()->filter(\is_array(...))->toList() as [$chunk, $type]) {
-            $output .= $chunk->toString();
-            $this->assertSame($count % 2 === 0 ? Type::output : Type::error, $type);
+        foreach ($process->output()->keep(Instance::of(Chunk::class))->toList() as $chunk) {
+            $output .= $chunk->data()->toString();
+            $this->assertSame($count % 2 === 0 ? Type::output : Type::error, $chunk->type());
             ++$count;
         }
 
@@ -226,8 +230,8 @@ class UnixTest extends TestCase
         );
         $output = '';
 
-        foreach ($cat()->output()->filter(\is_array(...))->toList() as [$value]) {
-            $output .= $value->toString();
+        foreach ($cat()->output()->keep(Instance::of(Chunk::class))->toList() as $chunk) {
+            $output .= $chunk->data()->toString();
         }
 
         $this->assertSame(
