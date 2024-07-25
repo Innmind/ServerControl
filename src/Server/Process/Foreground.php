@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\Server\Process;
+use Innmind\Server\Control\{
+    Server\Process,
+    Exception\RuntimeException,
+};
 use Innmind\Immutable\{
     Sequence,
     Maybe,
@@ -66,16 +69,12 @@ final class Foreground implements Process
             $_ = $this->output->foreach(static fn() => null);
         }
 
+        if (\is_null($this->status)) {
+            throw new RuntimeException('Unable to retrieve the status');
+        }
+
         // the status should always be set here because we iterated over the
-        // output above but we stil coalesce to the wait() call to please psalm
-        return $this->status ??= $this
-            ->process
-            ->wait()
-            ->map(fn() => new Success($this->output))
-            ->leftMap(fn($error) => match ($error) {
-                'timed-out' => new TimedOut($this->output),
-                'signaled' => new Signaled($this->output),
-                default => new Failed($error, $this->output),
-            });
+        // output above
+        return $this->status;
     }
 }
