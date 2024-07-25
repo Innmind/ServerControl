@@ -240,7 +240,7 @@ final class Started
             ->content
             ->map(static fn($content) => $content->chunks())
             ->otherwise(function() {
-                $this->closeInput($this->input);
+                $this->closeInput();
 
                 /** @var Maybe<Sequence<Str>> */
                 return Maybe::nothing();
@@ -285,7 +285,7 @@ final class Started
 
                     return $this->readOnce();
                 });
-            $this->closeInput($stream);
+            $this->closeInput();
         })
             ->flatMap(static fn($chunks) => $chunks);
     }
@@ -303,14 +303,14 @@ final class Started
         return $stream;
     }
 
-    private function closeInput(Writable $input): void
+    private function closeInput(): void
     {
         // we crash the app if we fail to close the input stream be cause the
         // underlying process receiving the input may not behave correctly, in
         // some cases this could result on this process hanging forever
         // there is no way to recover safely from unpredictable behaviour so it's
         // better to stop everything
-        $_ = $input->close()->match(
+        $_ = $this->input->close()->match(
             static fn() => null, // closed correctly
             static fn() => throw new RuntimeException('Failed to close input stream'),
         );
