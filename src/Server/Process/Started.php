@@ -129,7 +129,7 @@ final class Started
         // stream as this data will never be exposed to caller, so by discarding
         // this data we prevent ourself from reaching a possible "out of memory"
         // error
-        $output = $this->output(false);
+        $output = $this->output();
 
         foreach ($output as $_) {
             // do nothing with the output
@@ -141,11 +141,11 @@ final class Started
     /**
      * @return \Generator<int, array{0: Str, 1: Type}, mixed, Either<ExitCode|'signaled'|'timed-out', SideEffect>>
      */
-    public function output(bool $keepOutputWhileWriting = true): \Generator
+    public function output(): \Generator
     {
         $this->ensureExecuteOnce();
 
-        $chunks = $this->writeInputAndRead($keepOutputWhileWriting);
+        $chunks = $this->writeInputAndRead();
 
         foreach ($chunks->toList() as $value) {
             yield $value;
@@ -234,9 +234,8 @@ final class Started
      *
      * @return Sequence<array{0: Str, 1: Type}>
      */
-    private function writeInputAndRead(
-        bool $keepOutputWhileWriting,
-    ): Sequence {
+    private function writeInputAndRead(): Sequence
+    {
         return $this
             ->content
             ->map(static fn($content) => $content->chunks())
@@ -250,8 +249,6 @@ final class Started
                 fn($chunks) => $this->writeAndRead(
                     $this->input,
                     $chunks,
-                    Sequence::of(),
-                    $keepOutputWhileWriting,
                 ),
                 static fn() => Sequence::of(),
             );
@@ -259,26 +256,17 @@ final class Started
 
     /**
      * @param Sequence<Str> $chunks
-     * @param Sequence<array{0: Str, 1: Type}> $output
      *
      * @return Sequence<array{0: Str, 1: Type}>
      */
     private function writeAndRead(
         Writable $stream,
         Sequence $chunks,
-        Sequence $output,
-        bool $keepOutputWhileWriting,
     ): Sequence {
-        [$output, $stream] = $chunks
-            ->map(static fn($chunk) => $chunk->toEncoding(Str\Encoding::ascii))
-            ->reduce(
-                [$output, $stream],
-                function($state, $chunk) use ($keepOutputWhileWriting) {
-                    /**
-                     * @psalm-suppress MixedAssignment
-                     * @psalm-suppress MixedArrayAccess
-                     */
-                    [$output, $stream] = $state;
+        return Sequence::lazy(function() use ($chunks, $stream) {
+            yield $chunks
+                ->map(static fn($chunk) => $chunk->toEncoding(Str\Encoding::ascii))
+                ->flatMap(function($chunk) use ($stream) {
                     // leave the exception here in case we can't write to the
                     // input stream because for now there is no clear way to
                     // handle this case
@@ -287,25 +275,19 @@ final class Started
                     // the part of the chunk that hasn't be written. This is not
                     // done at this moment for sake of simplicity while the case
                     // has never been encountered
-                    $stream = $this
+                    $_ = $this
                         ->waitAvailable($stream)
                         ->write($chunk)
                         ->match(
                             static fn($stream) => $stream,
                             static fn($e) => throw new RuntimeException($e::class),
                         );
-                    $read = $this->readOnce();
 
-                    if ($keepOutputWhileWriting) {
-                        $output = $output->append($read);
-                    }
-
-                    return [$output, $stream];
-                },
-            );
-        $this->closeInput($stream);
-
-        return $output;
+                    return $this->readOnce();
+                });
+            $this->closeInput($stream);
+        })
+            ->flatMap(static fn($chunks) => $chunks);
     }
 
     private function waitAvailable(Writable $stream): Writable
