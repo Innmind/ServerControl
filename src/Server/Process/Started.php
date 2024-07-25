@@ -82,14 +82,6 @@ final class Started
         Maybe $content,
     ) {
         $this->clock = $clock;
-        // We use a short timeout to watch the streams when there is a timeout
-        // defined on the command to make sure we're as close as possible to the
-        // defined value without using polling.
-        // When simply reading the output we can't wait forever as the tests
-        // hang forever on Linux.
-        $this->watch = $capabilities
-            ->watch()
-            ->timeoutAfter(ElapsedPeriod::of(100));
         $this->halt = $halt;
         $this->grace = $grace;
         $this->background = $background;
@@ -105,6 +97,19 @@ final class Started
             $capabilities->readable()->acquire($pipes[2]),
         );
         $this->input = $capabilities->writable()->acquire($pipes[0]);
+        // We use a short timeout to watch the streams when there is a timeout
+        // defined on the command to make sure we're as close as possible to the
+        // defined value without using polling.
+        // When simply reading the output we can't wait forever as the tests
+        // hang forever on Linux.
+        $this->watch = $capabilities
+            ->watch()
+            ->timeoutAfter(ElapsedPeriod::of(100))
+            ->forRead(
+                $this->output,
+                $this->error,
+            )
+            ->forWrite($this->input);
         $this->timeout = $timeout;
         $this->content = $content;
         $this->pid = new Pid($this->status()['pid']);
@@ -140,24 +145,16 @@ final class Started
     {
         $this->ensureExecuteOnce();
 
-        $watch = $this
-            ->watch
-            ->forRead(
-                $this->output,
-                $this->error,
-            )
-            ->forWrite($this->input);
-
-        [$watch, $chunks] = $this->writeInputAndRead($watch, $keepOutputWhileWriting);
+        $chunks = $this->writeInputAndRead($keepOutputWhileWriting);
 
         foreach ($chunks->toList() as $value) {
             yield $value;
         }
 
-        $watch = $watch->unwatch($this->input);
+        $this->watch = $this->watch->unwatch($this->input);
 
         do {
-            [$watch, $chunks] = $this->readOnce($watch);
+            $chunks = $this->readOnce();
 
             foreach ($chunks->toList() as $value) {
                 yield $value;
@@ -183,7 +180,7 @@ final class Started
         while (!$this->background && $this->outputStillOpen()) {
             // even though the process is no longer running there might stil be
             // data to be read in the streams
-            [$watch, $chunks] = $this->readOnce($watch);
+            $chunks = $this->readOnce();
 
             foreach ($chunks->toList() as $value) {
                 yield $value;
@@ -235,12 +232,11 @@ final class Started
      * this process because the output will be kept in memory before being able
      * to send it back to the caller. This may result in an "out of memory" error
      *
-     * @return array{0: Watch, 1: Sequence<array{0: Str, 1: Type}>}
+     * @return Sequence<array{0: Str, 1: Type}>
      */
     private function writeInputAndRead(
-        Watch $watch,
         bool $keepOutputWhileWriting,
-    ): array {
+    ): Sequence {
         return $this
             ->content
             ->map(static fn($content) => $content->chunks())
@@ -252,13 +248,12 @@ final class Started
             })
             ->match(
                 fn($chunks) => $this->writeAndRead(
-                    $watch,
                     $this->input,
                     $chunks,
                     Sequence::of(),
                     $keepOutputWhileWriting,
                 ),
-                static fn() => [$watch, Sequence::of()],
+                static fn() => Sequence::of(),
             );
     }
 
@@ -266,25 +261,24 @@ final class Started
      * @param Sequence<Str> $chunks
      * @param Sequence<array{0: Str, 1: Type}> $output
      *
-     * @return array{0: Watch, 1: Sequence<array{0: Str, 1: Type}>}
+     * @return Sequence<array{0: Str, 1: Type}>
      */
     private function writeAndRead(
-        Watch $watch,
         Writable $stream,
         Sequence $chunks,
         Sequence $output,
         bool $keepOutputWhileWriting,
-    ): array {
-        [$watch, $output, $stream] = $chunks
+    ): Sequence {
+        [$output, $stream] = $chunks
             ->map(static fn($chunk) => $chunk->toEncoding(Str\Encoding::ascii))
             ->reduce(
-                [$watch, $output, $stream],
+                [$output, $stream],
                 function($state, $chunk) use ($keepOutputWhileWriting) {
                     /**
                      * @psalm-suppress MixedAssignment
                      * @psalm-suppress MixedArrayAccess
                      */
-                    [$watch, $output, $stream] = $state;
+                    [$output, $stream] = $state;
                     // leave the exception here in case we can't write to the
                     // input stream because for now there is no clear way to
                     // handle this case
@@ -294,31 +288,31 @@ final class Started
                     // done at this moment for sake of simplicity while the case
                     // has never been encountered
                     $stream = $this
-                        ->waitAvailable($watch, $stream)
+                        ->waitAvailable($stream)
                         ->write($chunk)
                         ->match(
                             static fn($stream) => $stream,
                             static fn($e) => throw new RuntimeException($e::class),
                         );
-                    [$watch, $read] = $this->readOnce($watch);
+                    $read = $this->readOnce();
 
                     if ($keepOutputWhileWriting) {
                         $output = $output->append($read);
                     }
 
-                    return [$watch, $output, $stream];
+                    return [$output, $stream];
                 },
             );
         $this->closeInput($stream);
 
-        return [$watch, $output];
+        return $output;
     }
 
-    private function waitAvailable(Watch $watch, Writable $stream): Writable
+    private function waitAvailable(Writable $stream): Writable
     {
         do {
             /** @var Set<Writable> */
-            $toWrite = $watch()->match(
+            $toWrite = ($this->watch)()->match(
                 static fn($ready) => $ready->toWrite(),
                 static fn() => Set::of(),
             );
@@ -373,12 +367,12 @@ final class Started
     }
 
     /**
-     * @return array{0: Watch, 1: Sequence<array{0: Str, 1: Type}>}
+     * @return Sequence<array{0: Str, 1: Type}>
      */
-    private function readOnce(Watch $watch): array
+    private function readOnce(): Sequence
     {
         /** @var Set<Readable> */
-        $toRead = $watch()->match(
+        $toRead = ($this->watch)()->match(
             static fn($ready) => $ready->toRead(),
             static fn() => Set::of(),
         );
@@ -392,12 +386,12 @@ final class Started
             ->filter(static fn($pair) => !$pair[0]->empty())
             ->toList();
 
-        $watch = $toRead->reduce(
-            $watch,
+        $this->watch = $toRead->reduce(
+            $this->watch,
             $this->maybeUnwatch(...),
         );
 
-        return [$watch, Sequence::of(...$chunks)];
+        return Sequence::of(...$chunks);
     }
 
     /**
