@@ -10,7 +10,6 @@ use Innmind\Server\Control\Server\{
     Command,
     Signal,
     Process\Pid,
-    Process\ExitCode,
 };
 use Innmind\Url\{
     Path,

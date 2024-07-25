@@ -68,18 +68,18 @@ final class Logger implements Process
             ->wait()
             ->leftMap(function($e) {
                 [$message, $context] = match (\get_class($e)) {
-                    Process\Signaled::class => [
+                    Signaled::class => [
                         'Command {command} stopped due to external signal',
                         ['command' => $this->command->toString()],
                     ],
-                    Process\Failed::class => [
+                    Failed::class => [
                         'Command {command} failed with {exitCode}',
                         [
                             'command' => $this->command->toString(),
                             'exitCode' => $e->exitCode()->toInt(),
                         ],
                     ],
-                    Process\TimedOut::class => [
+                    TimedOut::class => [
                         'Command {command} timed out',
                         ['command' => $this->command->toString()],
                     ],

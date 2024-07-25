@@ -3,12 +3,16 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\Server\Process;
+use Innmind\Server\Control\{
+    Server\Process,
+    Server\Process\Output\Chunk,
+    Exception\RuntimeException,
+};
 use Innmind\Immutable\{
     Sequence,
-    Str,
     Maybe,
     Either,
+    Predicate\Instance,
 };
 
 final class Foreground implements Process
@@ -22,29 +26,35 @@ final class Foreground implements Process
     {
         $this->process = $process;
         $yieldOutput = function() use ($process): \Generator {
-            $output = $process->output();
+            yield $process
+                ->output()
+                ->map(function($chunk) {
+                    if ($chunk instanceof Either) {
+                        $this->status = $chunk
+                            ->map(fn() => new Success($this->output))
+                            ->leftMap(fn($error) => match ($error) {
+                                'timed-out' => new TimedOut($this->output),
+                                'signaled' => new Signaled($this->output),
+                                default => new Failed($error, $this->output),
+                            });
+                    }
 
-            foreach ($output as $chunk) {
-                yield $chunk;
-            }
-
-            $this->status = $output
-                ->getReturn()
-                ->map(fn() => new Success($this->output))
-                ->leftMap(fn($error) => match ($error) {
-                    'timed-out' => new TimedOut($this->output),
-                    'signaled' => new Signaled($this->output),
-                    default => new Failed($error, $this->output),
-                });
+                    return $chunk;
+                })
+                ->keep(Instance::of(Chunk::class));
         };
 
         if ($streamOutput) {
-            $output = Sequence::lazy($yieldOutput);
+            $output = Sequence::lazy($yieldOutput)->flatMap(
+                static fn($chunks) => $chunks,
+            );
         } else {
-            $output = Sequence::defer($yieldOutput());
+            $output = Sequence::defer($yieldOutput())->flatMap(
+                static fn($chunks) => $chunks,
+            );
         }
 
-        $this->output = new Output\Output($output);
+        $this->output = Output\Output::of($output);
     }
 
     public function pid(): Maybe
@@ -67,16 +77,12 @@ final class Foreground implements Process
             $_ = $this->output->foreach(static fn() => null);
         }
 
+        if (\is_null($this->status)) {
+            throw new RuntimeException('Unable to retrieve the status');
+        }
+
         // the status should always be set here because we iterated over the
-        // output above but we stil coalesce to the wait() call to please psalm
-        return $this->status ??= $this
-            ->process
-            ->wait()
-            ->map(fn() => new Success($this->output))
-            ->leftMap(fn($error) => match ($error) {
-                'timed-out' => new TimedOut($this->output),
-                'signaled' => new Signaled($this->output),
-                default => new Failed($error, $this->output),
-            });
+        // output above
+        return $this->status;
     }
 }

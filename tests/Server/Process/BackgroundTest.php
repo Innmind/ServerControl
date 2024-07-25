@@ -13,14 +13,10 @@ use Innmind\Server\Control\Server\{
 };
 use Innmind\TimeContinuum\Earth\{
     Clock,
-    ElapsedPeriod,
     Period\Second,
 };
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\{
-    Watch\Select,
-    Streams,
-};
+use Innmind\Stream\Streams;
 use PHPUnit\Framework\TestCase;
 
 class BackgroundTest extends TestCase

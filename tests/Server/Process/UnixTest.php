@@ -5,6 +5,7 @@ namespace Tests\Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\{
     Server\Process\Unix,
+    Server\Process\Output\Chunk,
     Server\Process\Output\Type,
     Server\Process\ExitCode,
     Server\Command,
@@ -23,7 +24,10 @@ use Innmind\Stream\{
     Streams,
     Watch\Select,
 };
-use Innmind\Immutable\SideEffect;
+use Innmind\Immutable\{
+    SideEffect,
+    Predicate\Instance,
+};
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -46,9 +50,9 @@ class UnixTest extends TestCase
         $count = 0;
         $process = $cat();
 
-        foreach ($process->output() as [$value, $type]) {
-            $this->assertSame(Type::output, $type);
-            $this->assertSame("hello\n", $value->toString());
+        foreach ($process->output()->keep(Instance::of(Chunk::class))->toList() as $chunk) {
+            $this->assertSame(Type::output, $chunk->type());
+            $this->assertSame("hello\n", $chunk->data()->toString());
             ++$count;
         }
 
@@ -74,8 +78,8 @@ class UnixTest extends TestCase
                 $process = $cat();
                 $output = '';
 
-                foreach ($process->output() as [$value, $type]) {
-                    $output .= $value->toString();
+                foreach ($process->output()->keep(Instance::of(Chunk::class))->toList() as $chunk) {
+                    $output .= $chunk->data()->toString();
                 }
 
                 $this->assertSame("$echo\n", $output);
@@ -100,9 +104,9 @@ class UnixTest extends TestCase
 
         $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
 
-        foreach ($process->output() as [$chunk, $type]) {
-            $output .= $chunk->toString();
-            $this->assertSame($count % 2 === 0 ? Type::output : Type::error, $type);
+        foreach ($process->output()->keep(Instance::of(Chunk::class))->toList() as $chunk) {
+            $output .= $chunk->data()->toString();
+            $this->assertSame($count % 2 === 0 ? Type::output : Type::error, $chunk->type());
             ++$count;
         }
 
@@ -128,9 +132,9 @@ class UnixTest extends TestCase
 
         $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
 
-        foreach ($process->output() as [$chunk, $type]) {
-            $output .= $chunk->toString();
-            $this->assertSame($count % 2 === 0 ? Type::output : Type::error, $type);
+        foreach ($process->output()->keep(Instance::of(Chunk::class))->toList() as $chunk) {
+            $output .= $chunk->data()->toString();
+            $this->assertSame($count % 2 === 0 ? Type::output : Type::error, $chunk->type());
             ++$count;
         }
 
@@ -163,10 +167,15 @@ class UnixTest extends TestCase
         $started = \microtime(true);
 
         $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
-        $e = $process->wait()->match(
-            static fn() => null,
-            static fn($e) => $e,
-        );
+        $e = $process
+            ->output()
+            ->last()
+            ->either()
+            ->flatMap(static fn($result) => $result)
+            ->match(
+                static fn() => null,
+                static fn($e) => $e,
+            );
         $this->assertSame('timed-out', $e);
         // 3 because of the grace period
         $this->assertEqualsWithDelta(3, \microtime(true) - $started, 0.5);
@@ -182,10 +191,15 @@ class UnixTest extends TestCase
             Command::foreground('echo')->withArgument('hello'),
         );
 
-        $value = $cat()->wait()->match(
-            static fn($value) => $value,
-            static fn() => null,
-        );
+        $value = $cat()
+            ->output()
+            ->last()
+            ->either()
+            ->flatMap(static fn($result) => $result)
+            ->match(
+                static fn($value) => $value,
+                static fn() => null,
+            );
 
         $this->assertInstanceOf(SideEffect::class, $value);
     }
@@ -202,10 +216,15 @@ class UnixTest extends TestCase
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
 
-        $value = $cat()->wait()->match(
-            static fn() => null,
-            static fn($e) => $e,
-        );
+        $value = $cat()
+            ->output()
+            ->last()
+            ->either()
+            ->flatMap(static fn($result) => $result)
+            ->match(
+                static fn() => null,
+                static fn($e) => $e,
+            );
 
         $this->assertInstanceOf(ExitCode::class, $value);
         $this->assertSame(1, $value->toInt());
@@ -226,8 +245,8 @@ class UnixTest extends TestCase
         );
         $output = '';
 
-        foreach ($cat()->output() as [$value]) {
-            $output .= $value->toString();
+        foreach ($cat()->output()->keep(Instance::of(Chunk::class))->toList() as $chunk) {
+            $output .= $chunk->data()->toString();
         }
 
         $this->assertSame(
@@ -253,10 +272,15 @@ class UnixTest extends TestCase
                 ->overwrite(Path::of('test.log')),
         );
 
-        $value = $cat()->wait()->match(
-            static fn($value) => $value,
-            static fn() => null,
-        );
+        $value = $cat()
+            ->output()
+            ->last()
+            ->either()
+            ->flatMap(static fn($result) => $result)
+            ->match(
+                static fn($value) => $value,
+                static fn() => null,
+            );
 
         $this->assertInstanceOf(SideEffect::class, $value);
         $this->assertSame(

@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Output generated while writing the input is now directly available (previously it was when the whole input was written)
+
 ## 5.2.1 - 2023-11-11
 
 ### Fixed
