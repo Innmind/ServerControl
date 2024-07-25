@@ -34,6 +34,7 @@ use Innmind\Immutable\{
     Either,
     SideEffect,
     Set,
+    Predicate\Instance,
 };
 
 /**
@@ -129,89 +130,89 @@ final class Started
         // stream as this data will never be exposed to caller, so by discarding
         // this data we prevent ourself from reaching a possible "out of memory"
         // error
-        $output = $this->output();
-
-        foreach ($output as $_) {
-            // do nothing with the output
-        }
-
-        return $output->getReturn();
+        /** @var Either<ExitCode|'signaled'|'timed-out', SideEffect> */
+        return $this
+            ->output()
+            ->last()
+            ->keep(Instance::of(Either::class))
+            ->match(
+                static fn($return) => $return,
+                static fn() => throw new RuntimeException('Unable to retrieve process result'),
+            );
     }
 
     /**
-     * @return \Generator<int, array{0: Str, 1: Type}, mixed, Either<ExitCode|'signaled'|'timed-out', SideEffect>>
+     * @return Sequence<array{0: Str, 1: Type}|Either<ExitCode|'signaled'|'timed-out', SideEffect>>
      */
-    public function output(): \Generator
+    public function output(): Sequence
     {
         $this->ensureExecuteOnce();
 
-        $chunks = $this->writeInputAndRead();
+        return Sequence::lazy(function() {
+            yield $this->writeInputAndRead();
 
-        foreach ($chunks->toList() as $value) {
-            yield $value;
-        }
+            $this->watch = $this->watch->unwatch($this->input);
 
-        $this->watch = $this->watch->unwatch($this->input);
+            do {
+                yield $this->readOnce();
 
-        do {
-            $chunks = $this->readOnce();
+                $timedOut = $this->checkTimeout()->match(
+                    static fn() => true,
+                    static fn() => false,
+                );
 
-            foreach ($chunks->toList() as $value) {
-                yield $value;
+                if ($timedOut) {
+                    /** @var Sequence<Either<ExitCode|'signaled'|'timed-out', SideEffect>> */
+                    yield Sequence::of(Either::left($this->abort()));
+
+                    return;
+                }
+
+                $status = $this->status();
+            } while ($status['running']);
+
+            // we don't read the remaining data in the streams for background
+            // processes because it will hang until the concrete process is really
+            // finished, thus defeating the purpose of launching the process in the
+            // background
+            while (!$this->background && $this->outputStillOpen()) {
+                // even though the process is no longer running there might stil be
+                // data to be read in the streams
+                $chunks = $this->readOnce();
+
+                yield $chunks;
+
+                if ($chunks->empty()) {
+                    // do not try to continue reading the streams when no output
+                    // otherwise for commands like "tail -f" it will run forever
+                    break;
+                }
+
+                // no need to check for timeouts here since the process is no longer
+                // running
             }
 
-            $timedOut = $this->checkTimeout()->match(
-                static fn() => true,
-                static fn() => false,
-            );
+            $this->close();
 
-            if ($timedOut) {
-                /** @var Either<ExitCode|'signaled'|'timed-out', SideEffect> */
-                return Either::left($this->abort());
+            if ($status['signaled'] || $status['stopped']) {
+                /** @var Sequence<Either<ExitCode|'signaled'|'timed-out', SideEffect>> */
+                yield Sequence::of(Either::left('signaled'));
+
+                return;
             }
 
-            $status = $this->status();
-        } while ($status['running']);
+            $exitCode = new ExitCode($status['exitcode']);
 
-        // we don't read the remaining data in the streams for background
-        // processes because it will hang until the concrete process is really
-        // finished, thus defeating the purpose of launching the process in the
-        // background
-        while (!$this->background && $this->outputStillOpen()) {
-            // even though the process is no longer running there might stil be
-            // data to be read in the streams
-            $chunks = $this->readOnce();
+            if (!$exitCode->successful()) {
+                /** @var Sequence<Either<ExitCode|'signaled'|'timed-out', SideEffect>> */
+                yield Sequence::of(Either::left($exitCode));
 
-            foreach ($chunks->toList() as $value) {
-                yield $value;
+                return;
             }
 
-            if ($chunks->empty()) {
-                // do not try to continue reading the streams when no output
-                // otherwise for commands like "tail -f" it will run forever
-                break;
-            }
-
-            // no need to check for timeouts here since the process is no longer
-            // running
-        }
-
-        $this->close();
-
-        if ($status['signaled'] || $status['stopped']) {
-            /** @var Either<ExitCode|'signaled'|'timed-out', SideEffect> */
-            return Either::left('signaled');
-        }
-
-        $exitCode = new ExitCode($status['exitcode']);
-
-        if (!$exitCode->successful()) {
-            /** @var Either<ExitCode|'signaled'|'timed-out', SideEffect> */
-            return Either::left($exitCode);
-        }
-
-        /** @var Either<ExitCode|'signaled'|'timed-out', SideEffect> */
-        return Either::right(new SideEffect);
+            /** @var Sequence<Either<ExitCode|'signaled'|'timed-out', SideEffect>> */
+            yield Sequence::of(Either::right(new SideEffect));
+        })->flatMap(static fn($chunks) => $chunks);
     }
 
     /**

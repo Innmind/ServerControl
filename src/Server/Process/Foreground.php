@@ -24,26 +24,32 @@ final class Foreground implements Process
     {
         $this->process = $process;
         $yieldOutput = function() use ($process): \Generator {
-            $output = $process->output();
+            yield $process
+                ->output()
+                ->map(function($chunk) {
+                    if ($chunk instanceof Either) {
+                        $this->status = $chunk
+                            ->map(fn() => new Success($this->output))
+                            ->leftMap(fn($error) => match ($error) {
+                                'timed-out' => new TimedOut($this->output),
+                                'signaled' => new Signaled($this->output),
+                                default => new Failed($error, $this->output),
+                            });
+                    }
 
-            foreach ($output as $chunk) {
-                yield $chunk;
-            }
-
-            $this->status = $output
-                ->getReturn()
-                ->map(fn() => new Success($this->output))
-                ->leftMap(fn($error) => match ($error) {
-                    'timed-out' => new TimedOut($this->output),
-                    'signaled' => new Signaled($this->output),
-                    default => new Failed($error, $this->output),
-                });
+                    return $chunk;
+                })
+                ->filter(\is_array(...));
         };
 
         if ($streamOutput) {
-            $output = Sequence::lazy($yieldOutput);
+            $output = Sequence::lazy($yieldOutput)->flatMap(
+                static fn($chunks) => $chunks,
+            );
         } else {
-            $output = Sequence::defer($yieldOutput());
+            $output = Sequence::defer($yieldOutput())->flatMap(
+                static fn($chunks) => $chunks,
+            );
         }
 
         $this->output = new Output\Output($output);

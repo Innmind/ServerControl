@@ -20,7 +20,7 @@ final class Background implements Process
         // wait for the process to be started in the background otherwise the
         // process will be killed
         // this also allows to send any input to the stream
-        $process->wait();
+        $process->output()->memoize();
         /** @var Sequence<array{0: Str, 1: Output\Type}> */
         $output = Sequence::of();
         $this->output = new Output\Output($output);

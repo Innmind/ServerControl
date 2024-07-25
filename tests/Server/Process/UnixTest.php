@@ -46,7 +46,7 @@ class UnixTest extends TestCase
         $count = 0;
         $process = $cat();
 
-        foreach ($process->output() as [$value, $type]) {
+        foreach ($process->output()->filter(\is_array(...))->toList() as [$value, $type]) {
             $this->assertSame(Type::output, $type);
             $this->assertSame("hello\n", $value->toString());
             ++$count;
@@ -74,7 +74,7 @@ class UnixTest extends TestCase
                 $process = $cat();
                 $output = '';
 
-                foreach ($process->output() as [$value, $type]) {
+                foreach ($process->output()->filter(\is_array(...))->toList() as [$value, $type]) {
                     $output .= $value->toString();
                 }
 
@@ -100,7 +100,7 @@ class UnixTest extends TestCase
 
         $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
 
-        foreach ($process->output() as [$chunk, $type]) {
+        foreach ($process->output()->filter(\is_array(...))->toList() as [$chunk, $type]) {
             $output .= $chunk->toString();
             $this->assertSame($count % 2 === 0 ? Type::output : Type::error, $type);
             ++$count;
@@ -128,7 +128,7 @@ class UnixTest extends TestCase
 
         $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
 
-        foreach ($process->output() as [$chunk, $type]) {
+        foreach ($process->output()->filter(\is_array(...))->toList() as [$chunk, $type]) {
             $output .= $chunk->toString();
             $this->assertSame($count % 2 === 0 ? Type::output : Type::error, $type);
             ++$count;
@@ -226,7 +226,7 @@ class UnixTest extends TestCase
         );
         $output = '';
 
-        foreach ($cat()->output() as [$value]) {
+        foreach ($cat()->output()->filter(\is_array(...))->toList() as [$value]) {
             $output .= $value->toString();
         }
 
