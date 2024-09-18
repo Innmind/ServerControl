@@ -252,4 +252,23 @@ class UnixTest extends TestCase
         // when done correctly then the foreach above would run forever
         $this->assertTrue(true);
     }
+
+    public function testRegressionWhenProcessFinishesTooFastItsFlaggedAsFailingEvenThoughItSucceeded()
+    {
+        $processes = Unix::of(
+            new Clock,
+            Streams::fromAmbientAuthority(),
+            new Usleep,
+        );
+
+        $this->assertTrue(
+            $processes
+                ->execute(Command::foreground('df')->withShortOption('lh'))
+                ->wait()
+                ->match(
+                    static fn() => true,
+                    static fn() => false,
+                ),
+        );
+    }
 }

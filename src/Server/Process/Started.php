@@ -63,6 +63,8 @@ final class Started
     private Maybe $content;
     private Pid $pid;
     private bool $executed = false;
+    /** @var int<0, 255> */
+    private ?int $exitCode = null;
 
     /**
      * @param callable(): array{0: resource, 1: array{0: resource, 1: resource, 2: resource}} $start
@@ -198,7 +200,22 @@ final class Started
     private function status(): array
     {
         /** @var Status */
-        return \proc_get_status($this->process);
+        $status = \proc_get_status($this->process);
+
+        // Here we cache the exit code as soon as we find the process stopped
+        // running. Otherwise if a process finishes before the first call to
+        // this method to retrieve the pid (done in this class constructor) then
+        // the following call when accessing the output will result in an exit
+        // code being `-1`.
+        if (!\is_null($this->exitCode)) {
+            $status['exitcode'] = $this->exitCode;
+        }
+
+        if ($status['running'] === false && \is_null($this->exitCode)) {
+            $this->exitCode = $status['exitcode'];
+        }
+
+        return $status;
     }
 
     /**
