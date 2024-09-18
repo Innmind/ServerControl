@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- A race condition where a process executing too fast was reported as failing even though it succeeded
+
 ## 5.2.2 - 2024-07-25
 
 ### Fixed
