@@ -30,7 +30,7 @@ final class Remote implements Processes
         Processes $processes,
         User $user,
         Host $host,
-        Port $port = null,
+        ?Port $port = null,
     ) {
         $this->processes = $processes;
         $command = Command::foreground('ssh');

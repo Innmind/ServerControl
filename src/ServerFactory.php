@@ -23,7 +23,7 @@ final class ServerFactory
         Clock $clock,
         Capabilities $capabilities,
         Halt $halt,
-        Period $grace = null,
+        ?Period $grace = null,
     ): Server {
         switch (\PHP_OS) {
             case 'Darwin':

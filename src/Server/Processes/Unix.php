@@ -48,7 +48,7 @@ final class Unix implements Processes
         Clock $clock,
         Capabilities $capabilities,
         Halt $halt,
-        Period $grace = null,
+        ?Period $grace = null,
     ): self {
         return new self(
             $clock,
