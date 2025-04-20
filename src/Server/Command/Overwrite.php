@@ -18,6 +18,7 @@ final class Overwrite implements Parameter
         $this->value = '> '.(new Argument($path->toString()))->toString();
     }
 
+    #[\Override]
     public function toString(): string
     {
         return $this->value;

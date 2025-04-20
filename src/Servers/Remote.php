@@ -35,21 +35,25 @@ final class Remote implements Server
         $this->volumes = new Volumes\Unix($this->processes);
     }
 
+    #[\Override]
     public function processes(): Processes
     {
         return $this->processes;
     }
 
+    #[\Override]
     public function volumes(): Volumes
     {
         return $this->volumes;
     }
 
+    #[\Override]
     public function reboot(): Either
     {
         return Server\Script::of('sudo shutdown -r now')($this);
     }
 
+    #[\Override]
     public function shutdown(): Either
     {
         return Server\Script::of('sudo shutdown -h now')($this);

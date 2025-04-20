@@ -41,6 +41,7 @@ final class Output implements OutputInterface
     /**
      * @param callable(Str, Type): void $function
      */
+    #[\Override]
     public function foreach(callable $function): SideEffect
     {
         return $this->output->foreach(static fn(array $output) => $function(
@@ -57,6 +58,7 @@ final class Output implements OutputInterface
      *
      * @return C
      */
+    #[\Override]
     public function reduce($carry, callable $reducer)
     {
         /**
@@ -76,6 +78,7 @@ final class Output implements OutputInterface
     /**
      * @param callable(Str, Type): bool $predicate
      */
+    #[\Override]
     public function filter(callable $predicate): OutputInterface
     {
         return new self($this->output->filter(
@@ -90,6 +93,7 @@ final class Output implements OutputInterface
      *
      * @return Map<G, OutputInterface>
      */
+    #[\Override]
     public function groupBy(callable $discriminator): Map
     {
         /**
@@ -110,6 +114,7 @@ final class Output implements OutputInterface
      *
      * @return Map<bool, OutputInterface>
      */
+    #[\Override]
     public function partition(callable $predicate): Map
     {
         /** @var Map<bool, OutputInterface> */
@@ -122,6 +127,7 @@ final class Output implements OutputInterface
             ->map(static fn($_, $output) => new self($output));
     }
 
+    #[\Override]
     public function toString(): string
     {
         $bits = $this->output->map(
@@ -131,6 +137,7 @@ final class Output implements OutputInterface
         return Str::of('')->join($bits)->toString();
     }
 
+    #[\Override]
     public function chunks(): Sequence
     {
         return $this->output;

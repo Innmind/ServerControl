@@ -57,16 +57,19 @@ final class Foreground implements Process
         $this->output = Output\Output::of($output);
     }
 
+    #[\Override]
     public function pid(): Maybe
     {
         return Maybe::of($this->process->pid());
     }
 
+    #[\Override]
     public function output(): Output
     {
         return $this->output;
     }
 
+    #[\Override]
     public function wait(): Either
     {
         if (\is_null($this->status)) {

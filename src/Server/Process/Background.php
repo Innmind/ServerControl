@@ -34,17 +34,20 @@ final class Background implements Process
         // the background pid
     }
 
+    #[\Override]
     public function pid(): Maybe
     {
         /** @var Maybe<Pid> */
         return Maybe::nothing();
     }
 
+    #[\Override]
     public function output(): Output
     {
         return $this->output;
     }
 
+    #[\Override]
     public function wait(): Either
     {
         return Either::right(new Success($this->output));

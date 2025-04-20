@@ -58,6 +58,7 @@ final class Unix implements Processes
         );
     }
 
+    #[\Override]
     public function execute(Command $command): Process
     {
         $process = new Process\Unix(
@@ -75,6 +76,7 @@ final class Unix implements Processes
         return new Foreground($process(), $command->outputToBeStreamed());
     }
 
+    #[\Override]
     public function kill(Pid $pid, Signal $signal): Either
     {
         $process = $this->execute(
