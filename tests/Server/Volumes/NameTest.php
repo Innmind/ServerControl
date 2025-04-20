@@ -17,7 +17,7 @@ class NameTest extends TestCase
     public function testInterface()
     {
         $this
-            ->forAll(Set\Strings::atLeast(1))
+            ->forAll(Set::strings()->atLeast(1))
             ->then(function($name) {
                 $this->assertSame($name, (new Name($name))->toString());
             });

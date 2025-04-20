@@ -17,7 +17,7 @@ class SecondTest extends TestCase
     public function testCanBeAnyPositiveValue()
     {
         $this
-            ->forAll(Set\Integers::above(1))
+            ->forAll(Set::integers()->above(1))
             ->then(function($second) {
                 $this->assertSame($second, (new Second($second))->toInt());
             });
