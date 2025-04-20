@@ -64,7 +64,8 @@ class UnixTest extends TestCase
     {
         $this
             ->forAll(
-                Set\Strings::madeOf(Set\Chars::ascii()->filter(static fn($char) => $char !== '\\'))
+                Set::strings()
+                    ->madeOf(Set::strings()->chars()->ascii()->filter(static fn($char) => $char !== '\\'))
                     ->between(1, 126),
             )
             ->then(function($echo) {
