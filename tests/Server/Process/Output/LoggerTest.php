@@ -5,6 +5,7 @@ namespace Tests\Innmind\Server\Control\Server\Process\Output;
 
 use Innmind\Server\Control\Server\{
     Process\Output\Logger,
+    Process\Output\Chunk,
     Process\Output\Type,
     Process\Output,
     Command,
@@ -46,7 +47,7 @@ class LoggerTest extends TestCase
             ->expects($this->once())
             ->method('foreach')
             ->with($this->callback(static function($callback) {
-                $callback(Str::of(''), Type::output);
+                $callback(Chunk::of(Str::of(''), Type::output));
 
                 return true;
             }))
@@ -72,7 +73,7 @@ class LoggerTest extends TestCase
             ->expects($this->once())
             ->method('foreach')
             ->with($this->callback(static function($callback) {
-                $callback(Str::of(''), Type::error);
+                $callback(Chunk::of(Str::of(''), Type::error));
 
                 return true;
             }))

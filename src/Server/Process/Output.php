@@ -3,10 +3,9 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\Server\Process\Output\Type;
+use Innmind\Server\Control\Server\Process\Output\Chunk;
 use Innmind\Immutable\{
     Map,
-    Str,
     SideEffect,
     Sequence,
 };
@@ -17,7 +16,7 @@ use Innmind\Immutable\{
 interface Output
 {
     /**
-     * @param callable(Str, Type): void $function
+     * @param callable(Chunk): void $function
      */
     public function foreach(callable $function): SideEffect;
 
@@ -25,28 +24,28 @@ interface Output
      * @template C
      *
      * @param C $carry
-     * @param callable(C, Str, Type): C $reducer
+     * @param callable(C, Chunk): C $reducer
      *
      * @return C
      */
     public function reduce($carry, callable $reducer);
 
     /**
-     * @param callable(Str, Type): bool $predicate
+     * @param callable(Chunk): bool $predicate
      */
     public function filter(callable $predicate): self;
 
     /**
      * @template G
      *
-     * @param callable(Str, Type): G $discriminator
+     * @param callable(Chunk): G $discriminator
      *
      * @return Map<G, self>
      */
     public function groupBy(callable $discriminator): Map;
 
     /**
-     * @param callable(Str, Type): bool $predicate
+     * @param callable(Chunk): bool $predicate
      *
      * @return Map<bool, self>
      */
@@ -54,7 +53,7 @@ interface Output
     public function toString(): string;
 
     /**
-     * @return Sequence<array{0: Str, 1: Type}>
+     * @return Sequence<Chunk>
      */
     public function chunks(): Sequence;
 }

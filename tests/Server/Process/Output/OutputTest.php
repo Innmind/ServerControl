@@ -5,6 +5,7 @@ namespace Tests\Innmind\Server\Control\Server\Process\Output;
 
 use Innmind\Server\Control\{
     Server\Process\Output\Output,
+    Server\Process\Output\Chunk,
     Server\Process\Output\Type,
     Server\Process\Output as OutputInterface,
 };
@@ -30,17 +31,17 @@ class OutputTest extends TestCase
     {
         $output = new Output(
             Sequence::of(
-                [Str::of('0'), Type::output],
-                [Str::of('1'), Type::output],
-                [Str::of('2'), Type::output],
+                Chunk::of(Str::of('0'), Type::output),
+                Chunk::of(Str::of('1'), Type::output),
+                Chunk::of(Str::of('2'), Type::output),
             ),
         );
         $count = 0;
 
         $this->assertInstanceOf(
             SideEffect::class,
-            $output->foreach(function(Str $data, Type $type) use (&$count) {
-                $this->assertSame((string) $count, $data->toString());
+            $output->foreach(function($chunk) use (&$count) {
+                $this->assertSame((string) $count, $chunk->data()->toString());
                 ++$count;
             }),
         );
@@ -51,9 +52,9 @@ class OutputTest extends TestCase
     {
         $output = new Output(
             Sequence::of(
-                [Str::of('0'), Type::output],
-                [Str::of('1'), Type::output],
-                [Str::of('2'), Type::output],
+                Chunk::of(Str::of('0'), Type::output),
+                Chunk::of(Str::of('1'), Type::output),
+                Chunk::of(Str::of('2'), Type::output),
             ),
         );
 
@@ -61,8 +62,8 @@ class OutputTest extends TestCase
             3,
             $output->reduce(
                 0,
-                static function(int $carry, Str $data, Type $type) {
-                    return $carry + (int) $data->toString();
+                static function(int $carry, $chunk) {
+                    return $carry + (int) $chunk->data()->toString();
                 },
             ),
         );
@@ -72,13 +73,13 @@ class OutputTest extends TestCase
     {
         $output = new Output(
             Sequence::of(
-                [Str::of('0'), Type::output],
-                [Str::of('1'), Type::output],
-                [Str::of('2'), Type::output],
+                Chunk::of(Str::of('0'), Type::output),
+                Chunk::of(Str::of('1'), Type::output),
+                Chunk::of(Str::of('2'), Type::output),
             ),
         );
-        $output2 = $output->filter(static function(Str $data, Type $type) {
-            return (int) $data->toString() % 2 === 0;
+        $output2 = $output->filter(static function($chunk) {
+            return (int) $chunk->data()->toString() % 2 === 0;
         });
 
         $this->assertInstanceOf(OutputInterface::class, $output2);
@@ -91,13 +92,13 @@ class OutputTest extends TestCase
     {
         $output = new Output(
             Sequence::of(
-                [Str::of('0'), Type::output],
-                [Str::of('1'), Type::output],
-                [Str::of('2'), Type::output],
+                Chunk::of(Str::of('0'), Type::output),
+                Chunk::of(Str::of('1'), Type::output),
+                Chunk::of(Str::of('2'), Type::output),
             ),
         );
-        $groups = $output->groupBy(static function(Str $data, Type $type) {
-            return (int) $data->toString() % 2;
+        $groups = $output->groupBy(static function($chunk) {
+            return (int) $chunk->data()->toString() % 2;
         });
 
         $this->assertInstanceOf(Map::class, $groups);
@@ -116,13 +117,13 @@ class OutputTest extends TestCase
     {
         $output = new Output(
             Sequence::of(
-                [Str::of('0'), Type::output],
-                [Str::of('1'), Type::output],
-                [Str::of('2'), Type::output],
+                Chunk::of(Str::of('0'), Type::output),
+                Chunk::of(Str::of('1'), Type::output),
+                Chunk::of(Str::of('2'), Type::output),
             ),
         );
-        $partitions = $output->partition(static function(Str $data, Type $type) {
-            return (int) $data->toString() % 2 === 0;
+        $partitions = $output->partition(static function($chunk) {
+            return (int) $chunk->data()->toString() % 2 === 0;
         });
 
         $this->assertInstanceOf(Map::class, $partitions);
@@ -141,9 +142,9 @@ class OutputTest extends TestCase
     {
         $output = new Output(
             Sequence::of(
-                [Str::of('0'), Type::output],
-                [Str::of('1'), Type::output],
-                [Str::of('2'), Type::output],
+                Chunk::of(Str::of('0'), Type::output),
+                Chunk::of(Str::of('1'), Type::output),
+                Chunk::of(Str::of('2'), Type::output),
             ),
         );
 

@@ -6,7 +6,6 @@ namespace Innmind\Server\Control\Server\Process;
 use Innmind\Server\Control\Server\Process;
 use Innmind\Immutable\{
     Sequence,
-    Str,
     Maybe,
     Either,
 };
@@ -21,9 +20,7 @@ final class Background implements Process
         // process will be killed
         // this also allows to send any input to the stream
         $process->output()->memoize();
-        /** @var Sequence<array{0: Str, 1: Output\Type}> */
-        $output = Sequence::of();
-        $this->output = new Output\Output($output);
+        $this->output = new Output\Output(Sequence::of());
 
         // the pid returned by `$process->pid()` is the one for the "foreground"
         // process that starts the background one, the real pid (the one we

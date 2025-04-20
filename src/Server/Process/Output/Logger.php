@@ -9,7 +9,6 @@ use Innmind\Server\Control\Server\{
 };
 use Innmind\Immutable\{
     Map,
-    Str,
     SideEffect,
     Sequence,
 };
@@ -45,18 +44,18 @@ final class Logger implements Output
     #[\Override]
     public function foreach(callable $function): SideEffect
     {
-        return $this->output->foreach(function(Str $output, Type $type) use ($function): void {
-            $method = match ($type) {
+        return $this->output->foreach(function($chunk) use ($function): void {
+            $method = match ($chunk->type()) {
                 Type::output => 'debug',
                 Type::error => 'warning',
             };
             $this->logger->$method('Command {command} output', [
                 'command' => $this->command->toString(),
-                'output' => $output->toString(),
-                'type' => $type->toString(),
+                'output' => $chunk->data()->toString(),
+                'type' => $chunk->type()->toString(),
             ]);
 
-            $function($output, $type);
+            $function($chunk);
         });
     }
 

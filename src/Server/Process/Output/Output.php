@@ -16,11 +16,11 @@ use Innmind\Immutable\{
  */
 final class Output implements OutputInterface
 {
-    /** @var Sequence<array{0: Str, 1: Type}> */
+    /** @var Sequence<Chunk> */
     private Sequence $output;
 
     /**
-     * @param Sequence<array{0: Str, 1: Type}> $output
+     * @param Sequence<Chunk> $output
      */
     public function __construct(Sequence $output)
     {
@@ -32,64 +32,48 @@ final class Output implements OutputInterface
      */
     public static function of(Sequence $chunks): self
     {
-        return new self($chunks->map(static fn($chunk) => [
-            $chunk->data(),
-            $chunk->type(),
-        ]));
+        return new self($chunks);
     }
 
     /**
-     * @param callable(Str, Type): void $function
+     * @param callable(Chunk): void $function
      */
     #[\Override]
     public function foreach(callable $function): SideEffect
     {
-        return $this->output->foreach(static fn(array $output) => $function(
-            $output[0],
-            $output[1],
-        ));
+        return $this->output->foreach($function);
     }
 
     /**
      * @template C
      *
      * @param C $carry
-     * @param callable(C, Str, Type): C $reducer
+     * @param callable(C, Chunk): C $reducer
      *
      * @return C
      */
     #[\Override]
     public function reduce($carry, callable $reducer)
     {
-        /**
-         * @psalm-suppress MissingClosureParamType
-         * @psalm-suppress MixedArgument
-         */
         return $this->output->reduce(
             $carry,
-            static fn($carry, array $output) => $reducer(
-                $carry,
-                $output[0],
-                $output[1],
-            ),
+            $reducer,
         );
     }
 
     /**
-     * @param callable(Str, Type): bool $predicate
+     * @param callable(Chunk): bool $predicate
      */
     #[\Override]
     public function filter(callable $predicate): OutputInterface
     {
-        return new self($this->output->filter(
-            static fn(array $output) => $predicate($output[0], $output[1]),
-        ));
+        return new self($this->output->filter($predicate));
     }
 
     /**
      * @template G
      *
-     * @param callable(Str, Type): G $discriminator
+     * @param callable(Chunk): G $discriminator
      *
      * @return Map<G, OutputInterface>
      */
@@ -97,20 +81,16 @@ final class Output implements OutputInterface
     public function groupBy(callable $discriminator): Map
     {
         /**
-         * @psalm-suppress MissingClosureParamType
          * @var Map<G, OutputInterface>
          */
         return $this
             ->output
-            ->groupBy(static fn(array $output) => $discriminator(
-                $output[0],
-                $output[1],
-            ))
+            ->groupBy($discriminator)
             ->map(static fn($_, $discriminated) => new self($discriminated));
     }
 
     /**
-     * @param callable(Str, Type): bool $predicate
+     * @param callable(Chunk): bool $predicate
      *
      * @return Map<bool, OutputInterface>
      */
@@ -120,10 +100,7 @@ final class Output implements OutputInterface
         /** @var Map<bool, OutputInterface> */
         return $this
             ->output
-            ->partition(static fn(array $output) => $predicate(
-                $output[0],
-                $output[1],
-            ))
+            ->partition($predicate)
             ->map(static fn($_, $output) => new self($output));
     }
 
@@ -131,7 +108,7 @@ final class Output implements OutputInterface
     public function toString(): string
     {
         $bits = $this->output->map(
-            static fn(array $output): string => $output[0]->toString(),
+            static fn($chunk): string => $chunk->data()->toString(),
         );
 
         return Str::of('')->join($bits)->toString();

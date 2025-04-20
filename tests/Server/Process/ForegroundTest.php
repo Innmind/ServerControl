@@ -19,7 +19,6 @@ use Innmind\TimeContinuum\Earth\{
 };
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Stream\Streams;
-use Innmind\Immutable\Str;
 use PHPUnit\Framework\TestCase;
 
 class ForegroundTest extends TestCase
@@ -77,11 +76,11 @@ class ForegroundTest extends TestCase
         $count = 0;
         $process
             ->output()
-            ->foreach(function(Str $data, Type $type) use ($start, &$count) {
-                $this->assertSame($count."\n", $data->toString());
+            ->foreach(function($chunk) use ($start, &$count) {
+                $this->assertSame($count."\n", $chunk->data()->toString());
                 $this->assertEquals(
-                    (int) $data->toString() % 2 === 0 ? Type::output : Type::error,
-                    $type,
+                    (int) $chunk->data()->toString() % 2 === 0 ? Type::output : Type::error,
+                    $chunk->type(),
                 );
                 $this->assertTrue((\time() - $start) >= (1 + $count));
                 ++$count;
