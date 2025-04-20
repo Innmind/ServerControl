@@ -17,7 +17,7 @@ final class Option implements Parameter
     /**
      * @param non-empty-string $key
      */
-    private function __construct(bool $long, string $key, string $value = null)
+    private function __construct(bool $long, string $key, ?string $value = null)
     {
         $this->long = $long;
         $this->key = $key;
@@ -28,7 +28,7 @@ final class Option implements Parameter
      * @psalm-pure
      * @param non-empty-string $key
      */
-    public static function long(string $key, string $value = null): self
+    public static function long(string $key, ?string $value = null): self
     {
         return new self(true, $key, $value);
     }
@@ -37,7 +37,7 @@ final class Option implements Parameter
      * @psalm-pure
      * @param non-empty-string $key
      */
-    public static function short(string $key, string $value = null): self
+    public static function short(string $key, ?string $value = null): self
     {
         return new self(false, $key, $value);
     }

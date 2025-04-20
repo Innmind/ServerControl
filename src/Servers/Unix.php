@@ -25,7 +25,7 @@ final class Unix implements Server
         Clock $clock,
         Capabilities $capabilities,
         Halt $halt,
-        Period $grace = null,
+        ?Period $grace = null,
     ) {
         $this->processes = Processes\Unix::of(
             $clock,
@@ -40,7 +40,7 @@ final class Unix implements Server
         Clock $clock,
         Capabilities $capabilities,
         Halt $halt,
-        Period $grace = null,
+        ?Period $grace = null,
     ): self {
         return new self($clock, $capabilities, $halt, $grace);
     }

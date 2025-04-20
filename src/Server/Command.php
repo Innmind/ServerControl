@@ -102,7 +102,7 @@ final class Command
     /**
      * @param non-empty-string $key
      */
-    public function withOption(string $key, string $value = null): self
+    public function withOption(string $key, ?string $value = null): self
     {
         $self = clone $this;
         $self->parameters = ($this->parameters)(Option::long($key, $value));
@@ -113,7 +113,7 @@ final class Command
     /**
      * @param non-empty-string $key
      */
-    public function withShortOption(string $key, string $value = null): self
+    public function withShortOption(string $key, ?string $value = null): self
     {
         $self = clone $this;
         $self->parameters = ($this->parameters)(Option::short($key, $value));
