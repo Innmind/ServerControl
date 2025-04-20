@@ -57,7 +57,7 @@ class LoggerTest extends TestCase
             );
 
         $this->assertInstanceOf(
-            Process\Logger::class,
+            Process::class,
             $logger->execute(
                 Command::foreground('ls')->withShortOption('l'),
             ),
@@ -89,7 +89,7 @@ class LoggerTest extends TestCase
             );
 
         $this->assertInstanceOf(
-            Process\Logger::class,
+            Process::class,
             $logger->execute(
                 Command::foreground('ls')
                     ->withShortOption('l')

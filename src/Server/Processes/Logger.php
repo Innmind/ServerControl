@@ -42,11 +42,7 @@ final class Logger implements Processes
             ),
         ]);
 
-        return Process\Logger::psr(
-            $this->processes->execute($command),
-            $command,
-            $this->logger,
-        );
+        return $this->processes->execute($command);
     }
 
     #[\Override]
