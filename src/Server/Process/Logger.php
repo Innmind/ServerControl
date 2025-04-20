@@ -37,6 +37,7 @@ final class Logger implements Process
         return new self($process, $command, $logger);
     }
 
+    #[\Override]
     public function pid(): Maybe
     {
         return $this
@@ -52,6 +53,7 @@ final class Logger implements Process
             });
     }
 
+    #[\Override]
     public function output(): Output
     {
         return Output\Logger::psr(
@@ -61,6 +63,7 @@ final class Logger implements Process
         );
     }
 
+    #[\Override]
     public function wait(): Either
     {
         return $this

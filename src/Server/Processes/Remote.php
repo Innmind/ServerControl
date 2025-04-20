@@ -46,6 +46,7 @@ final class Remote implements Processes
         ));
     }
 
+    #[\Override]
     public function execute(Command $command): Process
     {
         /** @psalm-suppress ArgumentTypeCoercion Due psalm not understing that $bash cannot be empty */
@@ -68,6 +69,7 @@ final class Remote implements Processes
             );
     }
 
+    #[\Override]
     public function kill(Pid $pid, Signal $signal): Either
     {
         $process = $this->execute(

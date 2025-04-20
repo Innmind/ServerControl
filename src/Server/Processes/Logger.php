@@ -31,6 +31,7 @@ final class Logger implements Processes
         return new self($processes, $logger);
     }
 
+    #[\Override]
     public function execute(Command $command): Process
     {
         $this->logger->info('About to execute a command', [
@@ -48,6 +49,7 @@ final class Logger implements Processes
         );
     }
 
+    #[\Override]
     public function kill(Pid $pid, Signal $signal): Either
     {
         $this->logger->info('About to kill a process', [

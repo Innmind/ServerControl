@@ -42,6 +42,7 @@ final class Logger implements Output
         return new self($output, $command, $logger);
     }
 
+    #[\Override]
     public function foreach(callable $function): SideEffect
     {
         return $this->output->foreach(function(Str $output, Type $type) use ($function): void {
@@ -59,11 +60,13 @@ final class Logger implements Output
         });
     }
 
+    #[\Override]
     public function reduce($carry, callable $reducer)
     {
         return $this->output->reduce($carry, $reducer);
     }
 
+    #[\Override]
     public function filter(callable $predicate): Output
     {
         return new self(
@@ -73,21 +76,25 @@ final class Logger implements Output
         );
     }
 
+    #[\Override]
     public function groupBy(callable $discriminator): Map
     {
         return $this->output->groupBy($discriminator);
     }
 
+    #[\Override]
     public function partition(callable $predicate): Map
     {
         return $this->output->partition($predicate);
     }
 
+    #[\Override]
     public function toString(): string
     {
         return $this->output->toString();
     }
 
+    #[\Override]
     public function chunks(): Sequence
     {
         return $this->output->chunks();

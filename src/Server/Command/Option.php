@@ -42,6 +42,7 @@ final class Option implements Parameter
         return new self(false, $key, $value);
     }
 
+    #[\Override]
     public function toString(): string
     {
         if ($this->long) {

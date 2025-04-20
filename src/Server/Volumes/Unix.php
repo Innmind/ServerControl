@@ -24,6 +24,7 @@ final class Unix implements Volumes
         $this->processes = $processes;
     }
 
+    #[\Override]
     public function mount(Name $name, Path $mountpoint): Either
     {
         if ($this->isOSX()) {
@@ -41,6 +42,7 @@ final class Unix implements Volumes
         );
     }
 
+    #[\Override]
     public function unmount(Name $name): Either
     {
         if ($this->isOSX()) {

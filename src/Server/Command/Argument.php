@@ -16,6 +16,7 @@ final class Argument implements Parameter
         $this->value = (new Str($value))->toString();
     }
 
+    #[\Override]
     public function toString(): string
     {
         return $this->value;

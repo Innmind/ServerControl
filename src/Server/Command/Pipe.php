@@ -9,6 +9,7 @@ namespace Innmind\Server\Control\Server\Command;
  */
 final class Pipe implements Parameter
 {
+    #[\Override]
     public function toString(): string
     {
         return '|';
