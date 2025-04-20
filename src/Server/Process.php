@@ -12,6 +12,7 @@ use Innmind\Server\Control\Server\Process\{
     Success,
 };
 use Innmind\Immutable\{
+    Sequence,
     Maybe,
     Either,
 };
@@ -27,7 +28,11 @@ interface Process
      * @return Maybe<Pid>
      */
     public function pid(): Maybe;
-    public function output(): Output;
+
+    /**
+     * @return Sequence<Output\Chunk>
+     */
+    public function output(): Sequence;
 
     /**
      * This method returns a Success either when a foreground process returned a

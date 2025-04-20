@@ -12,7 +12,8 @@ use Innmind\Immutable\{
 
 final class Background implements Process
 {
-    private Output $output;
+    /** @var Sequence<Output\Chunk> */
+    private Sequence $output;
 
     public function __construct(Started $process)
     {
@@ -20,7 +21,7 @@ final class Background implements Process
         // process will be killed
         // this also allows to send any input to the stream
         $process->output()->memoize();
-        $this->output = new Output\Output(Sequence::of());
+        $this->output = Sequence::of();
 
         // the pid returned by `$process->pid()` is the one for the "foreground"
         // process that starts the background one, the real pid (the one we
@@ -39,7 +40,7 @@ final class Background implements Process
     }
 
     #[\Override]
-    public function output(): Output
+    public function output(): Sequence
     {
         return $this->output;
     }

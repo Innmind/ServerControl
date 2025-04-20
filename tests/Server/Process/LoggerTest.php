@@ -7,7 +7,6 @@ use Innmind\Server\Control\Server\{
     Process\Logger,
     Process\Pid,
     Process\ExitCode,
-    Process\Output,
     Process,
     Command,
 };
@@ -15,6 +14,7 @@ use Innmind\Immutable\{
     Maybe,
     Either,
     SideEffect,
+    Sequence,
 };
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -85,7 +85,7 @@ class LoggerTest extends TestCase
             ->method('wait')
             ->willReturn($expected = Either::left(new Process\Failed(
                 new ExitCode(1),
-                $this->createMock(Output::class),
+                Sequence::of(),
             )));
 
         $this->assertEquals($expected, $process->wait());
@@ -106,7 +106,7 @@ class LoggerTest extends TestCase
             ->expects($this->once())
             ->method('wait')
             ->willReturn($expected = Either::left(new Process\TimedOut(
-                $this->createMock(Output::class),
+                Sequence::of(),
             )));
 
         $this->assertEquals($expected, $process->wait());
@@ -127,7 +127,7 @@ class LoggerTest extends TestCase
             ->expects($this->once())
             ->method('wait')
             ->willReturn($expected = Either::left(new Process\Signaled(
-                $this->createMock(Output::class),
+                Sequence::of(),
             )));
 
         $this->assertEquals($expected, $process->wait());
@@ -136,11 +136,15 @@ class LoggerTest extends TestCase
     public function testOutput()
     {
         $process = Logger::psr(
-            $this->createMock(Process::class),
+            $inner = $this->createMock(Process::class),
             Command::foreground('echo'),
             $this->createMock(LoggerInterface::class),
         );
+        $inner
+            ->expects($this->once())
+            ->method('output')
+            ->willReturn(Sequence::of());
 
-        $this->assertInstanceOf(Output\Logger::class, $process->output());
+        $this->assertInstanceOf(Sequence::class, $process->output());
     }
 }

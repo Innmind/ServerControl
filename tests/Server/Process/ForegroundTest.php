@@ -7,7 +7,6 @@ use Innmind\Server\Control\Server\{
     Process\Foreground,
     Process\Unix,
     Process,
-    Process\Output,
     Process\Output\Type,
     Process\Failed,
     Process\Success,
@@ -19,6 +18,7 @@ use Innmind\TimeContinuum\Earth\{
 };
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Stream\Streams;
+use Innmind\Immutable\Monoid\Concat;
 use PHPUnit\Framework\TestCase;
 
 class ForegroundTest extends TestCase
@@ -71,7 +71,6 @@ class ForegroundTest extends TestCase
         );
         $process = new Foreground($slow());
 
-        $this->assertInstanceOf(Output::class, $process->output());
         $start = \time();
         $count = 0;
         $process
@@ -85,7 +84,14 @@ class ForegroundTest extends TestCase
                 $this->assertTrue((\time() - $start) >= (1 + $count));
                 ++$count;
             });
-        $this->assertSame("0\n1\n2\n3\n4\n5\n", $process->output()->toString());
+        $this->assertSame(
+            "0\n1\n2\n3\n4\n5\n",
+            $process
+                ->output()
+                ->map(static fn($chunk) => $chunk->data())
+                ->fold(new Concat)
+                ->toString(),
+        );
         $this->assertSame(6, $count);
     }
 
@@ -186,7 +192,7 @@ class ForegroundTest extends TestCase
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
         $process = new Foreground($slow());
-        $process->output()->toString();
+        $process->output()->memoize();
 
         $this->assertInstanceOf(
             Success::class,
@@ -219,6 +225,13 @@ class ForegroundTest extends TestCase
                     static fn() => null,
                 ),
         );
-        $this->assertSame("0\n1\n2\n3\n4\n5\n", $process->output()->toString());
+        $this->assertSame(
+            "0\n1\n2\n3\n4\n5\n",
+            $process
+                ->output()
+                ->map(static fn($chunk) => $chunk->data())
+                ->fold(new Concat)
+                ->toString(),
+        );
     }
 }
