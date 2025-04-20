@@ -10,13 +10,13 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Process,
     Server\Process\ExitCode,
-    Server\Process\Output,
     ScriptFailed,
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Either,
     SideEffect,
+    Sequence,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -96,7 +96,7 @@ class UnixTest extends TestCase
             ->method('wait')
             ->willReturn(Either::left(new Process\Failed(
                 new ExitCode(1),
-                $this->createMock(Output::class),
+                Sequence::of(),
             )));
         $processes
             ->expects($matcher = $this->exactly(2))
@@ -192,7 +192,7 @@ class UnixTest extends TestCase
             ->method('wait')
             ->willReturn(Either::left(new Process\Failed(
                 new ExitCode(1),
-                $this->createMock(Output::class),
+                Sequence::of(),
             )));
         $processes
             ->expects($matcher = $this->exactly(2))
@@ -235,7 +235,7 @@ class UnixTest extends TestCase
             ->method('wait')
             ->willReturn(Either::left(new Process\Failed(
                 new ExitCode(1),
-                $this->createMock(Output::class),
+                Sequence::of(),
             )));
         $mount = $this->createMock(Process::class);
         $mount
@@ -286,7 +286,7 @@ class UnixTest extends TestCase
             ->method('wait')
             ->willReturn(Either::left(new Process\Failed(
                 new ExitCode(1),
-                $this->createMock(Output::class),
+                Sequence::of(),
             )));
         $mount = $this->createMock(Process::class);
         $mount
@@ -294,7 +294,7 @@ class UnixTest extends TestCase
             ->method('wait')
             ->willReturn(Either::left(new Process\Failed(
                 new ExitCode(1),
-                $this->createMock(Output::class),
+                Sequence::of(),
             )));
         $processes
             ->expects($matcher = $this->exactly(2))
@@ -340,7 +340,7 @@ class UnixTest extends TestCase
             ->method('wait')
             ->willReturn(Either::left(new Process\Failed(
                 new ExitCode(1),
-                $this->createMock(Output::class),
+                Sequence::of(),
             )));
         $mount = $this->createMock(Process::class);
         $mount
@@ -388,7 +388,7 @@ class UnixTest extends TestCase
             ->method('wait')
             ->willReturn(Either::left(new Process\Failed(
                 new ExitCode(1),
-                $this->createMock(Output::class),
+                Sequence::of(),
             )));
         $mount = $this->createMock(Process::class);
         $mount
@@ -396,7 +396,7 @@ class UnixTest extends TestCase
             ->method('wait')
             ->willReturn(Either::left(new Process\Failed(
                 new ExitCode(1),
-                $this->createMock(Output::class),
+                Sequence::of(),
             )));
         $processes
             ->expects($matcher = $this->exactly(2))

@@ -22,7 +22,10 @@ use Innmind\Stream\{
     Streams,
     Watch\Select,
 };
-use Innmind\Immutable\SideEffect;
+use Innmind\Immutable\{
+    SideEffect,
+    Monoid\Concat,
+};
 use PHPUnit\Framework\TestCase;
 
 class UnixTest extends TestCase
@@ -92,7 +95,11 @@ class UnixTest extends TestCase
 
         $this->assertSame(
             \file_get_contents('fixtures/symfony.log'),
-            $process->output()->toString(),
+            $process
+                ->output()
+                ->map(static fn($chunk) => $chunk->data())
+                ->fold(new Concat)
+                ->toString(),
         );
     }
 

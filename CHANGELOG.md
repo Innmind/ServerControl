@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `Innmind\Server\Control\Server\Process::output()` now returns `Innmind\Immutable\Sequence<Innmind\Server\Control\Server\Process\Output\Chunk>`
+
+### Removed
+
+- `Innmind\Server\Control\Server\Process\Output`
+
 ### Fixed
 
 - PHP `8.4` deprecations

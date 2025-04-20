@@ -3,18 +3,18 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process;
 
+use Innmind\Immutable\Sequence;
+
 final class Failed
 {
-    private ExitCode $exitCode;
-    private Output $output;
-
     /**
      * @internal
+     * @param Sequence<Output\Chunk> $output
      */
-    public function __construct(ExitCode $exitCode, Output $output)
-    {
-        $this->exitCode = $exitCode;
-        $this->output = $output;
+    public function __construct(
+        private ExitCode $exitCode,
+        private Sequence $output,
+    ) {
     }
 
     public function exitCode(): ExitCode
@@ -22,7 +22,10 @@ final class Failed
         return $this->exitCode;
     }
 
-    public function output(): Output
+    /**
+     * @return Sequence<Output\Chunk>
+     */
+    public function output(): Sequence
     {
         return $this->output;
     }

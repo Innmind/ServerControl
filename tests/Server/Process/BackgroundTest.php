@@ -8,7 +8,6 @@ use Innmind\Server\Control\Server\{
     Process\Unix,
     Process\Success,
     Process,
-    Process\Output\Output,
     Command,
 };
 use Innmind\TimeContinuum\Earth\{
@@ -17,6 +16,7 @@ use Innmind\TimeContinuum\Earth\{
 };
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Stream\Streams;
+use Innmind\Immutable\Monoid\Concat;
 use PHPUnit\Framework\TestCase;
 
 class BackgroundTest extends TestCase
@@ -65,9 +65,15 @@ class BackgroundTest extends TestCase
         );
         $process = new Background($slow());
 
-        $this->assertInstanceOf(Output::class, $process->output());
         $start = \time();
-        $this->assertSame('', $process->output()->toString());
+        $this->assertSame(
+            '',
+            $process
+                ->output()
+                ->map(static fn($chunk) => $chunk->data())
+                ->fold(new Concat)
+                ->toString(),
+        );
         $this->assertTrue((\time() - $start) < 1);
     }
 

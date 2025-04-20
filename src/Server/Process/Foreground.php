@@ -18,7 +18,8 @@ use Innmind\Immutable\{
 final class Foreground implements Process
 {
     private Started $process;
-    private Output $output;
+    /** @var Sequence<Chunk> */
+    private Sequence $output;
     /** @var ?Either<Failed|Signaled|TimedOut, Success> */
     private ?Either $status = null;
 
@@ -54,7 +55,7 @@ final class Foreground implements Process
             );
         }
 
-        $this->output = Output\Output::of($output);
+        $this->output = $output;
     }
 
     #[\Override]
@@ -64,7 +65,7 @@ final class Foreground implements Process
     }
 
     #[\Override]
-    public function output(): Output
+    public function output(): Sequence
     {
         return $this->output;
     }

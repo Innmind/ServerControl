@@ -10,12 +10,12 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Process,
     Server\Process\ExitCode,
-    Server\Process\Output,
     ScriptFailed,
 };
 use Innmind\Immutable\{
     Either,
     SideEffect,
+    Sequence,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -81,7 +81,7 @@ class ScriptTest extends TestCase
             ->method('wait')
             ->willReturn(Either::left(new Process\Failed(
                 new ExitCode(1),
-                $this->createMock(Output::class),
+                Sequence::of(),
             )));
         $processes
             ->expects($matcher = $this->exactly(2))
@@ -157,7 +157,7 @@ class ScriptTest extends TestCase
             ->expects($this->once())
             ->method('wait')
             ->willReturn(Either::left($expected = new Process\TimedOut(
-                $this->createMock(Output::class),
+                Sequence::of(),
             )));
 
         $e = $script($server)->match(

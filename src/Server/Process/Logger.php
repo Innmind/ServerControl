@@ -8,6 +8,7 @@ use Innmind\Server\Control\{
     Server\Command,
 };
 use Innmind\Immutable\{
+    Sequence,
     Maybe,
     Either,
 };
@@ -54,13 +55,9 @@ final class Logger implements Process
     }
 
     #[\Override]
-    public function output(): Output
+    public function output(): Sequence
     {
-        return Output\Logger::psr(
-            $this->process->output(),
-            $this->command,
-            $this->logger,
-        );
+        return $this->process->output();
     }
 
     #[\Override]
