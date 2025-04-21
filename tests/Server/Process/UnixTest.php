@@ -28,9 +28,9 @@ use Innmind\Immutable\{
     SideEffect,
     Predicate\Instance,
 };
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 
@@ -126,30 +126,29 @@ class UnixTest extends TestCase
                 ->timeoutAfter(new Timeout(2))
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = $slow();
-        $count = 0;
-        $output = '';
-        $started = \microtime(true);
 
-        $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
+        $this
+            ->assert()
+            ->time(function() use ($slow) {
+                $process = $slow();
+                $count = 0;
+                $output = '';
+                $started = \microtime(true);
 
-        foreach ($process->output()->keep(Instance::of(Chunk::class))->toList() as $chunk) {
-            $output .= $chunk->data()->toString();
-            $this->assertSame($count % 2 === 0 ? Type::output : Type::error, $chunk->type());
-            ++$count;
-        }
+                $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
 
-        // depending on when occur the timeout of the stream_select we may end
-        // up right after the process outputed its second value
-        $this->assertThat(
-            $output,
-            $this->logicalOr(
-                $this->identicalTo("0\n"),
-                $this->identicalTo("0\n1\n"),
-            ),
-        );
-        // 3 because of the grace period
-        $this->assertEqualsWithDelta(3, \microtime(true) - $started, 0.5);
+                foreach ($process->output()->keep(Instance::of(Chunk::class))->toList() as $chunk) {
+                    $output .= $chunk->data()->toString();
+                    $this->assertSame($count % 2 === 0 ? Type::output : Type::error, $chunk->type());
+                    ++$count;
+                }
+
+                // depending on when occur the timeout of the stream_select we may end
+                // up right after the process outputed its second value
+                $this->assertContains($output, ["0\n", "0\n1\n"]);
+            })
+            ->inMoreThan()
+            ->seconds(2);
     }
 
     public function testTimeoutWaitSlowProcess()
@@ -164,22 +163,25 @@ class UnixTest extends TestCase
                 ->timeoutAfter(new Timeout(2))
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = $slow();
-        $started = \microtime(true);
+        $this
+            ->assert()
+            ->time(function() use ($slow) {
+                $process = $slow();
 
-        $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
-        $e = $process
-            ->output()
-            ->last()
-            ->either()
-            ->flatMap(static fn($result) => $result)
-            ->match(
-                static fn() => null,
-                static fn($e) => $e,
-            );
-        $this->assertSame('timed-out', $e);
-        // 3 because of the grace period
-        $this->assertEqualsWithDelta(3, \microtime(true) - $started, 0.5);
+                $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
+                $e = $process
+                    ->output()
+                    ->last()
+                    ->either()
+                    ->flatMap(static fn($result) => $result)
+                    ->match(
+                        static fn() => null,
+                        static fn($e) => $e,
+                    );
+                $this->assertSame('timed-out', $e);
+            })
+            ->inMoreThan()
+            ->seconds(2);
     }
 
     public function testWaitSuccess()

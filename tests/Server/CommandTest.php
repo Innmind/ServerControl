@@ -10,7 +10,7 @@ use Innmind\Server\Control\{
 use Innmind\Filesystem\File\Content;
 use Innmind\Url\Path;
 use Innmind\Immutable\Map;
-use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class CommandTest extends TestCase
 {

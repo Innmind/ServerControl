@@ -5,7 +5,7 @@ namespace Tests\Innmind\Server\Control\Server\Command;
 
 use Innmind\Server\Control\Server\Command\Overwrite;
 use Innmind\Url\Path;
-use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class OverwriteTest extends TestCase
 {

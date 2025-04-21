@@ -22,7 +22,7 @@ use Innmind\Immutable\{
     SideEffect,
 };
 use Psr\Log\NullLogger;
-use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class LoggerTest extends TestCase
 {

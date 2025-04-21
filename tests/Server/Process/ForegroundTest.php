@@ -18,7 +18,7 @@ use Innmind\TimeContinuum\Earth\{
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Stream\Streams;
 use Innmind\Immutable\Monoid\Concat;
-use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class ForegroundTest extends TestCase
 {
