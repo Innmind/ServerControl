@@ -8,7 +8,6 @@ use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Processes\Unix,
-    Server\Process,
     Server\Process\Pid,
     Server\Command,
     Server\Volumes,
@@ -24,6 +23,7 @@ use Innmind\Url\Authority\{
 };
 use Innmind\Immutable\{
     Either,
+    Attempt,
     SideEffect,
 };
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
@@ -170,7 +170,7 @@ class RemoteTest extends TestCase
                     ) {
                     }
 
-                    public function execute(Command $command): Process
+                    public function execute(Command $command): Attempt
                     {
                         $expected = \array_shift($this->commands);
                         $this->test->assertNotNull($expected);

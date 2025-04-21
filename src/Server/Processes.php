@@ -9,12 +9,16 @@ use Innmind\Server\Control\{
 };
 use Innmind\Immutable\{
     Either,
+    Attempt,
     SideEffect,
 };
 
 interface Processes
 {
-    public function execute(Command $command): Process;
+    /**
+     * @return Attempt<Process>
+     */
+    public function execute(Command $command): Attempt;
 
     /**
      * @return Either<ScriptFailed, SideEffect>

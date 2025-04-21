@@ -19,6 +19,7 @@ use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 use Innmind\Immutable\{
     Either,
+    Attempt,
     SideEffect,
 };
 
@@ -47,21 +48,23 @@ final class Unix implements Processes
     }
 
     #[\Override]
-    public function execute(Command $command): Process
+    public function execute(Command $command): Attempt
     {
-        $process = new Process\Unix(
-            $this->clock,
-            $this->io,
-            $this->halt,
-            $this->grace,
-            $command,
-        );
+        return Attempt::of(function() use ($command) {
+            $process = new Process\Unix(
+                $this->clock,
+                $this->io,
+                $this->halt,
+                $this->grace,
+                $command,
+            );
 
-        if ($command->toBeRunInBackground()) {
-            return Process::background($process());
-        }
+            if ($command->toBeRunInBackground()) {
+                return Process::background($process());
+            }
 
-        return Process::foreground($process(), $command->outputToBeStreamed());
+            return Process::foreground($process(), $command->outputToBeStreamed());
+        });
     }
 
     #[\Override]
@@ -71,7 +74,7 @@ final class Unix implements Processes
             $command = Command::foreground('kill')
                 ->withShortOption($signal->toString())
                 ->withArgument($pid->toString()),
-        );
+        )->unwrap();
 
         return $process
             ->wait()

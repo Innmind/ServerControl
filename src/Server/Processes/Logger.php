@@ -7,10 +7,12 @@ use Innmind\Server\Control\Server\{
     Processes,
     Command,
     Signal,
-    Process,
     Process\Pid,
 };
-use Innmind\Immutable\Either;
+use Innmind\Immutable\{
+    Either,
+    Attempt,
+};
 use Psr\Log\LoggerInterface;
 
 final class Logger implements Processes
@@ -27,7 +29,7 @@ final class Logger implements Processes
     }
 
     #[\Override]
-    public function execute(Command $command): Process
+    public function execute(Command $command): Attempt
     {
         $this->logger->info('About to execute a command', [
             'command' => $command->toString(),

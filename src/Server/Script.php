@@ -37,7 +37,7 @@ final class Script
         return $this->commands->reduce(
             Either::right(new SideEffect),
             static fn(Either $success, $command) => $success->flatMap(static function() use ($command, $processes) {
-                $process = $processes->execute($command);
+                $process = $processes->execute($command)->unwrap();
 
                 return $process
                     ->wait()

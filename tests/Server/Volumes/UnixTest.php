@@ -8,7 +8,6 @@ use Innmind\Server\Control\{
     Server\Volumes\Name,
     Server\Volumes,
     Server\Processes,
-    Server\Process,
     Server\Process\Pid,
     Server\Signal,
     Server\Command,
@@ -20,6 +19,7 @@ use Innmind\IO\IO;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Either,
+    Attempt,
     SideEffect,
 };
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
@@ -227,7 +227,7 @@ class UnixTest extends TestCase
             ) {
             }
 
-            public function execute(Command $command): Process
+            public function execute(Command $command): Attempt
             {
                 $expected = \array_shift($this->commands);
                 $this->test->assertNotNull($expected);

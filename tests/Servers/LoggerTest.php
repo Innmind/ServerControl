@@ -8,7 +8,6 @@ use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Processes\Unix,
-    Server\Process,
     Server\Process\Pid,
     Server\Command,
     Server\Volumes,
@@ -19,6 +18,7 @@ use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\IO\IO;
 use Innmind\Immutable\{
     Either,
+    Attempt,
     SideEffect,
 };
 use Psr\Log\NullLogger;
@@ -138,7 +138,7 @@ class LoggerTest extends TestCase
                     ) {
                     }
 
-                    public function execute(Command $command): Process
+                    public function execute(Command $command): Attempt
                     {
                         $expected = \array_shift($this->commands);
                         $this->test->assertNotNull($expected);

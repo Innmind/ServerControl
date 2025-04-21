@@ -62,7 +62,7 @@ final class Unix implements Volumes
      */
     private function run(Command $command): Either
     {
-        $process = $this->processes->execute($command);
+        $process = $this->processes->execute($command)->unwrap();
 
         return $process
             ->wait()

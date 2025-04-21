@@ -22,6 +22,7 @@ use Innmind\Url\{
 };
 use Innmind\Immutable\{
     Either,
+    Attempt,
     SideEffect,
 };
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
@@ -57,7 +58,7 @@ class RemoteTest extends TestCase
             Process::class,
             $remote->execute(
                 Command::foreground('ls')->withShortOption('l'),
-            ),
+            )->unwrap(),
         );
     }
 
@@ -76,7 +77,7 @@ class RemoteTest extends TestCase
             Process::class,
             $remote->execute(
                 Command::foreground('ls')->withShortOption('l'),
-            ),
+            )->unwrap(),
         );
     }
 
@@ -96,7 +97,7 @@ class RemoteTest extends TestCase
                 Command::foreground('ls')
                     ->withShortOption('l')
                     ->withWorkingDirectory(Path::of('/tmp/foo')),
-            ),
+            )->unwrap(),
         );
     }
 
@@ -155,7 +156,7 @@ class RemoteTest extends TestCase
             ) {
             }
 
-            public function execute(Command $command): Process
+            public function execute(Command $command): Attempt
             {
                 $expected = \array_shift($this->commands);
                 $this->test->assertNotNull($expected);

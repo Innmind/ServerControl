@@ -7,7 +7,6 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Command,
     Server\Signal,
-    Server\Process,
     Server\Process\Pid,
     ScriptFailed,
 };
@@ -18,6 +17,7 @@ use Innmind\Url\Authority\{
 };
 use Innmind\Immutable\{
     Either,
+    Attempt,
     SideEffect,
 };
 
@@ -47,7 +47,7 @@ final class Remote implements Processes
     }
 
     #[\Override]
-    public function execute(Command $command): Process
+    public function execute(Command $command): Attempt
     {
         /** @psalm-suppress ArgumentTypeCoercion Due psalm not understing that $bash cannot be empty */
         $command = $command
@@ -76,7 +76,7 @@ final class Remote implements Processes
             $command = Command::foreground('kill')
                 ->withShortOption($signal->toString())
                 ->withArgument($pid->toString()),
-        );
+        )->unwrap();
 
         return $process
             ->wait()
