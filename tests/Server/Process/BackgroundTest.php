@@ -17,9 +17,12 @@ use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Stream\Streams;
 use Innmind\Immutable\Monoid\Concat;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class BackgroundTest extends TestCase
 {
+    #[Group('ci')]
+    #[Group('local')]
     public function testInterface()
     {
         $process = new Unix(
@@ -36,6 +39,8 @@ class BackgroundTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testPid()
     {
         $ps = new Unix(
@@ -53,6 +58,8 @@ class BackgroundTest extends TestCase
         ));
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testOutput()
     {
         $slow = new Unix(
@@ -76,6 +83,8 @@ class BackgroundTest extends TestCase
         $this->assertTrue((\time() - $start) < 1);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWait()
     {
         $slow = new Unix(

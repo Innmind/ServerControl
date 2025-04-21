@@ -9,11 +9,14 @@ use Innmind\BlackBox\{
     PHPUnit\Framework\TestCase,
     Set,
 };
+use PHPUnit\Framework\Attributes\Group;
 
 class SecondTest extends TestCase
 {
     use BlackBox;
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testCanBeAnyPositiveValue()
     {
         $this

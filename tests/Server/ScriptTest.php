@@ -16,9 +16,12 @@ use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Stream\Streams;
 use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class ScriptTest extends TestCase
 {
+    #[Group('ci')]
+    #[Group('local')]
     public function testInvokation()
     {
         $script = new Script(
@@ -35,6 +38,8 @@ class ScriptTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testThrowOnFailure()
     {
         $script = new Script(
@@ -51,6 +56,8 @@ class ScriptTest extends TestCase
         $this->assertSame($command2, $e->command());
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testOf()
     {
         $script = Script::of('ls', 'ls');
@@ -66,6 +73,8 @@ class ScriptTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testFailDueToTimeout()
     {
         $script = new Script(

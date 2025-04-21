@@ -33,11 +33,14 @@ use Innmind\BlackBox\{
     PHPUnit\Framework\TestCase,
     Set,
 };
+use PHPUnit\Framework\Attributes\Group;
 
 class UnixTest extends TestCase
 {
     use BlackBox;
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testSimpleOutput()
     {
         $cat = new Unix(
@@ -60,6 +63,8 @@ class UnixTest extends TestCase
         $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testOutput()
     {
         $this
@@ -88,6 +93,8 @@ class UnixTest extends TestCase
             });
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testSlowOutput()
     {
         $slow = new Unix(
@@ -114,6 +121,8 @@ class UnixTest extends TestCase
         $this->assertSame("0\n1\n2\n3\n4\n5\n", $output);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testTimeoutSlowOutput()
     {
         $slow = new Unix(
@@ -151,6 +160,8 @@ class UnixTest extends TestCase
             ->seconds(2);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testTimeoutWaitSlowProcess()
     {
         $slow = new Unix(
@@ -184,6 +195,8 @@ class UnixTest extends TestCase
             ->seconds(2);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWaitSuccess()
     {
         $cat = new Unix(
@@ -207,6 +220,8 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(SideEffect::class, $value);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWaitFail()
     {
         $cat = new Unix(
@@ -233,6 +248,8 @@ class UnixTest extends TestCase
         $this->assertSame(1, $value->toInt());
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWithInput()
     {
         $cat = new Unix(
@@ -258,6 +275,8 @@ class UnixTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testOverwrite()
     {
         @\unlink('test.log');
