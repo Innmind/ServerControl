@@ -3,21 +3,21 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server;
 
-use Innmind\Server\Control\{
-    Server\Process\Pid,
-    ScriptFailed,
-};
+use Innmind\Server\Control\Server\Process\Pid;
 use Innmind\Immutable\{
-    Either,
+    Attempt,
     SideEffect,
 };
 
 interface Processes
 {
-    public function execute(Command $command): Process;
+    /**
+     * @return Attempt<Process>
+     */
+    public function execute(Command $command): Attempt;
 
     /**
-     * @return Either<ScriptFailed, SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function kill(Pid $pid, Signal $signal): Either;
+    public function kill(Pid $pid, Signal $signal): Attempt;
 }

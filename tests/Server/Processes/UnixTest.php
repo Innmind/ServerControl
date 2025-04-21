@@ -50,7 +50,7 @@ class UnixTest extends TestCase
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
-        );
+        )->unwrap();
 
         $this->assertInstanceOf(Process::class, $process);
         $process->wait();
@@ -71,7 +71,7 @@ class UnixTest extends TestCase
             Command::background('php')
                 ->withArgument('fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
-        );
+        )->unwrap();
 
         $this->assertInstanceOf(Process::class, $process);
         $this->assertLessThan(2, \time() - $start);
@@ -94,7 +94,7 @@ class UnixTest extends TestCase
                     ->streams()
                     ->acquire(\fopen('fixtures/symfony.log', 'r')),
             )),
-        );
+        )->unwrap();
 
         $this->assertSame(
             \file_get_contents('fixtures/symfony.log'),
@@ -125,7 +125,7 @@ class UnixTest extends TestCase
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
-        );
+        )->unwrap();
 
         $pid = $process->pid()->match(
             static fn($pid) => $pid,
@@ -158,7 +158,7 @@ class UnixTest extends TestCase
             Command::foreground('sleep')
                 ->withArgument('1000')
                 ->timeoutAfter(new Second(1)),
-        );
+        )->unwrap();
 
         $this->assertInstanceOf(
             TimedOut::class,
@@ -187,6 +187,7 @@ class UnixTest extends TestCase
                     ->withArgument('fixtures/symfony.log')
                     ->streamOutput(),
             )
+            ->unwrap()
             ->output()
             ->foreach(static function() use (&$called) {
                 $called = true;
@@ -210,7 +211,8 @@ class UnixTest extends TestCase
                 Command::foreground('cat')
                     ->withArgument('fixtures/symfony.log')
                     ->streamOutput(),
-            );
+            )
+            ->unwrap();
         $process->output()->foreach(static fn() => null);
 
         $this->expectException(\LogicException::class);
@@ -232,7 +234,8 @@ class UnixTest extends TestCase
             ->execute(
                 Command::foreground('cat')
                     ->withArgument('fixtures/symfony.log'),
-            );
+            )
+            ->unwrap();
         $process->output()->foreach(static fn() => null);
         $process
             ->output()
@@ -258,14 +261,14 @@ class UnixTest extends TestCase
             Command::foreground('tail')
                 ->withShortOption('f')
                 ->withArgument('/tmp/test-file'),
-        );
+        )->unwrap();
         $processes->execute(
             Command::background('sleep 2 && kill')
                 ->withArgument($tail->pid()->match(
                     static fn($pid) => $pid->toString(),
                     static fn() => null,
                 )),
-        );
+        )->unwrap();
 
         $tail->output()->foreach(static fn() => null);
         // when done correctly then the foreach above would run forever
@@ -285,6 +288,7 @@ class UnixTest extends TestCase
         $this->assertTrue(
             $processes
                 ->execute(Command::foreground('df')->withShortOption('lh'))
+                ->unwrap()
                 ->wait()
                 ->match(
                     static fn() => true,

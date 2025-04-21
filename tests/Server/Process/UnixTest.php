@@ -118,7 +118,6 @@ class UnixTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testTimeoutSlowOutput()
     {
         $slow = new Unix(

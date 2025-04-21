@@ -13,7 +13,7 @@ use Innmind\Url\Authority\{
     Port,
     UserInformation\User,
 };
-use Innmind\Immutable\Either;
+use Innmind\Immutable\Attempt;
 
 final class Remote implements Server
 {
@@ -48,13 +48,13 @@ final class Remote implements Server
     }
 
     #[\Override]
-    public function reboot(): Either
+    public function reboot(): Attempt
     {
         return Server\Script::of('sudo shutdown -r now')($this);
     }
 
     #[\Override]
-    public function shutdown(): Either
+    public function shutdown(): Attempt
     {
         return Server\Script::of('sudo shutdown -h now')($this);
     }

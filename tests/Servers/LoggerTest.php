@@ -8,7 +8,6 @@ use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Processes\Unix,
-    Server\Process,
     Server\Process\Pid,
     Server\Command,
     Server\Volumes,
@@ -18,7 +17,7 @@ use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\IO\IO;
 use Innmind\Immutable\{
-    Either,
+    Attempt,
     SideEffect,
 };
 use Psr\Log\NullLogger;
@@ -138,7 +137,7 @@ class LoggerTest extends TestCase
                     ) {
                     }
 
-                    public function execute(Command $command): Process
+                    public function execute(Command $command): Attempt
                     {
                         $expected = \array_shift($this->commands);
                         $this->test->assertNotNull($expected);
@@ -150,7 +149,7 @@ class LoggerTest extends TestCase
                         return $this->processes->execute(Command::foreground('echo'));
                     }
 
-                    public function kill(Pid $pid, Signal $signal): Either
+                    public function kill(Pid $pid, Signal $signal): Attempt
                     {
                     }
                 };
@@ -160,11 +159,11 @@ class LoggerTest extends TestCase
             {
             }
 
-            public function reboot(): Either
+            public function reboot(): Attempt
             {
             }
 
-            public function shutdown(): Either
+            public function shutdown(): Attempt
             {
             }
         };

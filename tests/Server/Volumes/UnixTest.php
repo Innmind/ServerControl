@@ -8,18 +8,17 @@ use Innmind\Server\Control\{
     Server\Volumes\Name,
     Server\Volumes,
     Server\Processes,
-    Server\Process,
     Server\Process\Pid,
     Server\Signal,
     Server\Command,
-    ScriptFailed,
+    Exception\ProcessFailed,
 };
 use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\IO\IO;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Either,
+    Attempt,
     SideEffect,
 };
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
@@ -74,7 +73,7 @@ class UnixTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            ScriptFailed::class,
+            ProcessFailed::class,
             $volumes->mount(
                 new Name('/dev/disk1s2'),
                 Path::of('/somewhere'),
@@ -117,7 +116,7 @@ class UnixTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            ScriptFailed::class,
+            ProcessFailed::class,
             $volumes->unmount(new Name('/dev/disk1s2'))->match(
                 static fn() => null,
                 static fn($e) => $e,
@@ -160,7 +159,7 @@ class UnixTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            ScriptFailed::class,
+            ProcessFailed::class,
             $volumes->mount(
                 new Name('/dev/disk1s2'),
                 Path::of('/somewhere'),
@@ -203,7 +202,7 @@ class UnixTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            ScriptFailed::class,
+            ProcessFailed::class,
             $volumes->unmount(new Name('/dev/disk1s2'))->match(
                 static fn() => null,
                 static fn($e) => $e,
@@ -227,7 +226,7 @@ class UnixTest extends TestCase
             ) {
             }
 
-            public function execute(Command $command): Process
+            public function execute(Command $command): Attempt
             {
                 $expected = \array_shift($this->commands);
                 $this->test->assertNotNull($expected);
@@ -243,7 +242,7 @@ class UnixTest extends TestCase
                 }));
             }
 
-            public function kill(Pid $pid, Signal $signal): Either
+            public function kill(Pid $pid, Signal $signal): Attempt
             {
             }
         };

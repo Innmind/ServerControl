@@ -9,7 +9,7 @@ use Innmind\Server\Control\{
     Server\Process,
     Server\Process\Pid,
     Server\Signal,
-    ScriptFailed,
+    Exception\ProcessFailed,
 };
 use Innmind\TimeContinuum\{
     Clock,
@@ -18,7 +18,7 @@ use Innmind\TimeContinuum\{
 use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 use Innmind\Immutable\{
-    Either,
+    Attempt,
     SideEffect,
 };
 
@@ -47,35 +47,41 @@ final class Unix implements Processes
     }
 
     #[\Override]
-    public function execute(Command $command): Process
+    public function execute(Command $command): Attempt
     {
-        $process = new Process\Unix(
-            $this->clock,
-            $this->io,
-            $this->halt,
-            $this->grace,
-            $command,
-        );
+        return Attempt::of(function() use ($command) {
+            $process = new Process\Unix(
+                $this->clock,
+                $this->io,
+                $this->halt,
+                $this->grace,
+                $command,
+            );
 
-        if ($command->toBeRunInBackground()) {
-            return Process::background($process());
-        }
+            if ($command->toBeRunInBackground()) {
+                return Process::background($process());
+            }
 
-        return Process::foreground($process(), $command->outputToBeStreamed());
+            return Process::foreground($process(), $command->outputToBeStreamed());
+        });
     }
 
     #[\Override]
-    public function kill(Pid $pid, Signal $signal): Either
+    public function kill(Pid $pid, Signal $signal): Attempt
     {
-        $process = $this->execute(
-            $command = Command::foreground('kill')
-                ->withShortOption($signal->toString())
-                ->withArgument($pid->toString()),
-        );
-
-        return $process
-            ->wait()
-            ->map(static fn() => new SideEffect)
-            ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
+        return $this
+            ->execute(
+                $command = Command::foreground('kill')
+                    ->withShortOption($signal->toString())
+                    ->withArgument($pid->toString()),
+            )
+            ->flatMap(static fn($process) => $process->wait()->match(
+                static fn() => Attempt::result(SideEffect::identity()),
+                static fn($e) => Attempt::error(new ProcessFailed(
+                    $command,
+                    $process,
+                    $e,
+                )),
+            ));
     }
 }

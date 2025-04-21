@@ -5,11 +5,11 @@ namespace Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\{
     Server,
-    ScriptFailed,
+    Exception\ProcessFailed,
 };
 use Innmind\Immutable\{
     Sequence,
-    Either,
+    Attempt,
     SideEffect,
 };
 
@@ -27,24 +27,27 @@ final class Script
     }
 
     /**
-     * @return Either<ScriptFailed, SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function __invoke(Server $server): Either
+    public function __invoke(Server $server): Attempt
     {
         $processes = $server->processes();
 
-        /** @var Either<ScriptFailed, SideEffect> */
-        return $this->commands->reduce(
-            Either::right(new SideEffect),
-            static fn(Either $success, $command) => $success->flatMap(static function() use ($command, $processes) {
-                $process = $processes->execute($command);
-
-                return $process
-                    ->wait()
-                    ->map(static fn() => new SideEffect)
-                    ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
-            }),
-        );
+        return $this
+            ->commands
+            ->sink(SideEffect::identity())
+            ->attempt(
+                static fn($_, $command) => $processes
+                    ->execute($command)
+                    ->flatMap(static fn($process) => $process->wait()->match(
+                        static fn() => Attempt::result(SideEffect::identity()),
+                        static fn($e) => Attempt::error(new ProcessFailed(
+                            $command,
+                            $process,
+                            $e,
+                        )),
+                    )),
+            );
     }
 
     /**

@@ -8,7 +8,6 @@ use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Processes\Unix,
-    Server\Process,
     Server\Process\Pid,
     Server\Command,
     Server\Volumes,
@@ -23,7 +22,7 @@ use Innmind\Url\Authority\{
     UserInformation\User
 };
 use Innmind\Immutable\{
-    Either,
+    Attempt,
     SideEffect,
 };
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
@@ -170,7 +169,7 @@ class RemoteTest extends TestCase
                     ) {
                     }
 
-                    public function execute(Command $command): Process
+                    public function execute(Command $command): Attempt
                     {
                         $expected = \array_shift($this->commands);
                         $this->test->assertNotNull($expected);
@@ -182,7 +181,7 @@ class RemoteTest extends TestCase
                         return $this->processes->execute(Command::foreground('echo'));
                     }
 
-                    public function kill(Pid $pid, Signal $signal): Either
+                    public function kill(Pid $pid, Signal $signal): Attempt
                     {
                     }
                 };
@@ -192,11 +191,11 @@ class RemoteTest extends TestCase
             {
             }
 
-            public function reboot(): Either
+            public function reboot(): Attempt
             {
             }
 
-            public function shutdown(): Either
+            public function shutdown(): Attempt
             {
             }
         };

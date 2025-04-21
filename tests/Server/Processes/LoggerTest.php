@@ -48,7 +48,7 @@ class LoggerTest extends TestCase
             Process::class,
             $logger->execute(
                 Command::foreground('ls')->withShortOption('l'),
-            ),
+            )->unwrap(),
         );
     }
 
@@ -67,7 +67,7 @@ class LoggerTest extends TestCase
                 Command::foreground('ls')
                     ->withShortOption('l')
                     ->withWorkingDirectory(Path::of('/tmp')),
-            ),
+            )->unwrap(),
         );
     }
 

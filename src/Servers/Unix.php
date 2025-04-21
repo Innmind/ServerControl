@@ -14,7 +14,7 @@ use Innmind\TimeContinuum\{
 };
 use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
-use Innmind\Immutable\Either;
+use Innmind\Immutable\Attempt;
 
 final class Unix implements Server
 {
@@ -58,13 +58,13 @@ final class Unix implements Server
     }
 
     #[\Override]
-    public function reboot(): Either
+    public function reboot(): Attempt
     {
         return Server\Script::of('sudo shutdown -r now')($this);
     }
 
     #[\Override]
-    public function shutdown(): Either
+    public function shutdown(): Attempt
     {
         return Server\Script::of('sudo shutdown -h now')($this);
     }
