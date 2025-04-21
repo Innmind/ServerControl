@@ -23,7 +23,7 @@ class ScriptTest extends TestCase
     #[Group('local')]
     public function testInvokation()
     {
-        $script = new Script(
+        $script = Script::of(
             Command::foreground('ls'),
             Command::foreground('ls'),
         );
@@ -41,7 +41,7 @@ class ScriptTest extends TestCase
     #[Group('local')]
     public function testThrowOnFailure()
     {
-        $script = new Script(
+        $script = Script::of(
             $command1 = Command::foreground('ls'),
             $command2 = Command::foreground('unknown'),
             $command3 = Command::foreground('ls'),
@@ -56,26 +56,9 @@ class ScriptTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    public function testOf()
-    {
-        $script = Script::of('ls', 'ls');
-
-        $this->assertInstanceOf(Script::class, $script);
-
-        $this->assertInstanceOf(
-            SideEffect::class,
-            $script($this->server())->match(
-                static fn($sideEffect) => $sideEffect,
-                static fn($e) => $e,
-            ),
-        );
-    }
-
-    #[Group('ci')]
-    #[Group('local')]
     public function testFailDueToTimeout()
     {
-        $script = new Script(
+        $script = Script::of(
             $command = Command::foreground('sleep 10')->timeoutAfter(
                 new Second(1),
             ),

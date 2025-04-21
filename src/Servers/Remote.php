@@ -7,6 +7,7 @@ use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Volumes,
+    Server\Command,
 };
 use Innmind\Url\Authority\{
     Host,
@@ -50,12 +51,12 @@ final class Remote implements Server
     #[\Override]
     public function reboot(): Attempt
     {
-        return Server\Script::of('sudo shutdown -r now')($this);
+        return Server\Script::of(Command::foreground('sudo shutdown -r now'))($this);
     }
 
     #[\Override]
     public function shutdown(): Attempt
     {
-        return Server\Script::of('sudo shutdown -h now')($this);
+        return Server\Script::of(Command::foreground('sudo shutdown -h now'))($this);
     }
 }
