@@ -11,6 +11,9 @@ use Innmind\Server\Control\Server\{
     Signal,
     Process\Pid,
 };
+use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\Stream\Streams;
 use Innmind\Url\{
     Path,
     Authority\Host,
@@ -30,7 +33,7 @@ class RemoteTest extends TestCase
         $this->assertInstanceOf(
             Processes::class,
             new Remote(
-                $this->createMock(Processes::class),
+                $this->processes(),
                 User::none(),
                 Host::of('example.com'),
             ),
@@ -40,20 +43,13 @@ class RemoteTest extends TestCase
     public function testExecute()
     {
         $remote = new Remote(
-            $processes = $this->createMock(Processes::class),
+            $this->processes("ssh 'foo@example.com' 'ls '\''-l'\'''"),
             User::of('foo'),
             Host::of('example.com'),
         );
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function(Command $command): bool {
-                return $command->toString() === "ssh 'foo@example.com' 'ls '\''-l'\'''";
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
 
-        $this->assertSame(
-            $process,
+        $this->assertInstanceOf(
+            Process::class,
             $remote->execute(
                 Command::foreground('ls')->withShortOption('l'),
             ),
@@ -63,21 +59,14 @@ class RemoteTest extends TestCase
     public function testExecuteViaSpecificPort()
     {
         $remote = new Remote(
-            $processes = $this->createMock(Processes::class),
+            $this->processes("ssh '-p' '24' 'foo@example.com' 'ls '\''-l'\'''"),
             User::of('foo'),
             Host::of('example.com'),
             Port::of(24),
         );
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function(Command $command): bool {
-                return $command->toString() === "ssh '-p' '24' 'foo@example.com' 'ls '\''-l'\'''";
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
 
-        $this->assertSame(
-            $process,
+        $this->assertInstanceOf(
+            Process::class,
             $remote->execute(
                 Command::foreground('ls')->withShortOption('l'),
             ),
@@ -87,20 +76,13 @@ class RemoteTest extends TestCase
     public function testExecuteWithWorkingDirectory()
     {
         $remote = new Remote(
-            $processes = $this->createMock(Processes::class),
+            $this->processes("ssh 'foo@example.com' 'cd /tmp/foo && ls '\''-l'\'''"),
             User::of('foo'),
             Host::of('example.com'),
         );
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function(Command $command): bool {
-                return $command->toString() === "ssh 'foo@example.com' 'cd /tmp/foo && ls '\''-l'\'''";
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
 
-        $this->assertSame(
-            $process,
+        $this->assertInstanceOf(
+            Process::class,
             $remote->execute(
                 Command::foreground('ls')
                     ->withShortOption('l')
@@ -112,21 +94,10 @@ class RemoteTest extends TestCase
     public function testKill()
     {
         $remote = new Remote(
-            $processes = $this->createMock(Processes::class),
+            $this->processes("ssh 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''"),
             User::of('foo'),
             Host::of('example.com'),
         );
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function(Command $command): bool {
-                return $command->toString() === "ssh 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''";
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
 
         $this->assertInstanceOf(
             SideEffect::class,
@@ -140,22 +111,11 @@ class RemoteTest extends TestCase
     public function testKillViaSpecificPort()
     {
         $remote = new Remote(
-            $processes = $this->createMock(Processes::class),
+            $this->processes("ssh '-p' '24' 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''"),
             User::of('foo'),
             Host::of('example.com'),
             Port::of(24),
         );
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function(Command $command): bool {
-                return $command->toString() === "ssh '-p' '24' 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''";
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
 
         $this->assertInstanceOf(
             SideEffect::class,
@@ -164,5 +124,39 @@ class RemoteTest extends TestCase
                 static fn() => null,
             ),
         );
+    }
+
+    private function processes(string ...$commands): Processes
+    {
+        $processes = Processes\Unix::of(
+            new Clock,
+            Streams::fromAmbientAuthority(),
+            new Usleep,
+        );
+
+        return new class($processes, $this, $commands) implements Processes {
+            public function __construct(
+                private $processes,
+                private $test,
+                private $commands,
+            ) {
+            }
+
+            public function execute(Command $command): Process
+            {
+                $expected = \array_shift($this->commands);
+                $this->test->assertNotNull($expected);
+                $this->test->assertSame(
+                    $expected,
+                    $command->toString(),
+                );
+
+                return $this->processes->execute(Command::foreground('echo'));
+            }
+
+            public function kill(Pid $pid, Signal $signal): Either
+            {
+            }
+        };
     }
 }

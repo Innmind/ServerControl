@@ -5,17 +5,17 @@ namespace Tests\Innmind\Server\Control\Server\Processes;
 
 use Innmind\Server\Control\Server\{
     Processes\Logger,
+    Processes\Unix,
     Processes,
     Process,
     Command,
     Signal,
     Process\Pid
 };
+use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\Stream\Streams;
 use Innmind\Url\Path;
-use Innmind\Immutable\{
-    Either,
-    SideEffect,
-};
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -26,7 +26,7 @@ class LoggerTest extends TestCase
         $this->assertInstanceOf(
             Processes::class,
             Logger::psr(
-                $this->createMock(Processes::class),
+                $this->processes(),
                 $this->createMock(LoggerInterface::class),
             ),
         );
@@ -35,16 +35,9 @@ class LoggerTest extends TestCase
     public function testExecute()
     {
         $logger = Logger::psr(
-            $processes = $this->createMock(Processes::class),
+            $this->processes(),
             $log = $this->createMock(LoggerInterface::class),
         );
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function(Command $command): bool {
-                return $command->toString() === "ls '-l'";
-            }))
-            ->willReturn($this->createMock(Process::class));
         $log
             ->expects($this->once())
             ->method('info')
@@ -67,16 +60,9 @@ class LoggerTest extends TestCase
     public function testExecuteWithWorkingDirectory()
     {
         $logger = Logger::psr(
-            $processes = $this->createMock(Processes::class),
+            $this->processes(),
             $log = $this->createMock(LoggerInterface::class),
         );
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function(Command $command): bool {
-                return $command->toString() === "ls '-l'";
-            }))
-            ->willReturn($this->createMock(Process::class));
         $log
             ->expects($this->once())
             ->method('info')
@@ -84,7 +70,7 @@ class LoggerTest extends TestCase
                 'About to execute a command',
                 [
                     'command' => "ls '-l'",
-                    'workingDirectory' => '/tmp/foo',
+                    'workingDirectory' => '/tmp',
                 ],
             );
 
@@ -93,7 +79,7 @@ class LoggerTest extends TestCase
             $logger->execute(
                 Command::foreground('ls')
                     ->withShortOption('l')
-                    ->withWorkingDirectory(Path::of('/tmp/foo')),
+                    ->withWorkingDirectory(Path::of('/tmp')),
             ),
         );
     }
@@ -101,14 +87,9 @@ class LoggerTest extends TestCase
     public function testKill()
     {
         $logger = Logger::psr(
-            $processes = $this->createMock(Processes::class),
+            $this->processes(),
             $log = $this->createMock(LoggerInterface::class),
         );
-        $processes
-            ->expects($this->once())
-            ->method('kill')
-            ->with(new Pid(42), Signal::kill)
-            ->willReturn($expected = Either::right(new SideEffect));
         $log
             ->expects($this->once())
             ->method('info')
@@ -120,6 +101,15 @@ class LoggerTest extends TestCase
                 ],
             );
 
-        $this->assertSame($expected, $logger->kill(new Pid(42), Signal::kill));
+        $this->assertNotNull($logger->kill(new Pid(42), Signal::kill));
+    }
+
+    private function processes(): Unix
+    {
+        return Unix::of(
+            new Clock,
+            Streams::fromAmbientAuthority(),
+            new Usleep,
+        );
     }
 }

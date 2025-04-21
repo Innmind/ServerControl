@@ -9,14 +9,18 @@ use Innmind\Server\Control\{
     Server\Volumes,
     Server\Processes,
     Server\Process,
-    Server\Process\ExitCode,
+    Server\Process\Pid,
+    Server\Signal,
+    Server\Command,
     ScriptFailed,
 };
+use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\Stream\Streams;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Either,
     SideEffect,
-    Sequence,
 };
 use PHPUnit\Framework\TestCase;
 
@@ -27,7 +31,7 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(
             Volumes::class,
             new Unix(
-                $this->createMock(Processes::class),
+                $this->processes(),
             ),
         );
     }
@@ -35,38 +39,11 @@ class UnixTest extends TestCase
     public function testMountOSXVolume()
     {
         $volumes = new Unix(
-            $processes = $this->createMock(Processes::class),
+            $this->processes(
+                ['which diskutil', true],
+                ["diskutil 'mount' '/dev/disk1s2'", true],
+            ),
         );
-        $which = $this->createMock(Process::class);
-        $which
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $mount = $this->createMock(Process::class);
-        $mount
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
-                match ($matcher->numberOfInvocations()) {
-                    1 => $this->assertSame(
-                        'which diskutil',
-                        $command->toString(),
-                    ),
-                    2 => $this->assertSame(
-                        "diskutil 'mount' '/dev/disk1s2'",
-                        $command->toString(),
-                    ),
-                };
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $which,
-                    2 => $mount,
-                };
-            });
 
         $this->assertInstanceOf(
             SideEffect::class,
@@ -83,41 +60,11 @@ class UnixTest extends TestCase
     public function testThrowWhenFailToMountOSXVolume()
     {
         $volumes = new Unix(
-            $processes = $this->createMock(Processes::class),
+            $this->processes(
+                ['which diskutil', true],
+                ["diskutil 'mount' '/dev/disk1s2'", false],
+            ),
         );
-        $which = $this->createMock(Process::class);
-        $which
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $mount = $this->createMock(Process::class);
-        $mount
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(
-                new ExitCode(1),
-                Sequence::of(),
-            )));
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
-                match ($matcher->numberOfInvocations()) {
-                    1 => $this->assertSame(
-                        'which diskutil',
-                        $command->toString(),
-                    ),
-                    2 => $this->assertSame(
-                        "diskutil 'mount' '/dev/disk1s2'",
-                        $command->toString(),
-                    ),
-                };
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $which,
-                    2 => $mount,
-                };
-            });
 
         $this->assertInstanceOf(
             ScriptFailed::class,
@@ -134,38 +81,11 @@ class UnixTest extends TestCase
     public function testUnmountOSXVolume()
     {
         $volumes = new Unix(
-            $processes = $this->createMock(Processes::class),
+            $this->processes(
+                ['which diskutil', true],
+                ["diskutil 'unmount' '/dev/disk1s2'", true],
+            ),
         );
-        $which = $this->createMock(Process::class);
-        $which
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $mount = $this->createMock(Process::class);
-        $mount
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
-                match ($matcher->numberOfInvocations()) {
-                    1 => $this->assertSame(
-                        'which diskutil',
-                        $command->toString(),
-                    ),
-                    2 => $this->assertSame(
-                        "diskutil 'unmount' '/dev/disk1s2'",
-                        $command->toString(),
-                    ),
-                };
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $which,
-                    2 => $mount,
-                };
-            });
 
         $this->assertInstanceOf(
             SideEffect::class,
@@ -179,41 +99,11 @@ class UnixTest extends TestCase
     public function testReturnErrorWhenFailToUnmountOSXVolume()
     {
         $volumes = new Unix(
-            $processes = $this->createMock(Processes::class),
+            $this->processes(
+                ['which diskutil', true],
+                ["diskutil 'unmount' '/dev/disk1s2'", false],
+            ),
         );
-        $which = $this->createMock(Process::class);
-        $which
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $mount = $this->createMock(Process::class);
-        $mount
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(
-                new ExitCode(1),
-                Sequence::of(),
-            )));
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
-                match ($matcher->numberOfInvocations()) {
-                    1 => $this->assertSame(
-                        'which diskutil',
-                        $command->toString(),
-                    ),
-                    2 => $this->assertSame(
-                        "diskutil 'unmount' '/dev/disk1s2'",
-                        $command->toString(),
-                    ),
-                };
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $which,
-                    2 => $mount,
-                };
-            });
 
         $this->assertInstanceOf(
             ScriptFailed::class,
@@ -227,41 +117,11 @@ class UnixTest extends TestCase
     public function testMountLinuxVolume()
     {
         $volumes = new Unix(
-            $processes = $this->createMock(Processes::class),
+            $this->processes(
+                ['which diskutil', false],
+                ["mount '/dev/disk1s2' '/somewhere'", true],
+            ),
         );
-        $which = $this->createMock(Process::class);
-        $which
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(
-                new ExitCode(1),
-                Sequence::of(),
-            )));
-        $mount = $this->createMock(Process::class);
-        $mount
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
-                match ($matcher->numberOfInvocations()) {
-                    1 => $this->assertSame(
-                        'which diskutil',
-                        $command->toString(),
-                    ),
-                    2 => $this->assertSame(
-                        "mount '/dev/disk1s2' '/somewhere'",
-                        $command->toString(),
-                    ),
-                };
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $which,
-                    2 => $mount,
-                };
-            });
 
         $this->assertInstanceOf(
             SideEffect::class,
@@ -278,44 +138,11 @@ class UnixTest extends TestCase
     public function testReturnErrorWhenFailToMountLinuxVolume()
     {
         $volumes = new Unix(
-            $processes = $this->createMock(Processes::class),
+            $this->processes(
+                ['which diskutil', false],
+                ["mount '/dev/disk1s2' '/somewhere'", false],
+            ),
         );
-        $which = $this->createMock(Process::class);
-        $which
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(
-                new ExitCode(1),
-                Sequence::of(),
-            )));
-        $mount = $this->createMock(Process::class);
-        $mount
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(
-                new ExitCode(1),
-                Sequence::of(),
-            )));
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
-                match ($matcher->numberOfInvocations()) {
-                    1 => $this->assertSame(
-                        'which diskutil',
-                        $command->toString(),
-                    ),
-                    2 => $this->assertSame(
-                        "mount '/dev/disk1s2' '/somewhere'",
-                        $command->toString(),
-                    ),
-                };
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $which,
-                    2 => $mount,
-                };
-            });
 
         $this->assertInstanceOf(
             ScriptFailed::class,
@@ -332,41 +159,11 @@ class UnixTest extends TestCase
     public function testUnmountLinuxVolume()
     {
         $volumes = new Unix(
-            $processes = $this->createMock(Processes::class),
+            $this->processes(
+                ['which diskutil', false],
+                ["umount '/dev/disk1s2'", true],
+            ),
         );
-        $which = $this->createMock(Process::class);
-        $which
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(
-                new ExitCode(1),
-                Sequence::of(),
-            )));
-        $mount = $this->createMock(Process::class);
-        $mount
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
-                match ($matcher->numberOfInvocations()) {
-                    1 => $this->assertSame(
-                        'which diskutil',
-                        $command->toString(),
-                    ),
-                    2 => $this->assertSame(
-                        "umount '/dev/disk1s2'",
-                        $command->toString(),
-                    ),
-                };
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $which,
-                    2 => $mount,
-                };
-            });
 
         $this->assertInstanceOf(
             SideEffect::class,
@@ -380,44 +177,11 @@ class UnixTest extends TestCase
     public function testReturnErrorWhenFailToUnmountLinuxVolume()
     {
         $volumes = new Unix(
-            $processes = $this->createMock(Processes::class),
+            $this->processes(
+                ['which diskutil', false],
+                ["umount '/dev/disk1s2'", false],
+            ),
         );
-        $which = $this->createMock(Process::class);
-        $which
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(
-                new ExitCode(1),
-                Sequence::of(),
-            )));
-        $mount = $this->createMock(Process::class);
-        $mount
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(
-                new ExitCode(1),
-                Sequence::of(),
-            )));
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $which, $mount) {
-                match ($matcher->numberOfInvocations()) {
-                    1 => $this->assertSame(
-                        'which diskutil',
-                        $command->toString(),
-                    ),
-                    2 => $this->assertSame(
-                        "umount '/dev/disk1s2'",
-                        $command->toString(),
-                    ),
-                };
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $which,
-                    2 => $mount,
-                };
-            });
 
         $this->assertInstanceOf(
             ScriptFailed::class,
@@ -426,5 +190,43 @@ class UnixTest extends TestCase
                 static fn($e) => $e,
             ),
         );
+    }
+
+    private function processes(array ...$commands): Processes
+    {
+        $processes = Processes\Unix::of(
+            new Clock,
+            Streams::fromAmbientAuthority(),
+            new Usleep,
+        );
+
+        return new class($processes, $this, $commands) implements Processes {
+            public function __construct(
+                private $processes,
+                private $test,
+                private $commands,
+            ) {
+            }
+
+            public function execute(Command $command): Process
+            {
+                $expected = \array_shift($this->commands);
+                $this->test->assertNotNull($expected);
+                [$expected, $success] = $expected;
+                $this->test->assertSame(
+                    $expected,
+                    $command->toString(),
+                );
+
+                return $this->processes->execute(Command::foreground(match ($success) {
+                    true => 'echo',
+                    false => 'unknown',
+                }));
+            }
+
+            public function kill(Pid $pid, Signal $signal): Either
+            {
+            }
+        };
     }
 }
