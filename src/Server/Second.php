@@ -8,15 +8,12 @@ namespace Innmind\Server\Control\Server;
  */
 final class Second
 {
-    /** @var positive-int */
-    private int $value;
-
     /**
      * @param positive-int $value
      */
-    public function __construct(int $value)
-    {
-        $this->value = $value;
+    public function __construct(
+        private int $value,
+    ) {
     }
 
     /**

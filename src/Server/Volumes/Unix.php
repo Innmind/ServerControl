@@ -17,11 +17,9 @@ use Innmind\Immutable\{
 
 final class Unix implements Volumes
 {
-    private Processes $processes;
-
-    public function __construct(Processes $processes)
-    {
-        $this->processes = $processes;
+    public function __construct(
+        private Processes $processes,
+    ) {
     }
 
     #[\Override]

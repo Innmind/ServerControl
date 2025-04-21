@@ -19,24 +19,13 @@ use Innmind\IO\IO;
  */
 final class Unix
 {
-    private Clock $clock;
-    private Halt $halt;
-    private IO $io;
-    private Period $grace;
-    private Command $command;
-
     public function __construct(
-        Clock $clock,
-        IO $io,
-        Halt $halt,
-        Period $grace,
-        Command $command,
+        private Clock $clock,
+        private IO $io,
+        private Halt $halt,
+        private Period $grace,
+        private Command $command,
     ) {
-        $this->clock = $clock;
-        $this->io = $io;
-        $this->halt = $halt;
-        $this->grace = $grace;
-        $this->command = $command;
     }
 
     public function __invoke(): Started

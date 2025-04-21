@@ -24,21 +24,12 @@ use Innmind\Immutable\{
 
 final class Unix implements Processes
 {
-    private Clock $clock;
-    private Halt $halt;
-    private IO $io;
-    private Period $grace;
-
     private function __construct(
-        Clock $clock,
-        IO $io,
-        Halt $halt,
-        Period $grace,
+        private Clock $clock,
+        private IO $io,
+        private Halt $halt,
+        private Period $grace,
     ) {
-        $this->clock = $clock;
-        $this->io = $io;
-        $this->halt = $halt;
-        $this->grace = $grace;
     }
 
     public static function of(

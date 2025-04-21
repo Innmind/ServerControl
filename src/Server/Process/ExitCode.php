@@ -8,15 +8,12 @@ namespace Innmind\Server\Control\Server\Process;
  */
 final class ExitCode
 {
-    /** @var int<0, 255> */
-    private int $value;
-
     /**
      * @param int<0, 255> $value
      */
-    public function __construct(int $value)
-    {
-        $this->value = $value;
+    public function __construct(
+        private int $value,
+    ) {
     }
 
     public function successful(): bool

@@ -8,15 +8,12 @@ namespace Innmind\Server\Control\Server\Volumes;
  */
 final class Name
 {
-    /** @var non-empty-string */
-    private string $value;
-
     /**
      * @param non-empty-string $value
      */
-    public function __construct(string $value)
-    {
-        $this->value = $value;
+    public function __construct(
+        private string $value,
+    ) {
     }
 
     /**

@@ -10,21 +10,14 @@ use Innmind\Server\Control\Server\{
 
 final class ScriptFailed
 {
-    private Command $command;
-    private Process $process;
-    private Process\Failed|Process\TimedOut|Process\Signaled $reason;
-
     /**
      * @internal
      */
     public function __construct(
-        Command $command,
-        Process $process,
-        Process\Failed|Process\TimedOut|Process\Signaled $reason,
+        private Command $command,
+        private Process $process,
+        private Process\Failed|Process\TimedOut|Process\Signaled $reason,
     ) {
-        $this->command = $command;
-        $this->process = $process;
-        $this->reason = $reason;
     }
 
     public function command(): Command
