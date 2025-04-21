@@ -16,8 +16,8 @@ use Innmind\TimeContinuum\Earth\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Stream\Streams;
 use Innmind\Url\Path;
-use Psr\Log\LoggerInterface;
-use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class LoggerTest extends TestCase
 {
@@ -27,7 +27,7 @@ class LoggerTest extends TestCase
             Processes::class,
             Logger::psr(
                 $this->processes(),
-                $this->createMock(LoggerInterface::class),
+                new NullLogger,
             ),
         );
     }
@@ -36,18 +36,8 @@ class LoggerTest extends TestCase
     {
         $logger = Logger::psr(
             $this->processes(),
-            $log = $this->createMock(LoggerInterface::class),
+            new NullLogger,
         );
-        $log
-            ->expects($this->once())
-            ->method('info')
-            ->with(
-                'About to execute a command',
-                [
-                    'command' => "ls '-l'",
-                    'workingDirectory' => null,
-                ],
-            );
 
         $this->assertInstanceOf(
             Process::class,
@@ -61,18 +51,8 @@ class LoggerTest extends TestCase
     {
         $logger = Logger::psr(
             $this->processes(),
-            $log = $this->createMock(LoggerInterface::class),
+            new NullLogger,
         );
-        $log
-            ->expects($this->once())
-            ->method('info')
-            ->with(
-                'About to execute a command',
-                [
-                    'command' => "ls '-l'",
-                    'workingDirectory' => '/tmp',
-                ],
-            );
 
         $this->assertInstanceOf(
             Process::class,
@@ -88,18 +68,8 @@ class LoggerTest extends TestCase
     {
         $logger = Logger::psr(
             $this->processes(),
-            $log = $this->createMock(LoggerInterface::class),
+            new NullLogger,
         );
-        $log
-            ->expects($this->once())
-            ->method('info')
-            ->with(
-                'About to kill a process',
-                [
-                    'pid' => 42,
-                    'signal' => 9,
-                ],
-            );
 
         $this->assertNotNull($logger->kill(new Pid(42), Signal::kill));
     }

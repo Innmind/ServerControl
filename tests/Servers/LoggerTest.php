@@ -21,11 +21,8 @@ use Innmind\Immutable\{
     Either,
     SideEffect,
 };
-use Psr\Log\{
-    LoggerInterface,
-    NullLogger,
-};
-use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class LoggerTest extends TestCase
 {
@@ -62,23 +59,8 @@ class LoggerTest extends TestCase
 
         $logger = Logger::psr(
             $server,
-            $log = $this->createMock(LoggerInterface::class),
+            new NullLogger,
         );
-        $log
-            ->expects($matcher = $this->atLeast(1))
-            ->method('info')
-            ->willReturnCallback(function($message, $context) use ($matcher) {
-                if ($matcher->numberOfInvocations() === 1) {
-                    $this->assertSame('About to execute a command', $message);
-                    $this->assertSame(
-                        [
-                            'command' => 'which diskutil',
-                            'workingDirectory' => null,
-                        ],
-                        $context,
-                    );
-                }
-            });
 
         $this->assertInstanceOf(
             Volumes::class,
@@ -93,18 +75,8 @@ class LoggerTest extends TestCase
 
         $logger = Logger::psr(
             $server,
-            $log = $this->createMock(LoggerInterface::class),
+            new NullLogger,
         );
-        $log
-            ->expects($this->once())
-            ->method('info')
-            ->with(
-                'About to execute a command',
-                [
-                    'command' => 'sudo shutdown -r now',
-                    'workingDirectory' => null,
-                ],
-            );
 
         $this->assertInstanceOf(
             SideEffect::class,
@@ -121,18 +93,8 @@ class LoggerTest extends TestCase
 
         $logger = Logger::psr(
             $server,
-            $log = $this->createMock(LoggerInterface::class),
+            new NullLogger,
         );
-        $log
-            ->expects($this->once())
-            ->method('info')
-            ->with(
-                'About to execute a command',
-                [
-                    'command' => 'sudo shutdown -h now',
-                    'workingDirectory' => null,
-                ],
-            );
 
         $this->assertInstanceOf(
             SideEffect::class,

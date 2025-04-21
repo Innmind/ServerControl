@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\Server\Process\Pid;
-use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class PidTest extends TestCase
 {

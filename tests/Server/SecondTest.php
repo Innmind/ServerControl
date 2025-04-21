@@ -4,9 +4,9 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\Server\Second;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 

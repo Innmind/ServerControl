@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server\Command;
 
 use Innmind\Server\Control\Server\Command\Pipe;
-use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class PipeTest extends TestCase
 {
