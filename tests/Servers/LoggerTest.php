@@ -72,7 +72,7 @@ class LoggerTest extends TestCase
             Volumes::class,
             $logger->volumes(),
         );
-        $logger->volumes()->unmount(new Volumes\Name('/dev'));
+        $logger->volumes()->unmount(Volumes\Name::of('/dev'));
     }
 
     #[Group('ci')]

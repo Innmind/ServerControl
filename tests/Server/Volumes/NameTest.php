@@ -22,7 +22,7 @@ class NameTest extends TestCase
         $this
             ->forAll(Set::strings()->atLeast(1))
             ->then(function($name) {
-                $this->assertSame($name, (new Name($name))->toString());
+                $this->assertSame($name, Name::of($name)->toString());
             });
     }
 }

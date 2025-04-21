@@ -102,7 +102,7 @@ class RemoteTest extends TestCase
             Volumes::class,
             $remote->volumes(),
         );
-        $remote->volumes()->unmount(new Volumes\Name('/dev'));
+        $remote->volumes()->unmount(Volumes\Name::of('/dev'));
     }
 
     #[Group('ci')]

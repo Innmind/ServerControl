@@ -11,9 +11,19 @@ final class Name
     /**
      * @param non-empty-string $value
      */
-    public function __construct(
+    private function __construct(
         private string $value,
     ) {
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @param non-empty-string $value
+     */
+    public static function of(string $value): self
+    {
+        return new self($value);
     }
 
     /**
