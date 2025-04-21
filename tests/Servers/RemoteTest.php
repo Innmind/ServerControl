@@ -36,7 +36,7 @@ class RemoteTest extends TestCase
     {
         $this->assertInstanceOf(
             Server::class,
-            new Remote(
+            Remote::of(
                 $this->server(),
                 User::none(),
                 Host::none(),
@@ -50,7 +50,7 @@ class RemoteTest extends TestCase
     {
         $server = $this->server("ssh 'foo@example.com' 'ls'");
 
-        $remote = new Remote(
+        $remote = Remote::of(
             $server,
             User::of('foo'),
             Host::of('example.com'),
@@ -69,7 +69,7 @@ class RemoteTest extends TestCase
     {
         $server = $this->server("ssh '-p' '42' 'foo@example.com' 'ls'");
 
-        $remote = new Remote(
+        $remote = Remote::of(
             $server,
             User::of('foo'),
             Host::of('example.com'),
@@ -92,7 +92,7 @@ class RemoteTest extends TestCase
             "ssh 'foo@example.com' 'diskutil '\''unmount'\'' '\''/dev'\'''",
         );
 
-        $remote = new Remote(
+        $remote = Remote::of(
             $server,
             User::of('foo'),
             Host::of('example.com'),
@@ -111,7 +111,7 @@ class RemoteTest extends TestCase
     {
         $server = $this->server("ssh 'foo@example.com' 'sudo shutdown -r now'");
 
-        $remote = new Remote(
+        $remote = Remote::of(
             $server,
             User::of('foo'),
             Host::of('example.com'),
@@ -132,7 +132,7 @@ class RemoteTest extends TestCase
     {
         $server = $this->server("ssh 'foo@example.com' 'sudo shutdown -h now'");
 
-        $remote = new Remote(
+        $remote = Remote::of(
             $server,
             User::of('foo'),
             Host::of('example.com'),

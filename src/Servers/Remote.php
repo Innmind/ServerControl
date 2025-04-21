@@ -21,7 +21,7 @@ final class Remote implements Server
     private Processes $processes;
     private Volumes $volumes;
 
-    public function __construct(
+    private function __construct(
         Server $server,
         User $user,
         Host $host,
@@ -34,6 +34,15 @@ final class Remote implements Server
             $port,
         );
         $this->volumes = new Volumes\Unix($this->processes);
+    }
+
+    public static function of(
+        Server $server,
+        User $user,
+        Host $host,
+        ?Port $port = null,
+    ): self {
+        return new self($server, $user, $host, $port);
     }
 
     #[\Override]

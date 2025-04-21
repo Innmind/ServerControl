@@ -35,6 +35,7 @@
     - `Innmind\Server\Control\Servers\Unix::of()`
 - `Innmind\Server\Control\Server\Script` constructor is now private, use `::of()` named constructor which now expects instances of `Command`
 - `Innmind\Server\Control\Server\Volumes\Name` constructor is now private, use `::of()` named constructor
+- `Innmind\Server\Control\Servers\Remote` constructor is now private, use `::of()` named constructor
 
 ### Removed
 
