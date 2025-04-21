@@ -50,12 +50,12 @@ final class Remote implements Server
     #[\Override]
     public function reboot(): Either
     {
-        return Server\Script::of('sudo shutdown -r now')($this);
+        return Server\Script::of('sudo shutdown -r now')($this)->either();
     }
 
     #[\Override]
     public function shutdown(): Either
     {
-        return Server\Script::of('sudo shutdown -h now')($this);
+        return Server\Script::of('sudo shutdown -h now')($this)->either();
     }
 }

@@ -6,10 +6,9 @@ namespace Tests\Innmind\Server\Control\Server;
 use Innmind\Server\Control\{
     Server\Script,
     Server\Command,
-    Server\Process,
     Server\Second,
     Servers\Unix,
-    ScriptFailed,
+    Exception\ProcessFailed,
 };
 use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
@@ -52,8 +51,7 @@ class ScriptTest extends TestCase
             static fn() => null,
             static fn($e) => $e,
         );
-        $this->assertInstanceOf(ScriptFailed::class, $e);
-        $this->assertSame($command2, $e->command());
+        $this->assertInstanceOf(ProcessFailed::class, $e);
     }
 
     #[Group('ci')]
@@ -88,9 +86,7 @@ class ScriptTest extends TestCase
             static fn($e) => $e,
         );
 
-        $this->assertInstanceOf(ScriptFailed::class, $e);
-        $this->assertSame($command, $e->command());
-        $this->assertInstanceOf(Process\TimedOut::class, $e->reason());
+        $this->assertInstanceOf(ProcessFailed::class, $e);
     }
 
     private function server(): Unix
