@@ -10,6 +10,15 @@
 - Requires `innmind/time-continuum:~4.1`
 - Requires `innmind/time-warp:~4.0`
 - Requires `innmind/filesystem:~8.0`
+- The following methods now return an `Innmind\Immutable\Attempt<Innmind\Immutable\SideEffect>`
+    - `Innmind\Server\Control\Server::reboot()`
+    - `Innmind\Server\Control\Server::shutdown()`
+    - `Innmind\Server\Control\Server::shutdown()`
+    - `Innmind\Server\Control\Server\Script::__invoke()`
+    - `Innmind\Server\Control\Server\Volumes::unmount()`
+    - `Innmind\Server\Control\Server\Volumes::unmount()`
+    - `Innmind\Server\Control\Server\Processes::kill()`
+- `Innmind\Server\Control\Server\Processes::execute()` now return an `Innmind\Immutable\Attempt<Innmind\Server\Control\Server\Process>`
 
 ### Removed
 
