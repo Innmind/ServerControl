@@ -15,15 +15,10 @@ use Innmind\Immutable\{
 
 final class Script
 {
-    /** @var Sequence<Command> */
-    private Sequence $commands;
-
-    /**
-     * @no-named-arguments
-     */
-    public function __construct(Command ...$commands)
-    {
-        $this->commands = Sequence::of(...$commands);
+    /** @param Sequence<Command> $commands */
+    private function __construct(
+        private Sequence $commands,
+    ) {
     }
 
     /**
@@ -52,13 +47,9 @@ final class Script
 
     /**
      * @no-named-arguments
-     * @param non-empty-string $commands
      */
-    public static function of(string ...$commands): self
+    public static function of(Command ...$commands): self
     {
-        return new self(...\array_map(
-            static fn(string $command): Command => Command::foreground($command),
-            $commands,
-        ));
+        return new self(Sequence::of(...$commands));
     }
 }

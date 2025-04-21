@@ -7,6 +7,7 @@ use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Volumes,
+    Server\Command,
 };
 use Innmind\TimeContinuum\{
     Clock,
@@ -36,6 +37,9 @@ final class Unix implements Server
         $this->volumes = new Volumes\Unix($this->processes);
     }
 
+    /**
+     * @internal Use the factory instead
+     */
     public static function of(
         Clock $clock,
         IO $io,
@@ -60,12 +64,12 @@ final class Unix implements Server
     #[\Override]
     public function reboot(): Attempt
     {
-        return Server\Script::of('sudo shutdown -r now')($this);
+        return Server\Script::of(Command::foreground('sudo shutdown -r now'))($this);
     }
 
     #[\Override]
     public function shutdown(): Attempt
     {
-        return Server\Script::of('sudo shutdown -h now')($this);
+        return Server\Script::of(Command::foreground('sudo shutdown -h now'))($this);
     }
 }

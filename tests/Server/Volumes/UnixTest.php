@@ -52,7 +52,7 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(
             SideEffect::class,
             $volumes->mount(
-                new Name('/dev/disk1s2'),
+                Name::of('/dev/disk1s2'),
                 Path::of('/somewhere'),
             )->match(
                 static fn($sideEffect) => $sideEffect,
@@ -75,7 +75,7 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(
             ProcessFailed::class,
             $volumes->mount(
-                new Name('/dev/disk1s2'),
+                Name::of('/dev/disk1s2'),
                 Path::of('/somewhere'),
             )->match(
                 static fn() => null,
@@ -97,7 +97,7 @@ class UnixTest extends TestCase
 
         $this->assertInstanceOf(
             SideEffect::class,
-            $volumes->unmount(new Name('/dev/disk1s2'))->match(
+            $volumes->unmount(Name::of('/dev/disk1s2'))->match(
                 static fn($sideEffect) => $sideEffect,
                 static fn() => null,
             ),
@@ -117,7 +117,7 @@ class UnixTest extends TestCase
 
         $this->assertInstanceOf(
             ProcessFailed::class,
-            $volumes->unmount(new Name('/dev/disk1s2'))->match(
+            $volumes->unmount(Name::of('/dev/disk1s2'))->match(
                 static fn() => null,
                 static fn($e) => $e,
             ),
@@ -138,7 +138,7 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(
             SideEffect::class,
             $volumes->mount(
-                new Name('/dev/disk1s2'),
+                Name::of('/dev/disk1s2'),
                 Path::of('/somewhere'),
             )->match(
                 static fn($sideEffect) => $sideEffect,
@@ -161,7 +161,7 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(
             ProcessFailed::class,
             $volumes->mount(
-                new Name('/dev/disk1s2'),
+                Name::of('/dev/disk1s2'),
                 Path::of('/somewhere'),
             )->match(
                 static fn() => null,
@@ -183,7 +183,7 @@ class UnixTest extends TestCase
 
         $this->assertInstanceOf(
             SideEffect::class,
-            $volumes->unmount(new Name('/dev/disk1s2'))->match(
+            $volumes->unmount(Name::of('/dev/disk1s2'))->match(
                 static fn($sideEffect) => $sideEffect,
                 static fn() => null,
             ),
@@ -203,7 +203,7 @@ class UnixTest extends TestCase
 
         $this->assertInstanceOf(
             ProcessFailed::class,
-            $volumes->unmount(new Name('/dev/disk1s2'))->match(
+            $volumes->unmount(Name::of('/dev/disk1s2'))->match(
                 static fn() => null,
                 static fn($e) => $e,
             ),

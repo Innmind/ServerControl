@@ -17,6 +17,9 @@ use Innmind\Immutable\{
 
 final class Unix implements Volumes
 {
+    /**
+     * @internal
+     */
     public function __construct(
         private Processes $processes,
     ) {

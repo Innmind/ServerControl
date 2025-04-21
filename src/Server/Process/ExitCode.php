@@ -9,6 +9,7 @@ namespace Innmind\Server\Control\Server\Process;
 final class ExitCode
 {
     /**
+     * @internal
      * @param int<0, 255> $value
      */
     public function __construct(

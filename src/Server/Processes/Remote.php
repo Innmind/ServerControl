@@ -24,6 +24,9 @@ final class Remote implements Processes
     private Processes $processes;
     private Command $command;
 
+    /**
+     * @internal
+     */
     public function __construct(
         Processes $processes,
         User $user,

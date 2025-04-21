@@ -221,6 +221,8 @@ final class Command
     }
 
     /**
+     * @internal
+     *
      * @return Map<string, string>
      */
     public function environment(): Map
@@ -229,6 +231,8 @@ final class Command
     }
 
     /**
+     * @internal
+     *
      * @return Maybe<Path>
      */
     public function workingDirectory(): Maybe
@@ -237,6 +241,8 @@ final class Command
     }
 
     /**
+     * @internal
+     *
      * @return Maybe<Content>
      */
     public function input(): Maybe
@@ -244,12 +250,17 @@ final class Command
         return $this->input;
     }
 
+    /**
+     * @internal
+     */
     public function toBeRunInBackground(): bool
     {
         return $this->background;
     }
 
     /**
+     * @internal
+     *
      * @return Maybe<Second>
      */
     public function timeout(): Maybe
@@ -257,12 +268,17 @@ final class Command
         return $this->timeout;
     }
 
+    /**
+     * @internal
+     */
     public function outputToBeStreamed(): bool
     {
         return $this->streamOutput;
     }
 
     /**
+     * @internal
+     *
      * @return non-empty-string
      */
     public function toString(): string
