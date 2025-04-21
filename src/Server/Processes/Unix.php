@@ -32,6 +32,9 @@ final class Unix implements Processes
     ) {
     }
 
+    /**
+     * @internal
+     */
     public static function of(
         Clock $clock,
         IO $io,

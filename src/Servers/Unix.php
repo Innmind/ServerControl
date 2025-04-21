@@ -36,6 +36,9 @@ final class Unix implements Server
         $this->volumes = new Volumes\Unix($this->processes);
     }
 
+    /**
+     * @internal Use the factory instead
+     */
     public static function of(
         Clock $clock,
         IO $io,

@@ -19,6 +19,20 @@
     - `Innmind\Server\Control\Server\Volumes::unmount()`
     - `Innmind\Server\Control\Server\Processes::kill()`
 - `Innmind\Server\Control\Server\Processes::execute()` now return an `Innmind\Immutable\Attempt<Innmind\Server\Control\Server\Process>`
+- The following methods are now internal:
+    - `Innmind\Server\Control\Server\Process\ExitCode::__construct()`
+    - `Innmind\Server\Control\Server\Process\Pid::__construct()`
+    - `Innmind\Server\Control\Server\Processes\Remote::__construct()`
+    - `Innmind\Server\Control\Server\Processes\Unix::of()`
+    - `Innmind\Server\Control\Server\Volumes\Unix::__construct()`
+    - `Innmind\Server\Control\Server\Command::environment()`
+    - `Innmind\Server\Control\Server\Command::workingDirectory()`
+    - `Innmind\Server\Control\Server\Command::input()`
+    - `Innmind\Server\Control\Server\Command::toBeRunInBackground()`
+    - `Innmind\Server\Control\Server\Command::timeout()`
+    - `Innmind\Server\Control\Server\Command::outputToBeStreamed()`
+    - `Innmind\Server\Control\Server\Command::toString()`
+    - `Innmind\Server\Control\Servers\Unix::of()`
 
 ### Removed
 

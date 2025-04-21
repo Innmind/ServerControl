@@ -9,8 +9,8 @@ namespace Innmind\Server\Control\Server\Process;
 final class Pid
 {
     /**
-     * 1 is reserved by the system
-     * @param int<2, max> $value
+     * @internal
+     * @param int<2, max> $value 1 is reserved by the system
      */
     public function __construct(
         private int $value,
