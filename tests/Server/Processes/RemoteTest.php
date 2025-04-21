@@ -11,9 +11,9 @@ use Innmind\Server\Control\Server\{
     Signal,
     Process\Pid,
 };
-use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Streams;
+use Innmind\IO\IO;
 use Innmind\Url\{
     Path,
     Authority\Host,
@@ -142,9 +142,9 @@ class RemoteTest extends TestCase
     private function processes(string ...$commands): Processes
     {
         $processes = Processes\Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
 
         return new class($processes, $this, $commands) implements Processes {

@@ -11,12 +11,12 @@ use Innmind\Server\Control\Server\{
     Process\Success,
     Command,
 };
-use Innmind\TimeContinuum\Earth\{
+use Innmind\TimeContinuum\{
     Clock,
-    Period\Second,
+    Period,
 };
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Streams;
+use Innmind\IO\IO;
 use Innmind\Immutable\Monoid\Concat;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
@@ -28,10 +28,10 @@ class ForegroundTest extends TestCase
     public function testInterface()
     {
         $ps = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('ps'),
         );
 
@@ -46,10 +46,10 @@ class ForegroundTest extends TestCase
     public function testPid()
     {
         $ps = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('ps'),
         );
         $process = Process::foreground($ps());
@@ -68,10 +68,10 @@ class ForegroundTest extends TestCase
     public function testOutput()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
@@ -106,10 +106,10 @@ class ForegroundTest extends TestCase
     public function testExitCodeForFailingProcess()
     {
         $fail = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php fixtures/fails.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
@@ -147,10 +147,10 @@ class ForegroundTest extends TestCase
     public function testWait()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
@@ -178,10 +178,10 @@ class ForegroundTest extends TestCase
     public function testExitStatusIsKeptInMemory()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
@@ -198,10 +198,10 @@ class ForegroundTest extends TestCase
     public function testExitStatusIsAvailableAfterIteratingOverTheOutput()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
@@ -224,10 +224,10 @@ class ForegroundTest extends TestCase
     public function testOutputIsAvailableAfterWaitingForExitStatus()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );

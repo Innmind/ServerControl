@@ -14,9 +14,9 @@ use Innmind\Server\Control\{
     Server\Volumes,
     Server\Signal,
 };
-use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Streams;
+use Innmind\IO\IO;
 use Innmind\Immutable\{
     Either,
     SideEffect,
@@ -173,9 +173,9 @@ class LoggerTest extends TestCase
     private function processes(): Unix
     {
         return Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
     }
 }

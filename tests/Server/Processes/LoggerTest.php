@@ -12,9 +12,9 @@ use Innmind\Server\Control\Server\{
     Signal,
     Process\Pid
 };
-use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Streams;
+use Innmind\IO\IO;
 use Innmind\Url\Path;
 use Psr\Log\NullLogger;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
@@ -86,9 +86,9 @@ class LoggerTest extends TestCase
     private function processes(): Unix
     {
         return Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
     }
 }

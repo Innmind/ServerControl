@@ -6,6 +6,10 @@
 
 - `Innmind\Server\Control\Server\Process::output()` now returns `Innmind\Immutable\Sequence<Innmind\Server\Control\Server\Process\Output\Chunk>`
 - `Innmind\Server\Control\Server\Process` is now a final class, old implementations are now declared internal
+- Requires `innmind/immutable:~5.0`
+- Requires `innmind/time-continuum:~4.1`
+- Requires `innmind/time-warp:~4.0`
+- Requires `innmind/filesystem:~8.0`
 
 ### Removed
 

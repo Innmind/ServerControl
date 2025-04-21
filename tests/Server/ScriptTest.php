@@ -11,9 +11,9 @@ use Innmind\Server\Control\{
     Servers\Unix,
     ScriptFailed,
 };
-use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Streams;
+use Innmind\IO\IO;
 use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
@@ -96,9 +96,9 @@ class ScriptTest extends TestCase
     private function server(): Unix
     {
         return Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
     }
 }

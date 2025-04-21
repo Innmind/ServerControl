@@ -13,7 +13,7 @@ use Innmind\TimeContinuum\{
     Period,
 };
 use Innmind\TimeWarp\Halt;
-use Innmind\Stream\Capabilities;
+use Innmind\IO\IO;
 use Innmind\Immutable\Either;
 
 final class Unix implements Server
@@ -23,13 +23,13 @@ final class Unix implements Server
 
     private function __construct(
         Clock $clock,
-        Capabilities $capabilities,
+        IO $io,
         Halt $halt,
         ?Period $grace = null,
     ) {
         $this->processes = Processes\Unix::of(
             $clock,
-            $capabilities,
+            $io,
             $halt,
             $grace,
         );
@@ -38,11 +38,11 @@ final class Unix implements Server
 
     public static function of(
         Clock $clock,
-        Capabilities $capabilities,
+        IO $io,
         Halt $halt,
         ?Period $grace = null,
     ): self {
-        return new self($clock, $capabilities, $halt, $grace);
+        return new self($clock, $io, $halt, $grace);
     }
 
     #[\Override]

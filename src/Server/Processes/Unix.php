@@ -14,10 +14,9 @@ use Innmind\Server\Control\{
 use Innmind\TimeContinuum\{
     Clock,
     Period,
-    Earth\Period\Second,
 };
 use Innmind\TimeWarp\Halt;
-use Innmind\Stream\Capabilities;
+use Innmind\IO\IO;
 use Innmind\Immutable\{
     Either,
     SideEffect,
@@ -27,32 +26,32 @@ final class Unix implements Processes
 {
     private Clock $clock;
     private Halt $halt;
-    private Capabilities $capabilities;
+    private IO $io;
     private Period $grace;
 
     private function __construct(
         Clock $clock,
-        Capabilities $capabilities,
+        IO $io,
         Halt $halt,
         Period $grace,
     ) {
         $this->clock = $clock;
-        $this->capabilities = $capabilities;
+        $this->io = $io;
         $this->halt = $halt;
         $this->grace = $grace;
     }
 
     public static function of(
         Clock $clock,
-        Capabilities $capabilities,
+        IO $io,
         Halt $halt,
         ?Period $grace = null,
     ): self {
         return new self(
             $clock,
-            $capabilities,
+            $io,
             $halt,
-            $grace ?? new Second(1),
+            $grace ?? Period::second(1),
         );
     }
 
@@ -61,7 +60,7 @@ final class Unix implements Processes
     {
         $process = new Process\Unix(
             $this->clock,
-            $this->capabilities,
+            $this->io,
             $this->halt,
             $this->grace,
             $command,
