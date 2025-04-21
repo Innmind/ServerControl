@@ -8,7 +8,7 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Volumes,
 };
-use Innmind\Immutable\Either;
+use Innmind\Immutable\Attempt;
 use Psr\Log\LoggerInterface;
 
 final class Logger implements Server
@@ -45,14 +45,14 @@ final class Logger implements Server
     }
 
     #[\Override]
-    public function reboot(): Either
+    public function reboot(): Attempt
     {
-        return Server\Script::of('sudo shutdown -r now')($this)->either();
+        return Server\Script::of('sudo shutdown -r now')($this);
     }
 
     #[\Override]
-    public function shutdown(): Either
+    public function shutdown(): Attempt
     {
-        return Server\Script::of('sudo shutdown -h now')($this)->either();
+        return Server\Script::of('sudo shutdown -h now')($this);
     }
 }

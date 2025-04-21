@@ -22,7 +22,6 @@ use Innmind\Url\Authority\{
     UserInformation\User
 };
 use Innmind\Immutable\{
-    Either,
     Attempt,
     SideEffect,
 };
@@ -192,11 +191,11 @@ class RemoteTest extends TestCase
             {
             }
 
-            public function reboot(): Either
+            public function reboot(): Attempt
             {
             }
 
-            public function shutdown(): Either
+            public function shutdown(): Attempt
             {
             }
         };

@@ -17,7 +17,6 @@ use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\IO\IO;
 use Innmind\Immutable\{
-    Either,
     Attempt,
     SideEffect,
 };
@@ -160,11 +159,11 @@ class LoggerTest extends TestCase
             {
             }
 
-            public function reboot(): Either
+            public function reboot(): Attempt
             {
             }
 
-            public function shutdown(): Either
+            public function shutdown(): Attempt
             {
             }
         };
