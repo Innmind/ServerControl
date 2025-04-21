@@ -41,7 +41,11 @@ final class Script
                     ->execute($command)
                     ->flatMap(static fn($process) => $process->wait()->match(
                         static fn() => Attempt::result(SideEffect::identity()),
-                        static fn($e) => Attempt::error(new ProcessFailed($e)),
+                        static fn($e) => Attempt::error(new ProcessFailed(
+                            $command,
+                            $process,
+                            $e,
+                        )),
                     )),
             );
     }
