@@ -15,15 +15,10 @@ use Psr\Log\LoggerInterface;
 
 final class Logger implements Processes
 {
-    private Processes $processes;
-    private LoggerInterface $logger;
-
     private function __construct(
-        Processes $processes,
-        LoggerInterface $logger,
+        private Processes $processes,
+        private LoggerInterface $logger,
     ) {
-        $this->processes = $processes;
-        $this->logger = $logger;
     }
 
     public static function psr(Processes $processes, LoggerInterface $logger): self

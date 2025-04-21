@@ -9,19 +9,14 @@ namespace Innmind\Server\Control\Server\Command;
  */
 final class Option implements Parameter
 {
-    private bool $long;
-    /** @var non-empty-string */
-    private string $key;
-    private ?string $value;
-
     /**
      * @param non-empty-string $key
      */
-    private function __construct(bool $long, string $key, ?string $value = null)
-    {
-        $this->long = $long;
-        $this->key = $key;
-        $this->value = $value;
+    private function __construct(
+        private bool $long,
+        private string $key,
+        private ?string $value = null,
+    ) {
     }
 
     /**
