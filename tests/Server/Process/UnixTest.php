@@ -12,18 +12,13 @@ use Innmind\Server\Control\{
     Server\Second as Timeout,
 };
 use Innmind\Filesystem\File\Content;
-use Innmind\TimeContinuum\Earth\{
+use Innmind\TimeContinuum\{
     Clock,
-    Period\Second,
+    Period,
 };
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Url\Path;
 use Innmind\IO\IO;
-use Innmind\Stream\{
-    Readable\Stream,
-    Streams,
-    Watch\Select,
-};
 use Innmind\Immutable\{
     SideEffect,
     Predicate\Instance,
@@ -44,10 +39,10 @@ class UnixTest extends TestCase
     public function testSimpleOutput()
     {
         $cat = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('echo')->withArgument('hello'),
         );
         $count = 0;
@@ -75,10 +70,10 @@ class UnixTest extends TestCase
             )
             ->then(function($echo) {
                 $cat = new Unix(
-                    new Clock,
-                    Streams::fromAmbientAuthority(),
-                    new Usleep,
-                    new Second(1),
+                    Clock::live(),
+                    IO::fromAmbientAuthority(),
+                    Usleep::new(),
+                    Period::second(1),
                     Command::foreground('echo')->withArgument($echo),
                 );
                 $process = $cat();
@@ -98,10 +93,10 @@ class UnixTest extends TestCase
     public function testSlowOutput()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
@@ -123,13 +118,14 @@ class UnixTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
+    #[Group('wip')]
     public function testTimeoutSlowOutput()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
                 ->timeoutAfter(new Timeout(2))
@@ -165,10 +161,10 @@ class UnixTest extends TestCase
     public function testTimeoutWaitSlowProcess()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
                 ->timeoutAfter(new Timeout(2))
@@ -200,10 +196,10 @@ class UnixTest extends TestCase
     public function testWaitSuccess()
     {
         $cat = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('echo')->withArgument('hello'),
         );
 
@@ -225,10 +221,10 @@ class UnixTest extends TestCase
     public function testWaitFail()
     {
         $cat = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/fails.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
@@ -253,14 +249,14 @@ class UnixTest extends TestCase
     public function testWithInput()
     {
         $cat = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('cat')->withInput(Content::oneShot(
-                IO::of(static fn() => Select::waitForever())->readable()->wrap(
-                    Stream::of(\fopen('fixtures/symfony.log', 'r')),
-                ),
+                IO::fromAmbientAuthority()
+                    ->streams()
+                    ->acquire(\fopen('fixtures/symfony.log', 'r')),
             )),
         );
         $output = '';
@@ -281,15 +277,15 @@ class UnixTest extends TestCase
     {
         @\unlink('test.log');
         $cat = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('cat')
                 ->withInput(Content::oneShot(
-                    IO::of(static fn() => Select::waitForever())->readable()->wrap(
-                        Stream::of(\fopen('fixtures/symfony.log', 'r')),
-                    ),
+                    IO::fromAmbientAuthority()
+                        ->streams()
+                        ->acquire(\fopen('fixtures/symfony.log', 'r')),
                 ))
                 ->overwrite(Path::of('test.log')),
         );

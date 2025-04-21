@@ -8,9 +8,9 @@ use Innmind\Server\Control\{
     Server,
     Exception\UnsupportedOperatingSystem
 };
-use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Streams;
+use Innmind\IO\IO;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -27,9 +27,9 @@ class ServerFactoryTest extends TestCase
         }
 
         $this->assertInstanceOf(Server::class, ServerFactory::build(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         ));
     }
 
@@ -46,9 +46,9 @@ class ServerFactoryTest extends TestCase
         $this->expectException(UnsupportedOperatingSystem::class);
 
         ServerFactory::build(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
     }
 }

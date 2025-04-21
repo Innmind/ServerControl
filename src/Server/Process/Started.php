@@ -8,22 +8,18 @@ use Innmind\Server\Control\{
     Server\Process\Output\Type,
     Server\Second,
     Server\Signal,
-    Exception\RuntimeException,
 };
 use Innmind\Filesystem\File\Content;
 use Innmind\TimeContinuum\{
     Clock,
     PointInTime,
     Period,
-    Earth\ElapsedPeriod,
 };
 use Innmind\TimeWarp\Halt;
-use Innmind\Stream\{
-    Readable,
-    Writable,
-    Stream,
-    Watch,
-    Capabilities,
+use Innmind\IO\{
+    IO,
+    Streams\Stream,
+    Streams\Stream\Read\Pool,
 };
 use Innmind\Immutable\{
     Maybe,
@@ -31,7 +27,6 @@ use Innmind\Immutable\{
     Sequence,
     Either,
     SideEffect,
-    Set,
 };
 
 /**
@@ -47,16 +42,17 @@ use Innmind\Immutable\{
 final class Started
 {
     private Clock $clock;
-    private Watch $watch;
     private Halt $halt;
     private Period $grace;
     private bool $background;
     private PointInTime $startedAt;
     /** @var resource */
     private $process;
-    private Readable\NonBlocking $output;
-    private Readable\NonBlocking $error;
-    private Writable $input;
+    private Stream $output;
+    private Stream $error;
+    /** @var Pool<Type> */
+    private Pool $pool;
+    private Stream $input;
     /** @var Maybe<Second> */
     private Maybe $timeout;
     /** @var Maybe<Content> */
@@ -74,7 +70,7 @@ final class Started
     public function __construct(
         Clock $clock,
         Halt $halt,
-        Capabilities $capabilities,
+        IO $io,
         Period $grace,
         callable $start,
         bool $background,
@@ -90,26 +86,20 @@ final class Started
         // to better control the property startedAt in case it needs to be moved
         // after the process is really started
         [$this->process, $pipes] = $start();
-        $this->output = Readable\NonBlocking::of(
-            $capabilities->readable()->acquire($pipes[1]),
-        );
-        $this->error = Readable\NonBlocking::of(
-            $capabilities->readable()->acquire($pipes[2]),
-        );
-        $this->input = $capabilities->writable()->acquire($pipes[0]);
+        $this->output = $io->streams()->acquire($pipes[1]);
+        $this->error = $io->streams()->acquire($pipes[2]);
+        $this->input = $io->streams()->acquire($pipes[0]);
         // We use a short timeout to watch the streams when there is a timeout
         // defined on the command to make sure we're as close as possible to the
         // defined value without using polling.
         // When simply reading the output we can't wait forever as the tests
         // hang forever on Linux.
-        $this->watch = $capabilities
-            ->watch()
-            ->timeoutAfter(ElapsedPeriod::of(100))
-            ->forRead(
-                $this->output,
-                $this->error,
-            )
-            ->forWrite($this->input);
+        $this->pool = $this
+            ->output
+            ->read()
+            ->pool(Type::output)
+            ->with(Type::error, $this->error->read())
+            ->timeoutAfter(Period::millisecond(100));
         $this->timeout = $timeout;
         $this->content = $content;
         $this->pid = new Pid($this->status()['pid']);
@@ -129,8 +119,6 @@ final class Started
 
         return Sequence::lazy(function() {
             yield $this->writeInputAndRead();
-
-            $this->watch = $this->watch->unwatch($this->input);
 
             do {
                 yield $this->readOnce();
@@ -241,10 +229,7 @@ final class Started
                 return Maybe::nothing();
             })
             ->match(
-                fn($chunks) => $this->writeAndRead(
-                    $this->input,
-                    $chunks,
-                ),
+                $this->writeAndRead(...),
                 static fn() => Sequence::of(),
             );
     }
@@ -254,14 +239,12 @@ final class Started
      *
      * @return Sequence<Chunk>
      */
-    private function writeAndRead(
-        Writable $stream,
-        Sequence $chunks,
-    ): Sequence {
-        return Sequence::lazy(function() use ($chunks, $stream) {
+    private function writeAndRead(Sequence $chunks): Sequence
+    {
+        return Sequence::lazy(function() use ($chunks) {
             yield $chunks
                 ->map(static fn($chunk) => $chunk->toEncoding(Str\Encoding::ascii))
-                ->flatMap(function($chunk) use ($stream) {
+                ->flatMap(function($chunk) {
                     // leave the exception here in case we can't write to the
                     // input stream because for now there is no clear way to
                     // handle this case
@@ -271,31 +254,17 @@ final class Started
                     // done at this moment for sake of simplicity while the case
                     // has never been encountered
                     $_ = $this
-                        ->waitAvailable($stream)
-                        ->write($chunk)
-                        ->match(
-                            static fn($stream) => $stream,
-                            static fn($e) => throw new RuntimeException($e::class),
-                        );
+                        ->input
+                        ->write()
+                        ->watch()
+                        ->sink(Sequence::of($chunk))
+                        ->unwrap();
 
                     return $this->readOnce();
                 });
             $this->closeInput();
         })
             ->flatMap(static fn($chunks) => $chunks);
-    }
-
-    private function waitAvailable(Writable $stream): Writable
-    {
-        do {
-            /** @var Set<Writable> */
-            $toWrite = ($this->watch)()->match(
-                static fn($ready) => $ready->toWrite(),
-                static fn() => Set::of(),
-            );
-        } while (!$toWrite->contains($stream));
-
-        return $stream;
     }
 
     private function closeInput(): void
@@ -305,10 +274,7 @@ final class Started
         // some cases this could result on this process hanging forever
         // there is no way to recover safely from unpredictable behaviour so it's
         // better to stop everything
-        $_ = $this->input->close()->match(
-            static fn() => null, // closed correctly
-            static fn() => throw new RuntimeException('Failed to close input stream'),
-        );
+        $_ = $this->input->close()->unwrap();
     }
 
     private function close(): void
@@ -326,48 +292,19 @@ final class Started
         $this->executed = true;
     }
 
-    private function maybeUnwatch(Watch $watch, Stream $stream): Watch
-    {
-        if ($stream->end() || $stream->closed()) {
-            $watch = $watch->unwatch($stream);
-        }
-
-        return $watch;
-    }
-
-    private function read(Readable $stream): Str
-    {
-        return $stream->read()->match(
-            static fn($chunk) => $chunk,
-            static fn() => Str::of(''),
-        );
-    }
-
     /**
      * @return Sequence<Chunk>
      */
     private function readOnce(): Sequence
     {
-        /** @var Set<Readable> */
-        $toRead = ($this->watch)()->match(
-            static fn($ready) => $ready->toRead(),
-            static fn() => Set::of(),
-        );
-
-        $chunks = $toRead
-            ->map(fn($stream) => match ($stream) {
-                $this->output => Chunk::of($this->read($stream), Type::output),
-                $this->error => Chunk::of($this->read($stream), Type::error),
-            })
-            ->filter(static fn($chunk) => !$chunk->data()->empty())
-            ->toList();
-
-        $this->watch = $toRead->reduce(
-            $this->watch,
-            $this->maybeUnwatch(...),
-        );
-
-        return Sequence::of(...$chunks);
+        return $this
+            ->pool
+            ->chunks()
+            ->map(static fn($chunk) => Chunk::of(
+                $chunk->value(),
+                $chunk->key(),
+            ))
+            ->filter(static fn($chunk) => !$chunk->data()->empty());
     }
 
     /**
@@ -377,9 +314,7 @@ final class Started
     {
         return $this
             ->timeout
-            ->map(static fn($second) => new ElapsedPeriod(
-                $second->toInt() * 1000,
-            ))
+            ->map(static fn($second) => Period::second($second->toInt())->asElapsedPeriod())
             ->filter(
                 fn($threshold) => $this
                     ->clock
@@ -409,11 +344,15 @@ final class Started
 
     private function outputStillOpen(): bool
     {
-        if (!$this->output->end() && !$this->output->closed()) {
+        $output = $this->output->read()->internal();
+
+        if (!$output->end() && !$output->closed()) {
             return true;
         }
 
-        if (!$this->error->end() && !$this->error->closed()) {
+        $error = $this->error->read()->internal();
+
+        if (!$error->end() && !$error->closed()) {
             return true;
         }
 

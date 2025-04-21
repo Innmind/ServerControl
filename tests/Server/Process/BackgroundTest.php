@@ -9,12 +9,12 @@ use Innmind\Server\Control\Server\{
     Process\Success,
     Command,
 };
-use Innmind\TimeContinuum\Earth\{
+use Innmind\TimeContinuum\{
     Clock,
-    Period\Second,
+    Period,
 };
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Streams;
+use Innmind\IO\IO;
 use Innmind\Immutable\Monoid\Concat;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
@@ -26,10 +26,10 @@ class BackgroundTest extends TestCase
     public function testInterface()
     {
         $process = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::background('ps'),
         );
 
@@ -44,10 +44,10 @@ class BackgroundTest extends TestCase
     public function testPid()
     {
         $ps = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::background('ps'),
         );
         $process = Process::background($ps());
@@ -63,10 +63,10 @@ class BackgroundTest extends TestCase
     public function testOutput()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::background('php fixtures/slow.php'),
         );
         $process = Process::background($slow());
@@ -88,10 +88,10 @@ class BackgroundTest extends TestCase
     public function testWait()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::background('php fixtures/slow.php'),
         );
         $process = Process::background($slow());

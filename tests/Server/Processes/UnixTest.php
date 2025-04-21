@@ -13,14 +13,9 @@ use Innmind\Server\Control\{
     Server\Signal,
 };
 use Innmind\Filesystem\File\Content;
-use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\IO\IO;
-use Innmind\Stream\{
-    Readable\Stream,
-    Streams,
-    Watch\Select,
-};
 use Innmind\Immutable\{
     SideEffect,
     Monoid\Concat,
@@ -35,9 +30,9 @@ class UnixTest extends TestCase
     public function testInterface()
     {
         $this->assertInstanceOf(Processes::class, Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         ));
     }
 
@@ -46,9 +41,9 @@ class UnixTest extends TestCase
     public function testExecute()
     {
         $processes = Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
         $start = \time();
         $process = $processes->execute(
@@ -67,9 +62,9 @@ class UnixTest extends TestCase
     public function testExecuteInBackground()
     {
         $processes = Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
         $start = \time();
         $process = $processes->execute(
@@ -89,15 +84,15 @@ class UnixTest extends TestCase
     public function testExecuteWithInput()
     {
         $processes = Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
         $process = $processes->execute(
             Command::foreground('cat')->withInput(Content::oneShot(
-                IO::of(static fn() => Select::waitForever())->readable()->wrap(
-                    Stream::of(\fopen('fixtures/symfony.log', 'r')),
-                ),
+                IO::fromAmbientAuthority()
+                    ->streams()
+                    ->acquire(\fopen('fixtures/symfony.log', 'r')),
             )),
         );
 
@@ -121,9 +116,9 @@ class UnixTest extends TestCase
         // todo investigate more why this is happening only for linux
 
         $processes = Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
         $start = \time();
         $process = $processes->execute(
@@ -154,9 +149,9 @@ class UnixTest extends TestCase
     public function testTimeout()
     {
         $processes = Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
         $start = \time();
         $process = $processes->execute(
@@ -182,9 +177,9 @@ class UnixTest extends TestCase
     {
         $called = false;
         $processes = Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
         $processes
             ->execute(
@@ -206,9 +201,9 @@ class UnixTest extends TestCase
     {
         $called = false;
         $processes = Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
         $process = $processes
             ->execute(
@@ -229,9 +224,9 @@ class UnixTest extends TestCase
     {
         $called = false;
         $processes = Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
         $process = $processes
             ->execute(
@@ -255,9 +250,9 @@ class UnixTest extends TestCase
         @\unlink('/tmp/test-file');
         \touch('/tmp/test-file');
         $processes = Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
         $tail = $processes->execute(
             Command::foreground('tail')
@@ -282,9 +277,9 @@ class UnixTest extends TestCase
     public function testRegressionWhenProcessFinishesTooFastItsFlaggedAsFailingEvenThoughItSucceeded()
     {
         $processes = Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
 
         $this->assertTrue(

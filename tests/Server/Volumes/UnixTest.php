@@ -14,9 +14,9 @@ use Innmind\Server\Control\{
     Server\Command,
     ScriptFailed,
 };
-use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Streams;
+use Innmind\IO\IO;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Either,
@@ -214,9 +214,9 @@ class UnixTest extends TestCase
     private function processes(array ...$commands): Processes
     {
         $processes = Processes\Unix::of(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
 
         return new class($processes, $this, $commands) implements Processes {
