@@ -5,14 +5,17 @@
 ### Changed
 
 - `Innmind\Server\Control\Server\Process::output()` now returns `Innmind\Immutable\Sequence<Innmind\Server\Control\Server\Process\Output\Chunk>`
+- `Innmind\Server\Control\Server\Process` is now a final class, old implementations are now declared internal
 
 ### Removed
 
 - `Innmind\Server\Control\Server\Process\Output`
+- A process internal state is now longer logged
 
 ### Fixed
 
 - PHP `8.4` deprecations
+- `Innmind\Server\Control\Server\Script` wasn't returning a `SideEffect`
 
 ## 5.2.3 - 2024-09-18
 

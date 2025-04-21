@@ -5,18 +5,16 @@ namespace Tests\Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\{
     Server\Script,
-    Server,
     Server\Command,
-    Server\Processes,
     Server\Process,
-    Server\Process\ExitCode,
+    Server\Second,
+    Servers\Unix,
     ScriptFailed,
 };
-use Innmind\Immutable\{
-    Either,
-    SideEffect,
-    Sequence,
-};
+use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\Stream\Streams;
+use Innmind\Immutable\SideEffect;
 use PHPUnit\Framework\TestCase;
 
 class ScriptTest extends TestCase
@@ -24,34 +22,13 @@ class ScriptTest extends TestCase
     public function testInvokation()
     {
         $script = new Script(
-            $command1 = Command::foreground('ls'),
-            $command2 = Command::foreground('ls'),
+            Command::foreground('ls'),
+            Command::foreground('ls'),
         );
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $process = $this->createMock(Process::class);
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $command1, $command2, $process) {
-                match ($matcher->numberOfInvocations()) {
-                    1 => $this->assertSame($command1, $command),
-                    2 => $this->assertSame($command2, $command),
-                };
-
-                return $process;
-            });
-        $process
-            ->expects($this->any())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
 
         $this->assertInstanceOf(
             SideEffect::class,
-            $script($server)->match(
+            $script($this->server())->match(
                 static fn($sideEffect) => $sideEffect,
                 static fn($e) => $e,
             ),
@@ -62,48 +39,15 @@ class ScriptTest extends TestCase
     {
         $script = new Script(
             $command1 = Command::foreground('ls'),
-            $command2 = Command::foreground('ls'),
+            $command2 = Command::foreground('unknown'),
             $command3 = Command::foreground('ls'),
         );
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $process1 = $this->createMock(Process::class);
-        $process1
-            ->expects($this->any())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process2 = $this->createMock(Process::class);
-        $process2
-            ->expects($this->any())
-            ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(
-                new ExitCode(1),
-                Sequence::of(),
-            )));
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $command1, $command2, $process1, $process2) {
-                match ($matcher->numberOfInvocations()) {
-                    1 => $this->assertSame($command1, $command),
-                    2 => $this->assertSame($command2, $command),
-                };
 
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $process1,
-                    2 => $process2,
-                };
-            });
-
-        $e = $script($server)->match(
+        $e = $script($this->server())->match(
             static fn() => null,
             static fn($e) => $e,
         );
         $this->assertInstanceOf(ScriptFailed::class, $e);
-        $this->assertSame($process2, $e->process());
         $this->assertSame($command2, $e->command());
     }
 
@@ -113,25 +57,9 @@ class ScriptTest extends TestCase
 
         $this->assertInstanceOf(Script::class, $script);
 
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $process = $this->createMock(Process::class);
-        $process
-            ->expects($this->any())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $processes
-            ->expects($this->exactly(2))
-            ->method('execute')
-            ->with(Command::foreground('ls'))
-            ->willReturn($process);
-
         $this->assertInstanceOf(
             SideEffect::class,
-            $script($server)->match(
+            $script($this->server())->match(
                 static fn($sideEffect) => $sideEffect,
                 static fn($e) => $e,
             ),
@@ -141,33 +69,27 @@ class ScriptTest extends TestCase
     public function testFailDueToTimeout()
     {
         $script = new Script(
-            $command = Command::foreground('ls'),
+            $command = Command::foreground('sleep 10')->timeoutAfter(
+                new Second(1),
+            ),
         );
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($command)
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::left($expected = new Process\TimedOut(
-                Sequence::of(),
-            )));
 
-        $e = $script($server)->match(
+        $e = $script($this->server())->match(
             static fn() => null,
             static fn($e) => $e,
         );
 
         $this->assertInstanceOf(ScriptFailed::class, $e);
-        $this->assertSame($process, $e->process());
         $this->assertSame($command, $e->command());
-        $this->assertSame($expected, $e->reason());
+        $this->assertInstanceOf(Process\TimedOut::class, $e->reason());
+    }
+
+    private function server(): Unix
+    {
+        return Unix::of(
+            new Clock,
+            Streams::fromAmbientAuthority(),
+            new Usleep,
+        );
     }
 }

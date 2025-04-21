@@ -4,9 +4,8 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\Server\{
-    Process\Foreground,
-    Process\Unix,
     Process,
+    Process\Unix,
     Process\Output\Type,
     Process\Failed,
     Process\Success,
@@ -35,7 +34,7 @@ class ForegroundTest extends TestCase
 
         $this->assertInstanceOf(
             Process::class,
-            new Foreground($ps()),
+            Process::foreground($ps()),
         );
     }
 
@@ -48,7 +47,7 @@ class ForegroundTest extends TestCase
             new Second(1),
             Command::foreground('ps'),
         );
-        $process = new Foreground($ps());
+        $process = Process::foreground($ps());
 
         $this->assertGreaterThanOrEqual(
             2,
@@ -69,7 +68,7 @@ class ForegroundTest extends TestCase
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = new Foreground($slow());
+        $process = Process::foreground($slow());
 
         $start = \time();
         $count = 0;
@@ -105,7 +104,7 @@ class ForegroundTest extends TestCase
             Command::foreground('php fixtures/fails.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = new Foreground($fail());
+        $process = Process::foreground($fail());
 
         \sleep(1);
 
@@ -144,7 +143,7 @@ class ForegroundTest extends TestCase
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = new Foreground($slow());
+        $process = Process::foreground($slow());
         $return = $process->wait();
 
         $this->assertInstanceOf(
@@ -173,7 +172,7 @@ class ForegroundTest extends TestCase
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = new Foreground($slow());
+        $process = Process::foreground($slow());
 
         $this->assertSame(
             $process->wait(),
@@ -191,7 +190,7 @@ class ForegroundTest extends TestCase
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = new Foreground($slow());
+        $process = Process::foreground($slow());
         $process->output()->memoize();
 
         $this->assertInstanceOf(
@@ -215,7 +214,7 @@ class ForegroundTest extends TestCase
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = new Foreground($slow());
+        $process = Process::foreground($slow());
         $this->assertInstanceOf(
             Success::class,
             $process

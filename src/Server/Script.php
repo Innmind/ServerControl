@@ -41,6 +41,7 @@ final class Script
 
                 return $process
                     ->wait()
+                    ->map(static fn() => new SideEffect)
                     ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
             }),
         );

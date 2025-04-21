@@ -8,8 +8,7 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Command,
     Server\Second,
-    Server\Process\Foreground,
-    Server\Process\Background,
+    Server\Process,
     Server\Process\TimedOut,
     Server\Signal,
 };
@@ -53,7 +52,7 @@ class UnixTest extends TestCase
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
 
-        $this->assertInstanceOf(Foreground::class, $process);
+        $this->assertInstanceOf(Process::class, $process);
         $process->wait();
         $this->assertTrue((\time() - $start) >= 6);
     }
@@ -72,7 +71,7 @@ class UnixTest extends TestCase
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
 
-        $this->assertInstanceOf(Background::class, $process);
+        $this->assertInstanceOf(Process::class, $process);
         $this->assertLessThan(2, \time() - $start);
         \exec('ps -eo '.(\PHP_OS === 'Linux' ? 'cmd' : 'command'), $commands);
         $this->assertContains('php fixtures/slow.php', $commands);
