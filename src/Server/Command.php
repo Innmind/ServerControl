@@ -10,6 +10,7 @@ use Innmind\Server\Control\{
     Server\Command\Append,
     Server\Command\Pipe,
 };
+use Innmind\TimeContinuum\Period;
 use Innmind\Filesystem\File\Content;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
@@ -37,7 +38,7 @@ final class Command
     /** @var Maybe<Append>|Maybe<Overwrite> */
     private Maybe $redirection;
     private bool $background = false;
-    /** @var Maybe<Second> */
+    /** @var Maybe<Period> */
     private Maybe $timeout;
     private bool $streamOutput = false;
 
@@ -58,7 +59,7 @@ final class Command
         $this->input = Maybe::nothing();
         /** @var Maybe<Append>|Maybe<Overwrite> */
         $this->redirection = Maybe::nothing();
-        /** @var Maybe<Second> */
+        /** @var Maybe<Period> */
         $this->timeout = Maybe::nothing();
     }
 
@@ -194,10 +195,10 @@ final class Command
         return $self;
     }
 
-    public function timeoutAfter(Second $seconds): self
+    public function timeoutAfter(Period $timeout): self
     {
         $self = clone $this;
-        $self->timeout = Maybe::just($seconds);
+        $self->timeout = Maybe::just($timeout);
 
         return $self;
     }
@@ -261,7 +262,7 @@ final class Command
     /**
      * @internal
      *
-     * @return Maybe<Second>
+     * @return Maybe<Period>
      */
     public function timeout(): Maybe
     {

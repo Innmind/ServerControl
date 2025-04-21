@@ -36,12 +36,14 @@
 - `Innmind\Server\Control\Server\Script` constructor is now private, use `::of()` named constructor which now expects instances of `Command`
 - `Innmind\Server\Control\Server\Volumes\Name` constructor is now private, use `::of()` named constructor
 - `Innmind\Server\Control\Servers\Remote` constructor is now private, use `::of()` named constructor
+- `Innmind\Server\Control\Server\Process\Command::timeoutAfter()` now expects a `Innmind\TimeContinuum\Period`
 
 ### Removed
 
 - `Innmind\Server\Control\Server\Process\Output`
 - A process internal state is now longer logged
 - `Innmind\Server\Control\ScriptFailed`
+- `Innmind\Server\Control\Server\Second`
 
 ### Fixed
 

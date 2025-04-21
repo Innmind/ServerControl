@@ -3,10 +3,8 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server;
 
-use Innmind\Server\Control\{
-    Server\Command,
-    Server\Second,
-};
+use Innmind\Server\Control\Server\Command;
+use Innmind\TimeContinuum\Period;
 use Innmind\Filesystem\File\Content;
 use Innmind\Url\Path;
 use Innmind\Immutable\Map;
@@ -219,7 +217,7 @@ class CommandTest extends TestCase
     public function testTimeout()
     {
         $commandA = Command::foreground('echo');
-        $commandB = $commandA->timeoutAfter($timeout = new Second(1));
+        $commandB = $commandA->timeoutAfter($timeout = Period::second(1));
 
         $this->assertFalse($commandA->timeout()->match(
             static fn() => true,
