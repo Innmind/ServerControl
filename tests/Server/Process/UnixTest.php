@@ -9,7 +9,6 @@ use Innmind\Server\Control\{
     Server\Process\Output\Type,
     Server\Process\ExitCode,
     Server\Command,
-    Server\Second as Timeout,
 };
 use Innmind\Filesystem\File\Content;
 use Innmind\TimeContinuum\{
@@ -127,7 +126,7 @@ class UnixTest extends TestCase
             Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
-                ->timeoutAfter(new Timeout(2))
+                ->timeoutAfter(Period::second(2))
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
 
@@ -166,7 +165,7 @@ class UnixTest extends TestCase
             Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
-                ->timeoutAfter(new Timeout(2))
+                ->timeoutAfter(Period::second(2))
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
         $this

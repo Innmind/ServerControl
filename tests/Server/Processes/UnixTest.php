@@ -7,13 +7,15 @@ use Innmind\Server\Control\{
     Server\Processes\Unix,
     Server\Processes,
     Server\Command,
-    Server\Second,
     Server\Process,
     Server\Process\TimedOut,
     Server\Signal,
 };
 use Innmind\Filesystem\File\Content;
-use Innmind\TimeContinuum\Clock;
+use Innmind\TimeContinuum\{
+    Clock,
+    Period,
+};
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\IO\IO;
 use Innmind\Immutable\{
@@ -157,7 +159,7 @@ class UnixTest extends TestCase
         $process = $processes->execute(
             Command::foreground('sleep')
                 ->withArgument('1000')
-                ->timeoutAfter(new Second(1)),
+                ->timeoutAfter(Period::second(1)),
         )->unwrap();
 
         $this->assertInstanceOf(

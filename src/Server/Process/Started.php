@@ -6,7 +6,6 @@ namespace Innmind\Server\Control\Server\Process;
 use Innmind\Server\Control\{
     Server\Process\Output\Chunk,
     Server\Process\Output\Type,
-    Server\Second,
     Server\Signal,
 };
 use Innmind\Filesystem\File\Content;
@@ -53,7 +52,7 @@ final class Started
     /** @var Pool<Type> */
     private Pool $pool;
     private Stream $input;
-    /** @var Maybe<Second> */
+    /** @var Maybe<Period> */
     private Maybe $timeout;
     /** @var Maybe<Content> */
     private Maybe $content;
@@ -64,7 +63,7 @@ final class Started
 
     /**
      * @param callable(): array{0: resource, 1: array{0: resource, 1: resource, 2: resource}} $start
-     * @param Maybe<Second> $timeout
+     * @param Maybe<Period> $timeout
      * @param Maybe<Content> $content
      */
     public function __construct(
@@ -314,7 +313,7 @@ final class Started
     {
         return $this
             ->timeout
-            ->map(static fn($second) => Period::second($second->toInt())->asElapsedPeriod())
+            ->map(static fn($period) => $period->asElapsedPeriod())
             ->filter(
                 fn($threshold) => $this
                     ->clock

@@ -6,11 +6,13 @@ namespace Tests\Innmind\Server\Control\Server;
 use Innmind\Server\Control\{
     Server\Script,
     Server\Command,
-    Server\Second,
     Servers\Unix,
     Exception\ProcessFailed,
 };
-use Innmind\TimeContinuum\Clock;
+use Innmind\TimeContinuum\{
+    Clock,
+    Period,
+};
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\IO\IO;
 use Innmind\Immutable\SideEffect;
@@ -60,7 +62,7 @@ class ScriptTest extends TestCase
     {
         $script = Script::of(
             $command = Command::foreground('sleep 10')->timeoutAfter(
-                new Second(1),
+                Period::second(1),
             ),
         );
 
