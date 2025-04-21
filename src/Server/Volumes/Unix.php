@@ -7,11 +7,11 @@ use Innmind\Server\Control\{
     Server\Volumes,
     Server\Processes,
     Server\Command,
-    ScriptFailed,
+    Exception\ProcessFailed,
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Either,
+    Attempt,
     SideEffect,
 };
 
@@ -23,7 +23,7 @@ final class Unix implements Volumes
     }
 
     #[\Override]
-    public function mount(Name $name, Path $mountpoint): Either
+    public function mount(Name $name, Path $mountpoint): Attempt
     {
         if ($this->isOSX()) {
             return $this->run(
@@ -41,7 +41,7 @@ final class Unix implements Volumes
     }
 
     #[\Override]
-    public function unmount(Name $name): Either
+    public function unmount(Name $name): Attempt
     {
         if ($this->isOSX()) {
             return $this->run(
@@ -58,16 +58,17 @@ final class Unix implements Volumes
     }
 
     /**
-     * @return Either<ScriptFailed, SideEffect>
+     * @return Attempt<SideEffect>
      */
-    private function run(Command $command): Either
+    private function run(Command $command): Attempt
     {
-        $process = $this->processes->execute($command)->unwrap();
-
-        return $process
-            ->wait()
-            ->map(static fn() => new SideEffect)
-            ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
+        return $this
+            ->processes
+            ->execute($command)
+            ->flatMap(static fn($process) => $process->wait()->match(
+                static fn() => Attempt::result(SideEffect::identity()),
+                static fn($e) => Attempt::error(new ProcessFailed($e)),
+            ));
     }
 
     private function isOSX(): bool

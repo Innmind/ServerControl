@@ -11,7 +11,7 @@ use Innmind\Server\Control\{
     Server\Process\Pid,
     Server\Signal,
     Server\Command,
-    ScriptFailed,
+    Exception\ProcessFailed,
 };
 use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
@@ -73,7 +73,7 @@ class UnixTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            ScriptFailed::class,
+            ProcessFailed::class,
             $volumes->mount(
                 new Name('/dev/disk1s2'),
                 Path::of('/somewhere'),
@@ -116,7 +116,7 @@ class UnixTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            ScriptFailed::class,
+            ProcessFailed::class,
             $volumes->unmount(new Name('/dev/disk1s2'))->match(
                 static fn() => null,
                 static fn($e) => $e,
@@ -159,7 +159,7 @@ class UnixTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            ScriptFailed::class,
+            ProcessFailed::class,
             $volumes->mount(
                 new Name('/dev/disk1s2'),
                 Path::of('/somewhere'),
@@ -202,7 +202,7 @@ class UnixTest extends TestCase
         );
 
         $this->assertInstanceOf(
-            ScriptFailed::class,
+            ProcessFailed::class,
             $volumes->unmount(new Name('/dev/disk1s2'))->match(
                 static fn() => null,
                 static fn($e) => $e,
