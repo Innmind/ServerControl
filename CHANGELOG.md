@@ -15,6 +15,7 @@
 
 - `Innmind\Server\Control\Server\Process\Output`
 - A process internal state is now longer logged
+- `Innmind\Server\Control\ScriptFailed`
 
 ### Fixed
 
