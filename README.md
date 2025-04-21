@@ -6,7 +6,8 @@
 
 Give access to giving instructions to the server.
 
-**Important**: to correctly use this library you must validate your code with [`vimeo/psalm`](https://packagist.org/packages/vimeo/psalm)
+> [!IMPORTANT]
+> To correctly use this library you must validate your code with [`vimeo/psalm`](https://packagist.org/packages/vimeo/psalm)
 
 ## Installation
 
@@ -20,21 +21,22 @@ composer require innmind/server-control
 use Innmind\Server\Control\{
     ServerFactory,
     Server\Command,
+    Server\Process\Output\Chunk,
     Server\Process\Output\Type,
     Server\Process\Pid,
     Server\Signal,
     Server\Volumes\Name,
 };
-use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Streams;
+use Innmind\IO\IO;
 use Innmind\Url\Path;
 use Innmind\Immutable\Str;
 
 $server = ServerFactory::build(
-    new Clock,
-    Streams::fromAmbientAuthority(),
-    new Usleep,
+    Clock::live(),
+    IO::fromAmbientAuthority(),
+    Usleep::new(),
 );
 $server
     ->processes()
@@ -42,25 +44,33 @@ $server
         Command::foreground('bin/console')
             ->withArgument('debug:router')
     )
+    ->unwrap()
     ->output()
-    ->foreach(static function(Str $data, Type $type): void {
-        $type = match ($type) {
+    ->foreach(static function(Chunk $chunk): void {
+        $type = match ($chunk->type()) {
             Type::error => 'ERR : ',
             Type::output => 'OUT : ',
         };
 
-        echo $type.$data->toString();
+        echo $type.$chunk->data()->toString();
     });
 $server
     ->processes()
     ->kill(
         new Pid(42),
         Signal::kill,
-    );
-$server->volumes()->mount(new Name('/dev/disk2s1'), Path::of('/somewhere')); // the path is only interpreted for linux
-$server->volumes()->unmount(new Name('/dev/disk2s1'));
-$server->reboot();
-$server->shutdown();
+    )
+    ->unwrap();
+$server
+    ->volumes()
+    ->mount(new Name('/dev/disk2s1'), Path::of('/somewhere')) // the path is only interpreted for linux
+    ->unwrap();
+$server
+    ->volumes()
+    ->unmount(new Name('/dev/disk2s1'))
+    ->unwrap();
+$server->reboot()->unwrap();
+$server->shutdown()->unwrap();
 ```
 
 ### Scripts
@@ -68,11 +78,14 @@ $server->shutdown();
 Sometimes you may want to run a set of commands on your server. You can easily do so like this:
 
 ```php
-use Innmind\Server\Control\Server\Script;
+use Innmind\Server\Control\Server\{
+    Script,
+    Command,
+};
 
 $script = Script::of(
-    'apt-get install php-fpm -y',
-    'service nginx start',
+    Command::foreground('apt-get install php-fpm -y'),
+    Command::foreground('service nginx start'),
 );
 $script($server);
 ```
@@ -89,18 +102,22 @@ use Innmind\Url\Authority\{
     UserInformation\User,
 };
 
-$server = new Remote(
+$server = Remote::of(
     $server,
     User::of('john'),
     Host::of('example.com'),
     Port::of(42),
 );
-$server->processes()->execute(Command::foreground('ls'));
+$server
+    ->processes()
+    ->execute(Command::foreground('ls'))
+    ->unwrap();
 ```
 
 This will run `ssh -p 42 john@example.com ls`.
 
-**Important**: specifying environment variables or an input stream will not be taken into account on the remote server.
+> [!IMPORTANT]
+> Specifying environment variables or an input stream will not be taken into account on the remote server.
 
 ### Logging
 
