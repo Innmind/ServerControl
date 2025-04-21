@@ -15,6 +15,7 @@
 ### Fixed
 
 - PHP `8.4` deprecations
+- `Innmind\Server\Control\Server\Script` wasn't returning a `SideEffect`
 
 ## 5.2.3 - 2024-09-18
 
