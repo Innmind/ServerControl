@@ -104,7 +104,7 @@ class UnixTest extends TestCase
 
     public function testKill()
     {
-        if (\getenv('CI') && \PHP_OS === 'Linux') {
+        if (\PHP_OS === 'Linux') {
             // for some reason this test doesn't pass for linux in the CI, the
             // kill tell it succeeded but when checking the process is killed it
             // is still running
