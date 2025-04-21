@@ -9,10 +9,7 @@ use Innmind\Server\Control\Server\{
     Signal,
     Process\Pid,
 };
-use Innmind\Immutable\{
-    Either,
-    Attempt,
-};
+use Innmind\Immutable\Attempt;
 use Psr\Log\LoggerInterface;
 
 final class Logger implements Processes
@@ -43,7 +40,7 @@ final class Logger implements Processes
     }
 
     #[\Override]
-    public function kill(Pid $pid, Signal $signal): Either
+    public function kill(Pid $pid, Signal $signal): Attempt
     {
         $this->logger->info('About to kill a process', [
             'pid' => $pid->toInt(),

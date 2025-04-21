@@ -8,7 +8,6 @@ use Innmind\Server\Control\{
     Server\Command,
     Server\Signal,
     Server\Process\Pid,
-    ScriptFailed,
 };
 use Innmind\Url\Authority\{
     Host,
@@ -16,7 +15,6 @@ use Innmind\Url\Authority\{
     UserInformation\User,
 };
 use Innmind\Immutable\{
-    Either,
     Attempt,
     SideEffect,
 };
@@ -70,17 +68,14 @@ final class Remote implements Processes
     }
 
     #[\Override]
-    public function kill(Pid $pid, Signal $signal): Either
+    public function kill(Pid $pid, Signal $signal): Attempt
     {
-        $process = $this->execute(
-            $command = Command::foreground('kill')
-                ->withShortOption($signal->toString())
-                ->withArgument($pid->toString()),
-        )->unwrap();
-
-        return $process
-            ->wait()
-            ->map(static fn() => new SideEffect)
-            ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
+        return $this
+            ->execute(
+                $command = Command::foreground('kill')
+                    ->withShortOption($signal->toString())
+                    ->withArgument($pid->toString()),
+            )
+            ->map(static fn() => SideEffect::identity());
     }
 }

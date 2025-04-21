@@ -182,7 +182,7 @@ class RemoteTest extends TestCase
                         return $this->processes->execute(Command::foreground('echo'));
                     }
 
-                    public function kill(Pid $pid, Signal $signal): Either
+                    public function kill(Pid $pid, Signal $signal): Attempt
                     {
                     }
                 };

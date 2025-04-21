@@ -18,7 +18,6 @@ use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\IO\IO;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Either,
     Attempt,
     SideEffect,
 };
@@ -243,7 +242,7 @@ class UnixTest extends TestCase
                 }));
             }
 
-            public function kill(Pid $pid, Signal $signal): Either
+            public function kill(Pid $pid, Signal $signal): Attempt
             {
             }
         };

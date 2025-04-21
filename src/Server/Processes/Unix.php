@@ -9,7 +9,7 @@ use Innmind\Server\Control\{
     Server\Process,
     Server\Process\Pid,
     Server\Signal,
-    ScriptFailed,
+    Exception\ProcessFailed,
 };
 use Innmind\TimeContinuum\{
     Clock,
@@ -18,7 +18,6 @@ use Innmind\TimeContinuum\{
 use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 use Innmind\Immutable\{
-    Either,
     Attempt,
     SideEffect,
 };
@@ -68,17 +67,17 @@ final class Unix implements Processes
     }
 
     #[\Override]
-    public function kill(Pid $pid, Signal $signal): Either
+    public function kill(Pid $pid, Signal $signal): Attempt
     {
-        $process = $this->execute(
-            $command = Command::foreground('kill')
-                ->withShortOption($signal->toString())
-                ->withArgument($pid->toString()),
-        )->unwrap();
-
-        return $process
-            ->wait()
-            ->map(static fn() => new SideEffect)
-            ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
+        return $this
+            ->execute(
+                $command = Command::foreground('kill')
+                    ->withShortOption($signal->toString())
+                    ->withArgument($pid->toString()),
+            )
+            ->flatMap(static fn($process) => $process->wait()->match(
+                static fn() => Attempt::result(SideEffect::identity()),
+                static fn($e) => Attempt::error(new ProcessFailed($e)),
+            ));
     }
 }
