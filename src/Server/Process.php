@@ -10,14 +10,39 @@ use Innmind\Server\Control\Server\Process\{
     Failed,
     Signaled,
     Success,
+    Started,
+    Foreground,
+    Background,
 };
 use Innmind\Immutable\{
+    Sequence,
     Maybe,
     Either,
 };
 
-interface Process
+final class Process
 {
+    private function __construct(
+        private Foreground|Background $implementation,
+    ) {
+    }
+
+    /**
+     * @internal
+     */
+    public static function foreground(Started $started, bool $streamOutput = false): self
+    {
+        return new self(new Foreground($started, $streamOutput));
+    }
+
+    /**
+     * @internal
+     */
+    public static function background(Started $started): self
+    {
+        return new self(new Background($started));
+    }
+
     /**
      * Depending on when you access this information the pid may or may not be
      * accessible
@@ -26,8 +51,18 @@ interface Process
      *
      * @return Maybe<Pid>
      */
-    public function pid(): Maybe;
-    public function output(): Output;
+    public function pid(): Maybe
+    {
+        return $this->implementation->pid();
+    }
+
+    /**
+     * @return Sequence<Output\Chunk>
+     */
+    public function output(): Sequence
+    {
+        return $this->implementation->output();
+    }
 
     /**
      * This method returns a Success either when a foreground process returned a
@@ -37,5 +72,8 @@ interface Process
      *
      * @return Either<TimedOut|Failed|Signaled, Success>
      */
-    public function wait(): Either;
+    public function wait(): Either
+    {
+        return $this->implementation->wait();
+    }
 }

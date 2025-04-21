@@ -7,9 +7,7 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Command,
     Server\Signal,
-    Server\Process,
     Server\Process\Pid,
-    ScriptFailed,
 };
 use Innmind\Url\Authority\{
     Host,
@@ -17,7 +15,7 @@ use Innmind\Url\Authority\{
     UserInformation\User,
 };
 use Innmind\Immutable\{
-    Either,
+    Attempt,
     SideEffect,
 };
 
@@ -26,11 +24,14 @@ final class Remote implements Processes
     private Processes $processes;
     private Command $command;
 
+    /**
+     * @internal
+     */
     public function __construct(
         Processes $processes,
         User $user,
         Host $host,
-        Port $port = null,
+        ?Port $port = null,
     ) {
         $this->processes = $processes;
         $command = Command::foreground('ssh');
@@ -46,7 +47,8 @@ final class Remote implements Processes
         ));
     }
 
-    public function execute(Command $command): Process
+    #[\Override]
+    public function execute(Command $command): Attempt
     {
         /** @psalm-suppress ArgumentTypeCoercion Due psalm not understing that $bash cannot be empty */
         $command = $command
@@ -68,17 +70,15 @@ final class Remote implements Processes
             );
     }
 
-    public function kill(Pid $pid, Signal $signal): Either
+    #[\Override]
+    public function kill(Pid $pid, Signal $signal): Attempt
     {
-        $process = $this->execute(
-            $command = Command::foreground('kill')
-                ->withShortOption($signal->toString())
-                ->withArgument($pid->toString()),
-        );
-
-        return $process
-            ->wait()
-            ->map(static fn() => new SideEffect)
-            ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
+        return $this
+            ->execute(
+                $command = Command::foreground('kill')
+                    ->withShortOption($signal->toString())
+                    ->withArgument($pid->toString()),
+            )
+            ->map(static fn() => SideEffect::identity());
     }
 }

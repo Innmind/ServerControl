@@ -9,26 +9,21 @@ namespace Innmind\Server\Control\Server\Command;
  */
 final class Option implements Parameter
 {
-    private bool $long;
-    /** @var non-empty-string */
-    private string $key;
-    private ?string $value;
-
     /**
      * @param non-empty-string $key
      */
-    private function __construct(bool $long, string $key, string $value = null)
-    {
-        $this->long = $long;
-        $this->key = $key;
-        $this->value = $value;
+    private function __construct(
+        private bool $long,
+        private string $key,
+        private ?string $value = null,
+    ) {
     }
 
     /**
      * @psalm-pure
      * @param non-empty-string $key
      */
-    public static function long(string $key, string $value = null): self
+    public static function long(string $key, ?string $value = null): self
     {
         return new self(true, $key, $value);
     }
@@ -37,11 +32,12 @@ final class Option implements Parameter
      * @psalm-pure
      * @param non-empty-string $key
      */
-    public static function short(string $key, string $value = null): self
+    public static function short(string $key, ?string $value = null): self
     {
         return new self(false, $key, $value);
     }
 
+    #[\Override]
     public function toString(): string
     {
         if ($this->long) {

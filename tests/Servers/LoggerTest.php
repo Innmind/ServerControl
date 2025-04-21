@@ -7,46 +7,43 @@ use Innmind\Server\Control\{
     Servers\Logger,
     Server,
     Server\Processes,
-    Server\Process,
+    Server\Processes\Unix,
+    Server\Process\Pid,
     Server\Command,
     Server\Volumes,
+    Server\Signal,
 };
+use Innmind\TimeContinuum\Clock;
+use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\IO\IO;
 use Innmind\Immutable\{
-    Either,
+    Attempt,
     SideEffect,
 };
-use Psr\Log\{
-    LoggerInterface,
-    NullLogger,
-};
-use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class LoggerTest extends TestCase
 {
+    #[Group('ci')]
+    #[Group('local')]
     public function testInterface()
     {
         $this->assertInstanceOf(
             Server::class,
             Logger::psr(
-                $this->createMock(Server::class),
-                $this->createMock(LoggerInterface::class),
+                $this->server(),
+                new NullLogger,
             ),
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testProcesses()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function(Command $command): bool {
-                return $command->toString() === 'ls';
-            }));
+        $server = $this->server('ls');
 
         $logger = Logger::psr(
             $server,
@@ -60,104 +57,34 @@ class LoggerTest extends TestCase
         $logger->processes()->execute(Command::foreground('ls'));
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testVolumes()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $which1 = $this->createMock(Process::class);
-        $which1
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $which2 = $this->createMock(Process::class);
-        $which2
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function(Command $command) use ($matcher, $which1, $which2) {
-                match ($matcher->numberOfInvocations()) {
-                    1 => $this->assertSame(
-                        'which diskutil',
-                        $command->toString(),
-                    ),
-                    2 => $this->assertSame(
-                        "diskutil 'unmount' '/dev'",
-                        $command->toString(),
-                    ),
-                };
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $which1,
-                    2 => $which2,
-                };
-            });
+        $server = $this->server('which diskutil', "diskutil 'unmount' '/dev'");
 
         $logger = Logger::psr(
             $server,
-            $log = $this->createMock(LoggerInterface::class),
+            new NullLogger,
         );
-        $log
-            ->expects($matcher = $this->atLeast(1))
-            ->method('info')
-            ->willReturnCallback(function($message, $context) use ($matcher) {
-                if ($matcher->numberOfInvocations() === 1) {
-                    $this->assertSame('About to execute a command', $message);
-                    $this->assertSame(
-                        [
-                            'command' => 'which diskutil',
-                            'workingDirectory' => null,
-                        ],
-                        $context,
-                    );
-                }
-            });
 
         $this->assertInstanceOf(
             Volumes::class,
             $logger->volumes(),
         );
-        $logger->volumes()->unmount(new Volumes\Name('/dev'));
+        $logger->volumes()->unmount(Volumes\Name::of('/dev'));
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testReboot()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function(Command $command): bool {
-                return $command->toString() === 'sudo shutdown -r now';
-            }))
-            ->willReturn($shutdown = $this->createMock(Process::class));
-        $shutdown
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
+        $server = $this->server('sudo shutdown -r now');
 
         $logger = Logger::psr(
             $server,
-            $log = $this->createMock(LoggerInterface::class),
+            new NullLogger,
         );
-        $log
-            ->expects($this->once())
-            ->method('info')
-            ->with(
-                'About to execute a command',
-                [
-                    'command' => 'sudo shutdown -r now',
-                    'workingDirectory' => null,
-                ],
-            );
 
         $this->assertInstanceOf(
             SideEffect::class,
@@ -168,39 +95,16 @@ class LoggerTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testShutdown()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function(Command $command): bool {
-                return $command->toString() === 'sudo shutdown -h now';
-            }))
-            ->willReturn($shutdown = $this->createMock(Process::class));
-        $shutdown
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
+        $server = $this->server('sudo shutdown -h now');
 
         $logger = Logger::psr(
             $server,
-            $log = $this->createMock(LoggerInterface::class),
+            new NullLogger,
         );
-        $log
-            ->expects($this->once())
-            ->method('info')
-            ->with(
-                'About to execute a command',
-                [
-                    'command' => 'sudo shutdown -h now',
-                    'workingDirectory' => null,
-                ],
-            );
 
         $this->assertInstanceOf(
             SideEffect::class,
@@ -208,6 +112,69 @@ class LoggerTest extends TestCase
                 static fn($sideEffect) => $sideEffect,
                 static fn() => null,
             ),
+        );
+    }
+
+    private function server(string ...$commands): Server
+    {
+        return new class($this->processes(), $this, $commands) implements Server {
+            private $inner;
+
+            public function __construct(
+                private $processes,
+                private $test,
+                private $commands,
+            ) {
+            }
+
+            public function processes(): Processes
+            {
+                return $this->inner ??= new class($this->processes, $this->test, $this->commands) implements Processes {
+                    public function __construct(
+                        private $processes,
+                        private $test,
+                        private $commands,
+                    ) {
+                    }
+
+                    public function execute(Command $command): Attempt
+                    {
+                        $expected = \array_shift($this->commands);
+                        $this->test->assertNotNull($expected);
+                        $this->test->assertSame(
+                            $expected,
+                            $command->toString(),
+                        );
+
+                        return $this->processes->execute(Command::foreground('echo'));
+                    }
+
+                    public function kill(Pid $pid, Signal $signal): Attempt
+                    {
+                    }
+                };
+            }
+
+            public function volumes(): Volumes
+            {
+            }
+
+            public function reboot(): Attempt
+            {
+            }
+
+            public function shutdown(): Attempt
+            {
+            }
+        };
+    }
+
+    private function processes(): Unix
+    {
+        return Unix::of(
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
     }
 }

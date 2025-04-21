@@ -8,84 +8,83 @@ use Innmind\Server\Control\{
     Server\Command,
     Server\Process,
     Server\Process\Pid,
-    Server\Process\Foreground,
-    Server\Process\Background,
     Server\Signal,
-    ScriptFailed,
+    Exception\ProcessFailed,
 };
 use Innmind\TimeContinuum\{
     Clock,
     Period,
-    Earth\Period\Second,
 };
 use Innmind\TimeWarp\Halt;
-use Innmind\Stream\Capabilities;
+use Innmind\IO\IO;
 use Innmind\Immutable\{
-    Either,
+    Attempt,
     SideEffect,
 };
 
 final class Unix implements Processes
 {
-    private Clock $clock;
-    private Halt $halt;
-    private Capabilities $capabilities;
-    private Period $grace;
-
     private function __construct(
-        Clock $clock,
-        Capabilities $capabilities,
-        Halt $halt,
-        Period $grace,
+        private Clock $clock,
+        private IO $io,
+        private Halt $halt,
+        private Period $grace,
     ) {
-        $this->clock = $clock;
-        $this->capabilities = $capabilities;
-        $this->halt = $halt;
-        $this->grace = $grace;
     }
 
+    /**
+     * @internal
+     */
     public static function of(
         Clock $clock,
-        Capabilities $capabilities,
+        IO $io,
         Halt $halt,
-        Period $grace = null,
+        ?Period $grace = null,
     ): self {
         return new self(
             $clock,
-            $capabilities,
+            $io,
             $halt,
-            $grace ?? new Second(1),
+            $grace ?? Period::second(1),
         );
     }
 
-    public function execute(Command $command): Process
+    #[\Override]
+    public function execute(Command $command): Attempt
     {
-        $process = new Process\Unix(
-            $this->clock,
-            $this->capabilities,
-            $this->halt,
-            $this->grace,
-            $command,
-        );
+        return Attempt::of(function() use ($command) {
+            $process = new Process\Unix(
+                $this->clock,
+                $this->io,
+                $this->halt,
+                $this->grace,
+                $command,
+            );
 
-        if ($command->toBeRunInBackground()) {
-            return new Background($process());
-        }
+            if ($command->toBeRunInBackground()) {
+                return Process::background($process());
+            }
 
-        return new Foreground($process(), $command->outputToBeStreamed());
+            return Process::foreground($process(), $command->outputToBeStreamed());
+        });
     }
 
-    public function kill(Pid $pid, Signal $signal): Either
+    #[\Override]
+    public function kill(Pid $pid, Signal $signal): Attempt
     {
-        $process = $this->execute(
-            $command = Command::foreground('kill')
-                ->withShortOption($signal->toString())
-                ->withArgument($pid->toString()),
-        );
-
-        return $process
-            ->wait()
-            ->map(static fn() => new SideEffect)
-            ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
+        return $this
+            ->execute(
+                $command = Command::foreground('kill')
+                    ->withShortOption($signal->toString())
+                    ->withArgument($pid->toString()),
+            )
+            ->flatMap(static fn($process) => $process->wait()->match(
+                static fn() => Attempt::result(SideEffect::identity()),
+                static fn($e) => Attempt::error(new ProcessFailed(
+                    $command,
+                    $process,
+                    $e,
+                )),
+            ));
     }
 }

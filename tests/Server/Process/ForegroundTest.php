@@ -4,52 +4,55 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\Server\{
-    Process\Foreground,
-    Process\Unix,
     Process,
-    Process\Output,
+    Process\Unix,
     Process\Output\Type,
     Process\Failed,
     Process\Success,
     Command,
 };
-use Innmind\TimeContinuum\Earth\{
+use Innmind\TimeContinuum\{
     Clock,
-    Period\Second,
+    Period,
 };
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Streams;
-use Innmind\Immutable\Str;
-use PHPUnit\Framework\TestCase;
+use Innmind\IO\IO;
+use Innmind\Immutable\Monoid\Concat;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class ForegroundTest extends TestCase
 {
+    #[Group('ci')]
+    #[Group('local')]
     public function testInterface()
     {
         $ps = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('ps'),
         );
 
         $this->assertInstanceOf(
             Process::class,
-            new Foreground($ps()),
+            Process::foreground($ps()),
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testPid()
     {
         $ps = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('ps'),
         );
-        $process = new Foreground($ps());
+        $process = Process::foreground($ps());
 
         $this->assertGreaterThanOrEqual(
             2,
@@ -60,47 +63,57 @@ class ForegroundTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testOutput()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = new Foreground($slow());
+        $process = Process::foreground($slow());
 
-        $this->assertInstanceOf(Output::class, $process->output());
         $start = \time();
         $count = 0;
         $process
             ->output()
-            ->foreach(function(Str $data, Type $type) use ($start, &$count) {
-                $this->assertSame($count."\n", $data->toString());
+            ->foreach(function($chunk) use ($start, &$count) {
+                $this->assertSame($count."\n", $chunk->data()->toString());
                 $this->assertEquals(
-                    (int) $data->toString() % 2 === 0 ? Type::output : Type::error,
-                    $type,
+                    (int) $chunk->data()->toString() % 2 === 0 ? Type::output : Type::error,
+                    $chunk->type(),
                 );
                 $this->assertTrue((\time() - $start) >= (1 + $count));
                 ++$count;
             });
-        $this->assertSame("0\n1\n2\n3\n4\n5\n", $process->output()->toString());
+        $this->assertSame(
+            "0\n1\n2\n3\n4\n5\n",
+            $process
+                ->output()
+                ->map(static fn($chunk) => $chunk->data())
+                ->fold(new Concat)
+                ->toString(),
+        );
         $this->assertSame(6, $count);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testExitCodeForFailingProcess()
     {
         $fail = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php fixtures/fails.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = new Foreground($fail());
+        $process = Process::foreground($fail());
 
         \sleep(1);
 
@@ -129,17 +142,19 @@ class ForegroundTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWait()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = new Foreground($slow());
+        $process = Process::foreground($slow());
         $return = $process->wait();
 
         $this->assertInstanceOf(
@@ -158,17 +173,19 @@ class ForegroundTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testExitStatusIsKeptInMemory()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = new Foreground($slow());
+        $process = Process::foreground($slow());
 
         $this->assertSame(
             $process->wait(),
@@ -176,18 +193,20 @@ class ForegroundTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testExitStatusIsAvailableAfterIteratingOverTheOutput()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = new Foreground($slow());
-        $process->output()->toString();
+        $process = Process::foreground($slow());
+        $process->output()->memoize();
 
         $this->assertInstanceOf(
             Success::class,
@@ -200,17 +219,19 @@ class ForegroundTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testOutputIsAvailableAfterWaitingForExitStatus()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = new Foreground($slow());
+        $process = Process::foreground($slow());
         $this->assertInstanceOf(
             Success::class,
             $process
@@ -220,6 +241,13 @@ class ForegroundTest extends TestCase
                     static fn() => null,
                 ),
         );
-        $this->assertSame("0\n1\n2\n3\n4\n5\n", $process->output()->toString());
+        $this->assertSame(
+            "0\n1\n2\n3\n4\n5\n",
+            $process
+                ->output()
+                ->map(static fn($chunk) => $chunk->data())
+                ->fold(new Concat)
+                ->toString(),
+        );
     }
 }

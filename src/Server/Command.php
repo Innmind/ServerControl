@@ -10,6 +10,7 @@ use Innmind\Server\Control\{
     Server\Command\Append,
     Server\Command\Pipe,
 };
+use Innmind\TimeContinuum\Period;
 use Innmind\Filesystem\File\Content;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
@@ -37,7 +38,7 @@ final class Command
     /** @var Maybe<Append>|Maybe<Overwrite> */
     private Maybe $redirection;
     private bool $background = false;
-    /** @var Maybe<Second> */
+    /** @var Maybe<Period> */
     private Maybe $timeout;
     private bool $streamOutput = false;
 
@@ -58,7 +59,7 @@ final class Command
         $this->input = Maybe::nothing();
         /** @var Maybe<Append>|Maybe<Overwrite> */
         $this->redirection = Maybe::nothing();
-        /** @var Maybe<Second> */
+        /** @var Maybe<Period> */
         $this->timeout = Maybe::nothing();
     }
 
@@ -102,7 +103,7 @@ final class Command
     /**
      * @param non-empty-string $key
      */
-    public function withOption(string $key, string $value = null): self
+    public function withOption(string $key, ?string $value = null): self
     {
         $self = clone $this;
         $self->parameters = ($this->parameters)(Option::long($key, $value));
@@ -113,7 +114,7 @@ final class Command
     /**
      * @param non-empty-string $key
      */
-    public function withShortOption(string $key, string $value = null): self
+    public function withShortOption(string $key, ?string $value = null): self
     {
         $self = clone $this;
         $self->parameters = ($this->parameters)(Option::short($key, $value));
@@ -194,10 +195,10 @@ final class Command
         return $self;
     }
 
-    public function timeoutAfter(Second $seconds): self
+    public function timeoutAfter(Period $timeout): self
     {
         $self = clone $this;
-        $self->timeout = Maybe::just($seconds);
+        $self->timeout = Maybe::just($timeout);
 
         return $self;
     }
@@ -221,6 +222,8 @@ final class Command
     }
 
     /**
+     * @internal
+     *
      * @return Map<string, string>
      */
     public function environment(): Map
@@ -229,6 +232,8 @@ final class Command
     }
 
     /**
+     * @internal
+     *
      * @return Maybe<Path>
      */
     public function workingDirectory(): Maybe
@@ -237,6 +242,8 @@ final class Command
     }
 
     /**
+     * @internal
+     *
      * @return Maybe<Content>
      */
     public function input(): Maybe
@@ -244,25 +251,35 @@ final class Command
         return $this->input;
     }
 
+    /**
+     * @internal
+     */
     public function toBeRunInBackground(): bool
     {
         return $this->background;
     }
 
     /**
-     * @return Maybe<Second>
+     * @internal
+     *
+     * @return Maybe<Period>
      */
     public function timeout(): Maybe
     {
         return $this->timeout;
     }
 
+    /**
+     * @internal
+     */
     public function outputToBeStreamed(): bool
     {
         return $this->streamOutput;
     }
 
     /**
+     * @internal
+     *
      * @return non-empty-string
      */
     public function toString(): string

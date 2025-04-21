@@ -1,5 +1,55 @@
 # Changelog
 
+## 6.0.0 - 2025-04-21
+
+### Changed
+
+- `Innmind\Server\Control\Server\Process::output()` now returns `Innmind\Immutable\Sequence<Innmind\Server\Control\Server\Process\Output\Chunk>`
+- `Innmind\Server\Control\Server\Process` is now a final class, old implementations are now declared internal
+- Requires `innmind/immutable:~5.12`
+- Requires `innmind/time-continuum:~4.1`
+- Requires `innmind/time-warp:~4.0`
+- Requires `innmind/filesystem:~8.0`
+- The following methods now return an `Innmind\Immutable\Attempt<Innmind\Immutable\SideEffect>`
+    - `Innmind\Server\Control\Server::reboot()`
+    - `Innmind\Server\Control\Server::shutdown()`
+    - `Innmind\Server\Control\Server::shutdown()`
+    - `Innmind\Server\Control\Server\Script::__invoke()`
+    - `Innmind\Server\Control\Server\Volumes::unmount()`
+    - `Innmind\Server\Control\Server\Volumes::unmount()`
+    - `Innmind\Server\Control\Server\Processes::kill()`
+- `Innmind\Server\Control\Server\Processes::execute()` now return an `Innmind\Immutable\Attempt<Innmind\Server\Control\Server\Process>`
+- The following methods are now internal:
+    - `Innmind\Server\Control\Server\Process\ExitCode::__construct()`
+    - `Innmind\Server\Control\Server\Process\Pid::__construct()`
+    - `Innmind\Server\Control\Server\Processes\Remote::__construct()`
+    - `Innmind\Server\Control\Server\Processes\Unix::of()`
+    - `Innmind\Server\Control\Server\Volumes\Unix::__construct()`
+    - `Innmind\Server\Control\Server\Command::environment()`
+    - `Innmind\Server\Control\Server\Command::workingDirectory()`
+    - `Innmind\Server\Control\Server\Command::input()`
+    - `Innmind\Server\Control\Server\Command::toBeRunInBackground()`
+    - `Innmind\Server\Control\Server\Command::timeout()`
+    - `Innmind\Server\Control\Server\Command::outputToBeStreamed()`
+    - `Innmind\Server\Control\Server\Command::toString()`
+    - `Innmind\Server\Control\Servers\Unix::of()`
+- `Innmind\Server\Control\Server\Script` constructor is now private, use `::of()` named constructor which now expects instances of `Command`
+- `Innmind\Server\Control\Server\Volumes\Name` constructor is now private, use `::of()` named constructor
+- `Innmind\Server\Control\Servers\Remote` constructor is now private, use `::of()` named constructor
+- `Innmind\Server\Control\Server\Process\Command::timeoutAfter()` now expects a `Innmind\TimeContinuum\Period`
+
+### Removed
+
+- `Innmind\Server\Control\Server\Process\Output`
+- A process internal state is now longer logged
+- `Innmind\Server\Control\ScriptFailed`
+- `Innmind\Server\Control\Server\Second`
+
+### Fixed
+
+- PHP `8.4` deprecations
+- `Innmind\Server\Control\Server\Script` wasn't returning a `SideEffect`
+
 ## 5.2.3 - 2024-09-18
 
 ### Fixed

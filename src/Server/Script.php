@@ -5,56 +5,51 @@ namespace Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\{
     Server,
-    ScriptFailed,
+    Exception\ProcessFailed,
 };
 use Innmind\Immutable\{
     Sequence,
-    Either,
+    Attempt,
     SideEffect,
 };
 
 final class Script
 {
-    /** @var Sequence<Command> */
-    private Sequence $commands;
-
-    /**
-     * @no-named-arguments
-     */
-    public function __construct(Command ...$commands)
-    {
-        $this->commands = Sequence::of(...$commands);
+    /** @param Sequence<Command> $commands */
+    private function __construct(
+        private Sequence $commands,
+    ) {
     }
 
     /**
-     * @return Either<ScriptFailed, SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function __invoke(Server $server): Either
+    public function __invoke(Server $server): Attempt
     {
         $processes = $server->processes();
 
-        /** @var Either<ScriptFailed, SideEffect> */
-        return $this->commands->reduce(
-            Either::right(new SideEffect),
-            static fn(Either $success, $command) => $success->flatMap(static function() use ($command, $processes) {
-                $process = $processes->execute($command);
-
-                return $process
-                    ->wait()
-                    ->leftMap(static fn($e) => new ScriptFailed($command, $process, $e));
-            }),
-        );
+        return $this
+            ->commands
+            ->sink(SideEffect::identity())
+            ->attempt(
+                static fn($_, $command) => $processes
+                    ->execute($command)
+                    ->flatMap(static fn($process) => $process->wait()->match(
+                        static fn() => Attempt::result(SideEffect::identity()),
+                        static fn($e) => Attempt::error(new ProcessFailed(
+                            $command,
+                            $process,
+                            $e,
+                        )),
+                    )),
+            );
     }
 
     /**
      * @no-named-arguments
-     * @param non-empty-string $commands
      */
-    public static function of(string ...$commands): self
+    public static function of(Command ...$commands): self
     {
-        return new self(...\array_map(
-            static fn(string $command): Command => Command::foreground($command),
-            $commands,
-        ));
+        return new self(Sequence::of(...$commands));
     }
 }

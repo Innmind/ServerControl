@@ -6,14 +6,17 @@ namespace Innmind\Server\Control\Server\Process;
 use Innmind\Server\Control\Server\Process;
 use Innmind\Immutable\{
     Sequence,
-    Str,
     Maybe,
     Either,
 };
 
-final class Background implements Process
+/**
+ * @internal
+ */
+final class Background
 {
-    private Output $output;
+    /** @var Sequence<Output\Chunk> */
+    private Sequence $output;
 
     public function __construct(Started $process)
     {
@@ -21,9 +24,7 @@ final class Background implements Process
         // process will be killed
         // this also allows to send any input to the stream
         $process->output()->memoize();
-        /** @var Sequence<array{0: Str, 1: Output\Type}> */
-        $output = Sequence::of();
-        $this->output = new Output\Output($output);
+        $this->output = Sequence::of();
 
         // the pid returned by `$process->pid()` is the one for the "foreground"
         // process that starts the background one, the real pid (the one we
@@ -34,17 +35,26 @@ final class Background implements Process
         // the background pid
     }
 
+    /**
+     * @return Maybe<Pid>
+     */
     public function pid(): Maybe
     {
         /** @var Maybe<Pid> */
         return Maybe::nothing();
     }
 
-    public function output(): Output
+    /**
+     * @return Sequence<Output\Chunk>
+     */
+    public function output(): Sequence
     {
         return $this->output;
     }
 
+    /**
+     * @return Either<TimedOut|Failed|Signaled, Success>
+     */
     public function wait(): Either
     {
         return Either::right(new Success($this->output));

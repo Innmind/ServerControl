@@ -8,38 +8,47 @@ use Innmind\Server\Control\{
     Server,
     Exception\UnsupportedOperatingSystem
 };
-use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Streams;
-use PHPUnit\Framework\TestCase;
+use Innmind\IO\IO;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class ServerFactoryTest extends TestCase
 {
+    #[Group('ci')]
+    #[Group('local')]
     public function testMakeUnix()
     {
         if (!\in_array(\PHP_OS, ['Darwin', 'Linux'], true)) {
-            $this->markTestSkipped();
+            $this->assertTrue(true);
+
+            return;
         }
 
         $this->assertInstanceOf(Server::class, ServerFactory::build(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         ));
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testThrowWhenUnsupportedOperatingSystem()
     {
         if (\in_array(\PHP_OS, ['Darwin', 'Linux'], true)) {
-            $this->markTestSkipped();
+            $this->assertTrue(true);
+
+            return;
         }
 
         $this->expectException(UnsupportedOperatingSystem::class);
 
         ServerFactory::build(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
         );
     }
 }

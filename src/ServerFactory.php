@@ -12,7 +12,7 @@ use Innmind\TimeContinuum\{
     Period,
 };
 use Innmind\TimeWarp\Halt;
-use Innmind\Stream\Capabilities;
+use Innmind\IO\IO;
 
 final class ServerFactory
 {
@@ -21,14 +21,14 @@ final class ServerFactory
      */
     public static function build(
         Clock $clock,
-        Capabilities $capabilities,
+        IO $io,
         Halt $halt,
-        Period $grace = null,
+        ?Period $grace = null,
     ): Server {
         switch (\PHP_OS) {
             case 'Darwin':
             case 'Linux':
-                return Unix::of($clock, $capabilities, $halt, $grace);
+                return Unix::of($clock, $io, $halt, $grace);
         }
 
         throw new UnsupportedOperatingSystem;

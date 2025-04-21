@@ -3,25 +3,22 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server;
 
-use Innmind\Server\Control\{
-    Server\Volumes\Name,
-    ScriptFailed,
-};
+use Innmind\Server\Control\Server\Volumes\Name;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Either,
+    Attempt,
     SideEffect,
 };
 
 interface Volumes
 {
     /**
-     * @return Either<ScriptFailed, SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function mount(Name $name, Path $mountpoint): Either;
+    public function mount(Name $name, Path $mountpoint): Attempt;
 
     /**
-     * @return Either<ScriptFailed, SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function unmount(Name $name): Either;
+    public function unmount(Name $name): Attempt;
 }

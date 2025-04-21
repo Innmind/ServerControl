@@ -7,23 +7,17 @@ use Innmind\Server\Control\Server\{
     Processes,
     Command,
     Signal,
-    Process,
     Process\Pid,
 };
-use Innmind\Immutable\Either;
+use Innmind\Immutable\Attempt;
 use Psr\Log\LoggerInterface;
 
 final class Logger implements Processes
 {
-    private Processes $processes;
-    private LoggerInterface $logger;
-
     private function __construct(
-        Processes $processes,
-        LoggerInterface $logger,
+        private Processes $processes,
+        private LoggerInterface $logger,
     ) {
-        $this->processes = $processes;
-        $this->logger = $logger;
     }
 
     public static function psr(Processes $processes, LoggerInterface $logger): self
@@ -31,7 +25,8 @@ final class Logger implements Processes
         return new self($processes, $logger);
     }
 
-    public function execute(Command $command): Process
+    #[\Override]
+    public function execute(Command $command): Attempt
     {
         $this->logger->info('About to execute a command', [
             'command' => $command->toString(),
@@ -41,14 +36,11 @@ final class Logger implements Processes
             ),
         ]);
 
-        return Process\Logger::psr(
-            $this->processes->execute($command),
-            $command,
-            $this->logger,
-        );
+        return $this->processes->execute($command);
     }
 
-    public function kill(Pid $pid, Signal $signal): Either
+    #[\Override]
+    public function kill(Pid $pid, Signal $signal): Attempt
     {
         $this->logger->info('About to kill a process', [
             'pid' => $pid->toInt(),

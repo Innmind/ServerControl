@@ -8,7 +8,7 @@ use Innmind\Server\Control\{
     Server\Volumes,
 };
 use Innmind\Immutable\{
-    Either,
+    Attempt,
     SideEffect,
 };
 
@@ -18,12 +18,12 @@ interface Server
     public function volumes(): Volumes;
 
     /**
-     * @return Either<ScriptFailed, SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function reboot(): Either;
+    public function reboot(): Attempt;
 
     /**
-     * @return Either<ScriptFailed, SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function shutdown(): Either;
+    public function shutdown(): Attempt;
 }

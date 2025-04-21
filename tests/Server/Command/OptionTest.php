@@ -4,10 +4,13 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server\Command;
 
 use Innmind\Server\Control\Server\Command\Option;
-use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class OptionTest extends TestCase
 {
+    #[Group('ci')]
+    #[Group('local')]
     public function testShort()
     {
         $option = Option::short('e');
@@ -21,6 +24,8 @@ class OptionTest extends TestCase
         $this->assertSame("'-e' 'dev'", $option->toString());
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testLong()
     {
         $option = Option::long('env');

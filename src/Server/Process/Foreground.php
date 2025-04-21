@@ -15,14 +15,18 @@ use Innmind\Immutable\{
     Predicate\Instance,
 };
 
-final class Foreground implements Process
+/**
+ * @internal
+ */
+final class Foreground
 {
     private Started $process;
-    private Output $output;
+    /** @var Sequence<Chunk> */
+    private Sequence $output;
     /** @var ?Either<Failed|Signaled|TimedOut, Success> */
     private ?Either $status = null;
 
-    public function __construct(Started $process, bool $streamOutput = false)
+    public function __construct(Started $process, bool $streamOutput)
     {
         $this->process = $process;
         $yieldOutput = function() use ($process): \Generator {
@@ -54,19 +58,28 @@ final class Foreground implements Process
             );
         }
 
-        $this->output = Output\Output::of($output);
+        $this->output = $output;
     }
 
+    /**
+     * @return Maybe<Pid>
+     */
     public function pid(): Maybe
     {
         return Maybe::of($this->process->pid());
     }
 
-    public function output(): Output
+    /**
+     * @return Sequence<Chunk>
+     */
+    public function output(): Sequence
     {
         return $this->output;
     }
 
+    /**
+     * @return Either<TimedOut|Failed|Signaled, Success>
+     */
     public function wait(): Either
     {
         if (\is_null($this->status)) {

@@ -7,14 +7,15 @@ use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Volumes,
+    Server\Command,
 };
 use Innmind\TimeContinuum\{
     Clock,
     Period,
 };
 use Innmind\TimeWarp\Halt;
-use Innmind\Stream\Capabilities;
-use Innmind\Immutable\Either;
+use Innmind\IO\IO;
+use Innmind\Immutable\Attempt;
 
 final class Unix implements Server
 {
@@ -23,45 +24,52 @@ final class Unix implements Server
 
     private function __construct(
         Clock $clock,
-        Capabilities $capabilities,
+        IO $io,
         Halt $halt,
-        Period $grace = null,
+        ?Period $grace = null,
     ) {
         $this->processes = Processes\Unix::of(
             $clock,
-            $capabilities,
+            $io,
             $halt,
             $grace,
         );
         $this->volumes = new Volumes\Unix($this->processes);
     }
 
+    /**
+     * @internal Use the factory instead
+     */
     public static function of(
         Clock $clock,
-        Capabilities $capabilities,
+        IO $io,
         Halt $halt,
-        Period $grace = null,
+        ?Period $grace = null,
     ): self {
-        return new self($clock, $capabilities, $halt, $grace);
+        return new self($clock, $io, $halt, $grace);
     }
 
+    #[\Override]
     public function processes(): Processes
     {
         return $this->processes;
     }
 
+    #[\Override]
     public function volumes(): Volumes
     {
         return $this->volumes;
     }
 
-    public function reboot(): Either
+    #[\Override]
+    public function reboot(): Attempt
     {
-        return Server\Script::of('sudo shutdown -r now')($this);
+        return Server\Script::of(Command::foreground('sudo shutdown -r now'))($this);
     }
 
-    public function shutdown(): Either
+    #[\Override]
+    public function shutdown(): Attempt
     {
-        return Server\Script::of('sudo shutdown -h now')($this);
+        return Server\Script::of(Command::foreground('sudo shutdown -h now'))($this);
     }
 }

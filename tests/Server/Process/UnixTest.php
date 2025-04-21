@@ -9,42 +9,39 @@ use Innmind\Server\Control\{
     Server\Process\Output\Type,
     Server\Process\ExitCode,
     Server\Command,
-    Server\Second as Timeout,
 };
 use Innmind\Filesystem\File\Content;
-use Innmind\TimeContinuum\Earth\{
+use Innmind\TimeContinuum\{
     Clock,
-    Period\Second,
+    Period,
 };
 use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Url\Path;
 use Innmind\IO\IO;
-use Innmind\Stream\{
-    Readable\Stream,
-    Streams,
-    Watch\Select,
-};
 use Innmind\Immutable\{
     SideEffect,
     Predicate\Instance,
 };
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
+use PHPUnit\Framework\Attributes\Group;
 
 class UnixTest extends TestCase
 {
     use BlackBox;
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testSimpleOutput()
     {
         $cat = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('echo')->withArgument('hello'),
         );
         $count = 0;
@@ -60,19 +57,22 @@ class UnixTest extends TestCase
         $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testOutput()
     {
         $this
             ->forAll(
-                Set\Strings::madeOf(Set\Chars::ascii()->filter(static fn($char) => $char !== '\\'))
+                Set::strings()
+                    ->madeOf(Set::strings()->chars()->ascii()->filter(static fn($char) => $char !== '\\'))
                     ->between(1, 126),
             )
             ->then(function($echo) {
                 $cat = new Unix(
-                    new Clock,
-                    Streams::fromAmbientAuthority(),
-                    new Usleep,
-                    new Second(1),
+                    Clock::live(),
+                    IO::fromAmbientAuthority(),
+                    Usleep::new(),
+                    Period::second(1),
                     Command::foreground('echo')->withArgument($echo),
                 );
                 $process = $cat();
@@ -87,13 +87,15 @@ class UnixTest extends TestCase
             });
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testSlowOutput()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
@@ -113,81 +115,89 @@ class UnixTest extends TestCase
         $this->assertSame("0\n1\n2\n3\n4\n5\n", $output);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testTimeoutSlowOutput()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
-                ->timeoutAfter(new Timeout(2))
+                ->timeoutAfter(Period::second(2))
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = $slow();
-        $count = 0;
-        $output = '';
-        $started = \microtime(true);
 
-        $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
+        $this
+            ->assert()
+            ->time(function() use ($slow) {
+                $process = $slow();
+                $count = 0;
+                $output = '';
+                $started = \microtime(true);
 
-        foreach ($process->output()->keep(Instance::of(Chunk::class))->toList() as $chunk) {
-            $output .= $chunk->data()->toString();
-            $this->assertSame($count % 2 === 0 ? Type::output : Type::error, $chunk->type());
-            ++$count;
-        }
+                $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
 
-        // depending on when occur the timeout of the stream_select we may end
-        // up right after the process outputed its second value
-        $this->assertThat(
-            $output,
-            $this->logicalOr(
-                $this->identicalTo("0\n"),
-                $this->identicalTo("0\n1\n"),
-            ),
-        );
-        // 3 because of the grace period
-        $this->assertEqualsWithDelta(3, \microtime(true) - $started, 0.5);
+                foreach ($process->output()->keep(Instance::of(Chunk::class))->toList() as $chunk) {
+                    $output .= $chunk->data()->toString();
+                    $this->assertSame($count % 2 === 0 ? Type::output : Type::error, $chunk->type());
+                    ++$count;
+                }
+
+                // depending on when occur the timeout of the stream_select we may end
+                // up right after the process outputed its second value
+                $this->assertContains($output, ["0\n", "0\n1\n"]);
+            })
+            ->inMoreThan()
+            ->seconds(2);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testTimeoutWaitSlowProcess()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
-                ->timeoutAfter(new Timeout(2))
+                ->timeoutAfter(Period::second(2))
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
-        $process = $slow();
-        $started = \microtime(true);
+        $this
+            ->assert()
+            ->time(function() use ($slow) {
+                $process = $slow();
 
-        $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
-        $e = $process
-            ->output()
-            ->last()
-            ->either()
-            ->flatMap(static fn($result) => $result)
-            ->match(
-                static fn() => null,
-                static fn($e) => $e,
-            );
-        $this->assertSame('timed-out', $e);
-        // 3 because of the grace period
-        $this->assertEqualsWithDelta(3, \microtime(true) - $started, 0.5);
+                $this->assertGreaterThanOrEqual(2, $process->pid()->toInt());
+                $e = $process
+                    ->output()
+                    ->last()
+                    ->either()
+                    ->flatMap(static fn($result) => $result)
+                    ->match(
+                        static fn() => null,
+                        static fn($e) => $e,
+                    );
+                $this->assertSame('timed-out', $e);
+            })
+            ->inMoreThan()
+            ->seconds(2);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWaitSuccess()
     {
         $cat = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('echo')->withArgument('hello'),
         );
 
@@ -204,13 +214,15 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(SideEffect::class, $value);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWaitFail()
     {
         $cat = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/fails.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
@@ -230,17 +242,19 @@ class UnixTest extends TestCase
         $this->assertSame(1, $value->toInt());
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWithInput()
     {
         $cat = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('cat')->withInput(Content::oneShot(
-                IO::of(static fn() => Select::waitForever())->readable()->wrap(
-                    Stream::of(\fopen('fixtures/symfony.log', 'r')),
-                ),
+                IO::fromAmbientAuthority()
+                    ->streams()
+                    ->acquire(\fopen('fixtures/symfony.log', 'r')),
             )),
         );
         $output = '';
@@ -255,19 +269,21 @@ class UnixTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testOverwrite()
     {
         @\unlink('test.log');
         $cat = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::foreground('cat')
                 ->withInput(Content::oneShot(
-                    IO::of(static fn() => Select::waitForever())->readable()->wrap(
-                        Stream::of(\fopen('fixtures/symfony.log', 'r')),
-                    ),
+                    IO::fromAmbientAuthority()
+                        ->streams()
+                        ->acquire(\fopen('fixtures/symfony.log', 'r')),
                 ))
                 ->overwrite(Path::of('test.log')),
         );

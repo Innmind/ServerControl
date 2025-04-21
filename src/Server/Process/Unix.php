@@ -12,31 +12,20 @@ use Innmind\TimeContinuum\{
     Period,
 };
 use Innmind\TimeWarp\Halt;
-use Innmind\Stream\Capabilities;
+use Innmind\IO\IO;
 
 /**
  * @internal
  */
 final class Unix
 {
-    private Clock $clock;
-    private Halt $halt;
-    private Capabilities $capabilities;
-    private Period $grace;
-    private Command $command;
-
     public function __construct(
-        Clock $clock,
-        Capabilities $capabilities,
-        Halt $halt,
-        Period $grace,
-        Command $command,
+        private Clock $clock,
+        private IO $io,
+        private Halt $halt,
+        private Period $grace,
+        private Command $command,
     ) {
-        $this->clock = $clock;
-        $this->capabilities = $capabilities;
-        $this->halt = $halt;
-        $this->grace = $grace;
-        $this->command = $command;
     }
 
     public function __invoke(): Started
@@ -76,7 +65,7 @@ final class Unix
         return new Started(
             $this->clock,
             $this->halt,
-            $this->capabilities,
+            $this->io,
             $this->grace,
             $start,
             $this->command->toBeRunInBackground(),

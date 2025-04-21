@@ -3,19 +3,23 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process;
 
+use Innmind\Immutable\Sequence;
+
 final class Success
 {
-    private Output $output;
-
     /**
      * @internal
+     * @param Sequence<Output\Chunk> $output
      */
-    public function __construct(Output $output)
-    {
-        $this->output = $output;
+    public function __construct(
+        private Sequence $output,
+    ) {
     }
 
-    public function output(): Output
+    /**
+     * @return Sequence<Output\Chunk>
+     */
+    public function output(): Sequence
     {
         return $this->output;
     }

@@ -4,49 +4,53 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\Server\{
-    Process\Background,
+    Process,
     Process\Unix,
     Process\Success,
-    Process,
-    Process\Output\Output,
     Command,
 };
-use Innmind\TimeContinuum\Earth\{
+use Innmind\TimeContinuum\{
     Clock,
-    Period\Second,
+    Period,
 };
 use Innmind\TimeWarp\Halt\Usleep;
-use Innmind\Stream\Streams;
-use PHPUnit\Framework\TestCase;
+use Innmind\IO\IO;
+use Innmind\Immutable\Monoid\Concat;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class BackgroundTest extends TestCase
 {
+    #[Group('ci')]
+    #[Group('local')]
     public function testInterface()
     {
         $process = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::background('ps'),
         );
 
         $this->assertInstanceOf(
             Process::class,
-            new Background($process()),
+            Process::background($process()),
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testPid()
     {
         $ps = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::background('ps'),
         );
-        $process = new Background($ps());
+        $process = Process::background($ps());
 
         $this->assertFalse($process->pid()->match(
             static fn() => true,
@@ -54,33 +58,43 @@ class BackgroundTest extends TestCase
         ));
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testOutput()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::background('php fixtures/slow.php'),
         );
-        $process = new Background($slow());
+        $process = Process::background($slow());
 
-        $this->assertInstanceOf(Output::class, $process->output());
         $start = \time();
-        $this->assertSame('', $process->output()->toString());
+        $this->assertSame(
+            '',
+            $process
+                ->output()
+                ->map(static fn($chunk) => $chunk->data())
+                ->fold(new Concat)
+                ->toString(),
+        );
         $this->assertTrue((\time() - $start) < 1);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWait()
     {
         $slow = new Unix(
-            new Clock,
-            Streams::fromAmbientAuthority(),
-            new Usleep,
-            new Second(1),
+            Clock::live(),
+            IO::fromAmbientAuthority(),
+            Usleep::new(),
+            Period::second(1),
             Command::background('php fixtures/slow.php'),
         );
-        $process = new Background($slow());
+        $process = Process::background($slow());
 
         $this->assertInstanceOf(
             Success::class,
