@@ -10,7 +10,10 @@ use Innmind\Immutable\{
     Either,
 };
 
-final class Background implements Process
+/**
+ * @internal
+ */
+final class Background
 {
     /** @var Sequence<Output\Chunk> */
     private Sequence $output;
@@ -32,20 +35,26 @@ final class Background implements Process
         // the background pid
     }
 
-    #[\Override]
+    /**
+     * @return Maybe<Pid>
+     */
     public function pid(): Maybe
     {
         /** @var Maybe<Pid> */
         return Maybe::nothing();
     }
 
-    #[\Override]
+    /**
+     * @return Sequence<Output\Chunk>
+     */
     public function output(): Sequence
     {
         return $this->output;
     }
 
-    #[\Override]
+    /**
+     * @return Either<TimedOut|Failed|Signaled, Success>
+     */
     public function wait(): Either
     {
         return Either::right(new Success($this->output));

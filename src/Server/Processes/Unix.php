@@ -8,8 +8,6 @@ use Innmind\Server\Control\{
     Server\Command,
     Server\Process,
     Server\Process\Pid,
-    Server\Process\Foreground,
-    Server\Process\Background,
     Server\Signal,
     ScriptFailed,
 };
@@ -70,10 +68,10 @@ final class Unix implements Processes
         );
 
         if ($command->toBeRunInBackground()) {
-            return new Background($process());
+            return Process::background($process());
         }
 
-        return new Foreground($process(), $command->outputToBeStreamed());
+        return Process::foreground($process(), $command->outputToBeStreamed());
     }
 
     #[\Override]

@@ -4,10 +4,9 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server\Process;
 
 use Innmind\Server\Control\Server\{
-    Process\Background,
+    Process,
     Process\Unix,
     Process\Success,
-    Process,
     Command,
 };
 use Innmind\TimeContinuum\Earth\{
@@ -33,7 +32,7 @@ class BackgroundTest extends TestCase
 
         $this->assertInstanceOf(
             Process::class,
-            new Background($process()),
+            Process::background($process()),
         );
     }
 
@@ -46,7 +45,7 @@ class BackgroundTest extends TestCase
             new Second(1),
             Command::background('ps'),
         );
-        $process = new Background($ps());
+        $process = Process::background($ps());
 
         $this->assertFalse($process->pid()->match(
             static fn() => true,
@@ -63,7 +62,7 @@ class BackgroundTest extends TestCase
             new Second(1),
             Command::background('php fixtures/slow.php'),
         );
-        $process = new Background($slow());
+        $process = Process::background($slow());
 
         $start = \time();
         $this->assertSame(
@@ -86,7 +85,7 @@ class BackgroundTest extends TestCase
             new Second(1),
             Command::background('php fixtures/slow.php'),
         );
-        $process = new Background($slow());
+        $process = Process::background($slow());
 
         $this->assertInstanceOf(
             Success::class,
