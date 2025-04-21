@@ -26,9 +26,12 @@ use Innmind\Immutable\{
     Monoid\Concat,
 };
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class UnixTest extends TestCase
 {
+    #[Group('ci')]
+    #[Group('local')]
     public function testInterface()
     {
         $this->assertInstanceOf(Processes::class, Unix::of(
@@ -38,6 +41,8 @@ class UnixTest extends TestCase
         ));
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testExecute()
     {
         $processes = Unix::of(
@@ -57,6 +62,8 @@ class UnixTest extends TestCase
         $this->assertTrue((\time() - $start) >= 6);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testExecuteInBackground()
     {
         $processes = Unix::of(
@@ -77,6 +84,8 @@ class UnixTest extends TestCase
         $this->assertContains('php fixtures/slow.php', $commands);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testExecuteWithInput()
     {
         $processes = Unix::of(
@@ -102,17 +111,14 @@ class UnixTest extends TestCase
         );
     }
 
+    #[Group('local')]
     public function testKill()
     {
-        if (\PHP_OS === 'Linux') {
-            // for some reason this test doesn't pass for linux in the CI, the
-            // kill tell it succeeded but when checking the process is killed it
-            // is still running
-            // todo investigate more why this is happening only for linux
-            $this->assertTrue(true);
-
-            return;
-        }
+        // For some reason this test doesn't pass for linux in the CI, the
+        // kill tell it succeeded but when checking the process is killed it
+        // is still running. It also sometime fail on macOS.
+        // That's why it's never run in the CI
+        // todo investigate more why this is happening only for linux
 
         $processes = Unix::of(
             new Clock,
@@ -143,6 +149,8 @@ class UnixTest extends TestCase
         $this->assertTrue((\time() - $start) < 2);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testTimeout()
     {
         $processes = Unix::of(
@@ -168,6 +176,8 @@ class UnixTest extends TestCase
         $this->assertLessThan(3, $start - \time());
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testStreamOutput()
     {
         $called = false;
@@ -190,6 +200,8 @@ class UnixTest extends TestCase
         $this->assertTrue($called);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testSecondCallToStreamedOutputThrowsAnError()
     {
         $called = false;
@@ -211,6 +223,8 @@ class UnixTest extends TestCase
         $process->output()->foreach(static fn() => null);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testOutputIsNotLostByDefault()
     {
         $called = false;
@@ -234,6 +248,8 @@ class UnixTest extends TestCase
         $this->assertTrue($called);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testStopProcessEvenWhenPipesAreStillOpenAfterTheProcessBeingKilled()
     {
         @\unlink('/tmp/test-file');
@@ -261,6 +277,8 @@ class UnixTest extends TestCase
         $this->assertTrue(true);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testRegressionWhenProcessFinishesTooFastItsFlaggedAsFailingEvenThoughItSucceeded()
     {
         $processes = Unix::of(

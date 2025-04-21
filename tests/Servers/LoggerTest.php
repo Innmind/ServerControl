@@ -23,9 +23,12 @@ use Innmind\Immutable\{
 };
 use Psr\Log\NullLogger;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class LoggerTest extends TestCase
 {
+    #[Group('ci')]
+    #[Group('local')]
     public function testInterface()
     {
         $this->assertInstanceOf(
@@ -37,6 +40,8 @@ class LoggerTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testProcesses()
     {
         $server = $this->server('ls');
@@ -53,6 +58,8 @@ class LoggerTest extends TestCase
         $logger->processes()->execute(Command::foreground('ls'));
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testVolumes()
     {
         $server = $this->server('which diskutil', "diskutil 'unmount' '/dev'");
@@ -69,6 +76,8 @@ class LoggerTest extends TestCase
         $logger->volumes()->unmount(new Volumes\Name('/dev'));
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testReboot()
     {
         $server = $this->server('sudo shutdown -r now');
@@ -87,6 +96,8 @@ class LoggerTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testShutdown()
     {
         $server = $this->server('sudo shutdown -h now');

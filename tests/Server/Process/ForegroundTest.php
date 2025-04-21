@@ -19,9 +19,12 @@ use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Stream\Streams;
 use Innmind\Immutable\Monoid\Concat;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class ForegroundTest extends TestCase
 {
+    #[Group('ci')]
+    #[Group('local')]
     public function testInterface()
     {
         $ps = new Unix(
@@ -38,6 +41,8 @@ class ForegroundTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testPid()
     {
         $ps = new Unix(
@@ -58,6 +63,8 @@ class ForegroundTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testOutput()
     {
         $slow = new Unix(
@@ -94,6 +101,8 @@ class ForegroundTest extends TestCase
         $this->assertSame(6, $count);
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testExitCodeForFailingProcess()
     {
         $fail = new Unix(
@@ -133,6 +142,8 @@ class ForegroundTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWait()
     {
         $slow = new Unix(
@@ -162,6 +173,8 @@ class ForegroundTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testExitStatusIsKeptInMemory()
     {
         $slow = new Unix(
@@ -180,6 +193,8 @@ class ForegroundTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testExitStatusIsAvailableAfterIteratingOverTheOutput()
     {
         $slow = new Unix(
@@ -204,6 +219,8 @@ class ForegroundTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testOutputIsAvailableAfterWaitingForExitStatus()
     {
         $slow = new Unix(

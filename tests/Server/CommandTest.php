@@ -11,9 +11,12 @@ use Innmind\Filesystem\File\Content;
 use Innmind\Url\Path;
 use Innmind\Immutable\Map;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class CommandTest extends TestCase
 {
+    #[Group('ci')]
+    #[Group('local')]
     public function testInterface()
     {
         $command = Command::foreground('ps');
@@ -30,6 +33,8 @@ class CommandTest extends TestCase
         $this->assertSame('ps', $command->toString());
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testBackground()
     {
         $command = Command::background('ps');
@@ -37,6 +42,8 @@ class CommandTest extends TestCase
         $this->assertTrue($command->toBeRunInBackground());
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testForeground()
     {
         $command = Command::foreground('ps');
@@ -44,6 +51,8 @@ class CommandTest extends TestCase
         $this->assertFalse($command->toBeRunInBackground());
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWithArgument()
     {
         $command = Command::foreground('echo')
@@ -53,6 +62,8 @@ class CommandTest extends TestCase
         $this->assertSame("echo 'foo'", $command->toString());
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testDoesntThrowWhenEmptyArgument()
     {
         $this->assertSame(
@@ -61,6 +72,8 @@ class CommandTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWithOption()
     {
         $command = Command::foreground('bin/console')
@@ -70,6 +83,8 @@ class CommandTest extends TestCase
         $this->assertSame("bin/console '--env=prod'", $command->toString());
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWithShortOption()
     {
         $command = Command::foreground('bin/console')
@@ -79,6 +94,8 @@ class CommandTest extends TestCase
         $this->assertSame("bin/console '-e' 'prod'", $command->toString());
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWithEnvironment()
     {
         $command = Command::foreground('bin/console')
@@ -94,6 +111,8 @@ class CommandTest extends TestCase
         ));
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWithEnvironments()
     {
         $command = Command::foreground('bin/console')
@@ -118,6 +137,8 @@ class CommandTest extends TestCase
         ));
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWithWorkingDirectory()
     {
         $command = Command::foreground('bin/console')
@@ -131,6 +152,8 @@ class CommandTest extends TestCase
         ));
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testWithInput()
     {
         $command = Command::foreground('bin/console')
@@ -145,6 +168,8 @@ class CommandTest extends TestCase
         ));
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testOverwrite()
     {
         $command = Command::foreground('echo')
@@ -154,6 +179,8 @@ class CommandTest extends TestCase
         $this->assertSame("echo 'bar' > 'foo.txt'", $command->toString());
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testAppend()
     {
         $command = Command::foreground('echo')
@@ -163,6 +190,8 @@ class CommandTest extends TestCase
         $this->assertSame("echo 'bar' >> 'foo.txt'", $command->toString());
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testPipe()
     {
         $commandA = Command::foreground('echo')
@@ -185,6 +214,8 @@ class CommandTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testTimeout()
     {
         $commandA = Command::foreground('echo');

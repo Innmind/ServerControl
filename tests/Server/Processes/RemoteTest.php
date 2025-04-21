@@ -25,9 +25,12 @@ use Innmind\Immutable\{
     SideEffect,
 };
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class RemoteTest extends TestCase
 {
+    #[Group('ci')]
+    #[Group('local')]
     public function testInterface()
     {
         $this->assertInstanceOf(
@@ -40,6 +43,8 @@ class RemoteTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testExecute()
     {
         $remote = new Remote(
@@ -56,6 +61,8 @@ class RemoteTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testExecuteViaSpecificPort()
     {
         $remote = new Remote(
@@ -73,6 +80,8 @@ class RemoteTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testExecuteWithWorkingDirectory()
     {
         $remote = new Remote(
@@ -91,6 +100,8 @@ class RemoteTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testKill()
     {
         $remote = new Remote(
@@ -108,6 +119,8 @@ class RemoteTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testKillViaSpecificPort()
     {
         $remote = new Remote(

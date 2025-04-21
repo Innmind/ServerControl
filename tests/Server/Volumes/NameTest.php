@@ -9,11 +9,14 @@ use Innmind\BlackBox\{
     PHPUnit\Framework\TestCase,
     Set,
 };
+use PHPUnit\Framework\Attributes\Group;
 
 class NameTest extends TestCase
 {
     use BlackBox;
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testInterface()
     {
         $this

@@ -23,9 +23,12 @@ use Innmind\Immutable\{
     SideEffect,
 };
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class UnixTest extends TestCase
 {
+    #[Group('ci')]
+    #[Group('local')]
     public function testInterface()
     {
         $this->assertInstanceOf(
@@ -36,6 +39,8 @@ class UnixTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testMountOSXVolume()
     {
         $volumes = new Unix(
@@ -57,6 +62,8 @@ class UnixTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testThrowWhenFailToMountOSXVolume()
     {
         $volumes = new Unix(
@@ -78,6 +85,8 @@ class UnixTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testUnmountOSXVolume()
     {
         $volumes = new Unix(
@@ -96,6 +105,8 @@ class UnixTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testReturnErrorWhenFailToUnmountOSXVolume()
     {
         $volumes = new Unix(
@@ -114,6 +125,8 @@ class UnixTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testMountLinuxVolume()
     {
         $volumes = new Unix(
@@ -135,6 +148,8 @@ class UnixTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testReturnErrorWhenFailToMountLinuxVolume()
     {
         $volumes = new Unix(
@@ -156,6 +171,8 @@ class UnixTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testUnmountLinuxVolume()
     {
         $volumes = new Unix(
@@ -174,6 +191,8 @@ class UnixTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testReturnErrorWhenFailToUnmountLinuxVolume()
     {
         $volumes = new Unix(

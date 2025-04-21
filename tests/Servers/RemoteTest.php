@@ -27,9 +27,12 @@ use Innmind\Immutable\{
     SideEffect,
 };
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class RemoteTest extends TestCase
 {
+    #[Group('ci')]
+    #[Group('local')]
     public function testInterface()
     {
         $this->assertInstanceOf(
@@ -42,6 +45,8 @@ class RemoteTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testProcesses()
     {
         $server = $this->server("ssh 'foo@example.com' 'ls'");
@@ -59,6 +64,8 @@ class RemoteTest extends TestCase
         $remote->processes()->execute(Command::foreground('ls'));
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testProcessesViaSpecificPort()
     {
         $server = $this->server("ssh '-p' '42' 'foo@example.com' 'ls'");
@@ -77,6 +84,8 @@ class RemoteTest extends TestCase
         $remote->processes()->execute(Command::foreground('ls'));
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testVolumes()
     {
         $server = $this->server(
@@ -97,6 +106,8 @@ class RemoteTest extends TestCase
         $remote->volumes()->unmount(new Volumes\Name('/dev'));
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testReboot()
     {
         $server = $this->server("ssh 'foo@example.com' 'sudo shutdown -r now'");
@@ -116,6 +127,8 @@ class RemoteTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testShutdown()
     {
         $server = $this->server("ssh 'foo@example.com' 'sudo shutdown -h now'");

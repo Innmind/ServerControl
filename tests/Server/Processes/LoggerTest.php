@@ -18,9 +18,12 @@ use Innmind\Stream\Streams;
 use Innmind\Url\Path;
 use Psr\Log\NullLogger;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\Group;
 
 class LoggerTest extends TestCase
 {
+    #[Group('ci')]
+    #[Group('local')]
     public function testInterface()
     {
         $this->assertInstanceOf(
@@ -32,6 +35,8 @@ class LoggerTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testExecute()
     {
         $logger = Logger::psr(
@@ -47,6 +52,8 @@ class LoggerTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testExecuteWithWorkingDirectory()
     {
         $logger = Logger::psr(
@@ -64,6 +71,8 @@ class LoggerTest extends TestCase
         );
     }
 
+    #[Group('ci')]
+    #[Group('local')]
     public function testKill()
     {
         $logger = Logger::psr(
