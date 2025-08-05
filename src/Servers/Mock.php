@@ -8,26 +8,20 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Volumes,
 };
-use Innmind\Immutable\{
-    Sequence,
-    Attempt,
-};
+use Innmind\Immutable\Attempt;
 use Innmind\BlackBox\Runner\Assert;
 
 final class Mock implements Server
 {
-    /**
-     * @param Sequence<object> $actions
-     */
     private function __construct(
         private Assert $assert,
-        private Sequence $actions,
+        private Mock\Actions $actions,
     ) {
     }
 
     public static function new(Assert $assert): self
     {
-        return new self($assert, Sequence::of());
+        return new self($assert, Mock\Actions::new($assert));
     }
 
     #[\Override]
@@ -43,33 +37,19 @@ final class Mock implements Server
     #[\Override]
     public function reboot(): Attempt
     {
-        $action = $this->actions->first()->match(
-            static fn($action) => $action,
-            static fn() => null,
-        );
-        $this->actions = $this->actions->drop(1);
-
-        if ($action instanceof Mock\Reboot) {
-            return $action->run();
-        }
-
-        $this->assert->fail('No reboot was expected');
+        return $this
+            ->actions
+            ->pull(Mock\Reboot::class, 'No reboot was expected')
+            ->run();
     }
 
     #[\Override]
     public function shutdown(): Attempt
     {
-        $action = $this->actions->first()->match(
-            static fn($action) => $action,
-            static fn() => null,
-        );
-        $this->actions = $this->actions->drop(1);
-
-        if ($action instanceof Mock\Shutdown) {
-            return $action->run();
-        }
-
-        $this->assert->fail('No shutdown was expected');
+        return $this
+            ->actions
+            ->pull(Mock\Shutdown::class, 'No shutdown was expected')
+            ->run();
     }
 
     #[\NoDiscard]
@@ -77,7 +57,7 @@ final class Mock implements Server
     {
         return new self(
             $this->assert,
-            ($this->actions)(Mock\Reboot::success()),
+            $this->actions->add(Mock\Reboot::success()),
         );
     }
 
@@ -86,7 +66,7 @@ final class Mock implements Server
     {
         return new self(
             $this->assert,
-            ($this->actions)(Mock\Reboot::fail()),
+            $this->actions->add(Mock\Reboot::fail()),
         );
     }
 
@@ -95,7 +75,7 @@ final class Mock implements Server
     {
         return new self(
             $this->assert,
-            ($this->actions)(Mock\Shutdown::success()),
+            $this->actions->add(Mock\Shutdown::success()),
         );
     }
 
@@ -104,7 +84,7 @@ final class Mock implements Server
     {
         return new self(
             $this->assert,
-            ($this->actions)(Mock\Shutdown::fail()),
+            $this->actions->add(Mock\Shutdown::fail()),
         );
     }
 
