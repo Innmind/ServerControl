@@ -32,6 +32,7 @@ final class Mock implements Server
     #[\Override]
     public function volumes(): Volumes
     {
+        return Mock\Volumes::new($this->assert, $this->actions);
     }
 
     #[\Override]
@@ -91,13 +92,19 @@ final class Mock implements Server
     #[\NoDiscard]
     public function willMountVolume(string $name, string $path): self
     {
-        return $this;
+        return new self(
+            $this->assert,
+            $this->actions->add(Mock\MountVolume::success($name, $path)),
+        );
     }
 
     #[\NoDiscard]
     public function willFailToMountVolume(string $name, string $path): self
     {
-        return $this;
+        return new self(
+            $this->assert,
+            $this->actions->add(Mock\MountVolume::fail($name, $path)),
+        );
     }
 
     #[\NoDiscard]

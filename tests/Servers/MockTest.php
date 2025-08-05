@@ -6,7 +6,9 @@ namespace Tests\Innmind\Server\Control\Servers;
 use Innmind\Server\Control\{
     Servers\Mock,
     Server,
+    Server\Volumes,
 };
+use Innmind\Url\Path;
 use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\{
     PHPUnit\Framework\TestCase,
@@ -172,6 +174,173 @@ class MockTest extends TestCase
     {
         $mock = Mock::new($this->assert())
             ->willShutdown();
+
+        try {
+            $mock->assert();
+        } catch (\Throwable $e) {
+            $this->assertInstanceOf(Failure::class, $e);
+
+            return;
+        }
+
+        $this->fail('It should throw');
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testWillMountVolume()
+    {
+        $mock = Mock::new($this->assert())
+            ->willMountVolume('foo', '/bar');
+
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $mock
+                ->volumes()
+                ->mount(Volumes\Name::of('foo'), Path::of('/bar'))
+                ->unwrap(),
+        );
+        $this
+            ->assert()
+            ->not()
+            ->throws(static fn() => $mock->assert());
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testWillMountVolumeWithWrongName()
+    {
+        $mock = Mock::new($this->assert())
+            ->willMountVolume('foo', '/bar');
+
+        try {
+            $mock
+                ->volumes()
+                ->mount(Volumes\Name::of('bar'), Path::of('/bar'));
+        } catch (\Throwable $e) {
+            $this->assertInstanceOf(Failure::class, $e);
+
+            return;
+        }
+
+        $this->fail('It should throw');
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testWillMountVolumeWithWrongPath()
+    {
+        $mock = Mock::new($this->assert())
+            ->willMountVolume('foo', '/bar');
+
+        try {
+            $mock
+                ->volumes()
+                ->mount(Volumes\Name::of('foo'), Path::of('/foo'));
+        } catch (\Throwable $e) {
+            $this->assertInstanceOf(Failure::class, $e);
+
+            return;
+        }
+
+        $this->fail('It should throw');
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testWillFailToMountVolume()
+    {
+        $mock = Mock::new($this->assert())
+            ->willFailToMountVolume('foo', '/bar');
+
+        $this->assertFalse(
+            $mock
+                ->volumes()
+                ->mount(Volumes\Name::of('foo'), Path::of('/bar'))
+                ->match(
+                    static fn() => true,
+                    static fn() => false,
+                ),
+        );
+        $this
+            ->assert()
+            ->not()
+            ->throws(static fn() => $mock->assert());
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testWillFailToMountVolumeWithWrongName()
+    {
+        $mock = Mock::new($this->assert())
+            ->willFailToMountVolume('foo', '/bar');
+
+        try {
+            $mock
+                ->volumes()
+                ->mount(Volumes\Name::of('bar'), Path::of('/bar'));
+        } catch (\Throwable $e) {
+            $this->assertInstanceOf(Failure::class, $e);
+
+            return;
+        }
+
+        $this->fail('It should throw');
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testWillFailToMountVolumeWithWrongPath()
+    {
+        $mock = Mock::new($this->assert())
+            ->willFailToMountVolume('foo', '/bar');
+
+        try {
+            $mock
+                ->volumes()
+                ->mount(Volumes\Name::of('foo'), Path::of('/foo'));
+        } catch (\Throwable $e) {
+            $this->assertInstanceOf(Failure::class, $e);
+
+            return;
+        }
+
+        $this->fail('It should throw');
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testUnexpectedMountVolume()
+    {
+        $mock = Mock::new($this->assert());
+
+        try {
+            $mock
+                ->volumes()
+                ->mount(Volumes\Name::of('foo'), Path::of('/bar'));
+        } catch (\Throwable $e) {
+            $this->assertInstanceOf(Failure::class, $e);
+
+            return;
+        }
+
+        $this->fail('It should throw');
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testUncalledMountVolume()
+    {
+        $mock = Mock::new($this->assert())
+            ->willMountVolume('foo', '/bar');
 
         try {
             $mock->assert();
