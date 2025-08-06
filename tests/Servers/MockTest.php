@@ -352,4 +352,129 @@ class MockTest extends TestCase
 
         $this->fail('It should throw');
     }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testWillUnmountVolume()
+    {
+        $mock = Mock::new($this->assert())
+            ->willUnmountVolume('foo');
+
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $mock
+                ->volumes()
+                ->unmount(Volumes\Name::of('foo'))
+                ->unwrap(),
+        );
+        $this
+            ->assert()
+            ->not()
+            ->throws(static fn() => $mock->assert());
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testWillUnmountVolumeWithWrongName()
+    {
+        $mock = Mock::new($this->assert())
+            ->willUnmountVolume('foo');
+
+        try {
+            $mock
+                ->volumes()
+                ->unmount(Volumes\Name::of('bar'));
+        } catch (\Throwable $e) {
+            $this->assertInstanceOf(Failure::class, $e);
+
+            return;
+        }
+
+        $this->fail('It should throw');
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testWillFailToUnmountVolume()
+    {
+        $mock = Mock::new($this->assert())
+            ->willFailToUnmountVolume('foo');
+
+        $this->assertFalse(
+            $mock
+                ->volumes()
+                ->unmount(Volumes\Name::of('foo'))
+                ->match(
+                    static fn() => true,
+                    static fn() => false,
+                ),
+        );
+        $this
+            ->assert()
+            ->not()
+            ->throws(static fn() => $mock->assert());
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testWillFailToUnmountVolumeWithWrongName()
+    {
+        $mock = Mock::new($this->assert())
+            ->willFailToUnmountVolume('foo');
+
+        try {
+            $mock
+                ->volumes()
+                ->unmount(Volumes\Name::of('bar'));
+        } catch (\Throwable $e) {
+            $this->assertInstanceOf(Failure::class, $e);
+
+            return;
+        }
+
+        $this->fail('It should throw');
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testUnexpectedUnmountVolume()
+    {
+        $mock = Mock::new($this->assert());
+
+        try {
+            $mock
+                ->volumes()
+                ->unmount(Volumes\Name::of('foo'));
+        } catch (\Throwable $e) {
+            $this->assertInstanceOf(Failure::class, $e);
+
+            return;
+        }
+
+        $this->fail('It should throw');
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testUncalledUnmountVolume()
+    {
+        $mock = Mock::new($this->assert())
+            ->willUnmountVolume('foo');
+
+        try {
+            $mock->assert();
+        } catch (\Throwable $e) {
+            $this->assertInstanceOf(Failure::class, $e);
+
+            return;
+        }
+
+        $this->fail('It should throw');
+    }
 }

@@ -110,13 +110,19 @@ final class Mock implements Server
     #[\NoDiscard]
     public function willUnmountVolume(string $name): self
     {
-        return $this;
+        return new self(
+            $this->assert,
+            $this->actions->add(Mock\UnmountVolume::success($name)),
+        );
     }
 
     #[\NoDiscard]
     public function willFailToUnmountVolume(string $name): self
     {
-        return $this;
+        return new self(
+            $this->assert,
+            $this->actions->add(Mock\UnmountVolume::fail($name)),
+        );
     }
 
     public function assert(): void
