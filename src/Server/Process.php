@@ -13,6 +13,7 @@ use Innmind\Server\Control\Server\Process\{
     Started,
     Foreground,
     Background,
+    Mock,
 };
 use Innmind\Immutable\{
     Sequence,
@@ -23,7 +24,7 @@ use Innmind\Immutable\{
 final class Process
 {
     private function __construct(
-        private Foreground|Background $implementation,
+        private Foreground|Background|Mock $implementation,
     ) {
     }
 
