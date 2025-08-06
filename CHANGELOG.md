@@ -1,5 +1,11 @@
 # Changelog
 
+## 6.1.0 - 2025-08-06
+
+### Added
+
+- `Innmind\Server\Control\Servers\Mock`
+
 ## 6.0.0 - 2025-04-21
 
 ### Changed

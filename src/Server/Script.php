@@ -24,6 +24,7 @@ final class Script
     /**
      * @return Attempt<SideEffect>
      */
+    #[\NoDiscard]
     public function __invoke(Server $server): Attempt
     {
         $processes = $server->processes();
@@ -48,6 +49,7 @@ final class Script
     /**
      * @no-named-arguments
      */
+    #[\NoDiscard]
     public static function of(Command ...$commands): self
     {
         return new self(Sequence::of(...$commands));

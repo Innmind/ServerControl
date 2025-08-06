@@ -74,6 +74,7 @@ final class Command
      *
      * @param non-empty-string $executable
      */
+    #[\NoDiscard]
     public static function background(string $executable): self
     {
         return new self(true, $executable);
@@ -87,11 +88,13 @@ final class Command
      *
      * @param non-empty-string $executable
      */
+    #[\NoDiscard]
     public static function foreground(string $executable): self
     {
         return new self(false, $executable);
     }
 
+    #[\NoDiscard]
     public function withArgument(string $value): self
     {
         $self = clone $this;
@@ -103,6 +106,7 @@ final class Command
     /**
      * @param non-empty-string $key
      */
+    #[\NoDiscard]
     public function withOption(string $key, ?string $value = null): self
     {
         $self = clone $this;
@@ -114,6 +118,7 @@ final class Command
     /**
      * @param non-empty-string $key
      */
+    #[\NoDiscard]
     public function withShortOption(string $key, ?string $value = null): self
     {
         $self = clone $this;
@@ -125,6 +130,7 @@ final class Command
     /**
      * @param non-empty-string $key
      */
+    #[\NoDiscard]
     public function withEnvironment(string $key, string $value): self
     {
         $self = clone $this;
@@ -136,6 +142,7 @@ final class Command
     /**
      * @param Map<non-empty-string, string> $values
      */
+    #[\NoDiscard]
     public function withEnvironments(Map $values): self
     {
         $self = clone $this;
@@ -144,6 +151,7 @@ final class Command
         return $self;
     }
 
+    #[\NoDiscard]
     public function withWorkingDirectory(Path $path): self
     {
         $self = clone $this;
@@ -152,6 +160,7 @@ final class Command
         return $self;
     }
 
+    #[\NoDiscard]
     public function withInput(Content $input): self
     {
         $self = clone $this;
@@ -160,6 +169,7 @@ final class Command
         return $self;
     }
 
+    #[\NoDiscard]
     public function overwrite(Path $path): self
     {
         $self = clone $this;
@@ -168,6 +178,7 @@ final class Command
         return $self;
     }
 
+    #[\NoDiscard]
     public function append(Path $path): self
     {
         $self = clone $this;
@@ -176,6 +187,7 @@ final class Command
         return $self;
     }
 
+    #[\NoDiscard]
     public function pipe(self $command): self
     {
         $self = clone $this;
@@ -195,6 +207,7 @@ final class Command
         return $self;
     }
 
+    #[\NoDiscard]
     public function timeoutAfter(Period $timeout): self
     {
         $self = clone $this;
@@ -213,6 +226,7 @@ final class Command
      * This is useful in the case you need to access the output but can't fit it
      * in memory like streaming large files.
      */
+    #[\NoDiscard]
     public function streamOutput(): self
     {
         $self = clone $this;

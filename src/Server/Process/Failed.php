@@ -17,6 +17,7 @@ final class Failed
     ) {
     }
 
+    #[\NoDiscard]
     public function exitCode(): ExitCode
     {
         return $this->exitCode;
@@ -25,6 +26,7 @@ final class Failed
     /**
      * @return Sequence<Output\Chunk>
      */
+    #[\NoDiscard]
     public function output(): Sequence
     {
         return $this->output;

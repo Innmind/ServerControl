@@ -13,6 +13,7 @@ use Innmind\Server\Control\Server\Process\{
     Started,
     Foreground,
     Background,
+    Mock,
 };
 use Innmind\Immutable\{
     Sequence,
@@ -23,7 +24,7 @@ use Innmind\Immutable\{
 final class Process
 {
     private function __construct(
-        private Foreground|Background $implementation,
+        private Foreground|Background|Mock $implementation,
     ) {
     }
 
@@ -51,6 +52,7 @@ final class Process
      *
      * @return Maybe<Pid>
      */
+    #[\NoDiscard]
     public function pid(): Maybe
     {
         return $this->implementation->pid();
@@ -59,6 +61,7 @@ final class Process
     /**
      * @return Sequence<Output\Chunk>
      */
+    #[\NoDiscard]
     public function output(): Sequence
     {
         return $this->implementation->output();
@@ -72,6 +75,7 @@ final class Process
      *
      * @return Either<TimedOut|Failed|Signaled, Success>
      */
+    #[\NoDiscard]
     public function wait(): Either
     {
         return $this->implementation->wait();

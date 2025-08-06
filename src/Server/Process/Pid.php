@@ -20,6 +20,7 @@ final class Pid
     /**
      * @return int<2, max>
      */
+    #[\NoDiscard]
     public function toInt(): int
     {
         return $this->value;
@@ -28,6 +29,7 @@ final class Pid
     /**
      * @return non-empty-string
      */
+    #[\NoDiscard]
     public function toString(): string
     {
         return (string) $this->value;

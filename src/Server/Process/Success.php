@@ -19,6 +19,7 @@ final class Success
     /**
      * @return Sequence<Output\Chunk>
      */
+    #[\NoDiscard]
     public function output(): Sequence
     {
         return $this->output;

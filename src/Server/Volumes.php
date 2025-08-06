@@ -15,10 +15,12 @@ interface Volumes
     /**
      * @return Attempt<SideEffect>
      */
+    #[\NoDiscard]
     public function mount(Name $name, Path $mountpoint): Attempt;
 
     /**
      * @return Attempt<SideEffect>
      */
+    #[\NoDiscard]
     public function unmount(Name $name): Attempt;
 }
