@@ -14,16 +14,21 @@ use Innmind\Immutable\{
 
 interface Server
 {
+    #[\NoDiscard]
     public function processes(): Processes;
+
+    #[\NoDiscard]
     public function volumes(): Volumes;
 
     /**
      * @return Attempt<SideEffect>
      */
+    #[\NoDiscard]
     public function reboot(): Attempt;
 
     /**
      * @return Attempt<SideEffect>
      */
+    #[\NoDiscard]
     public function shutdown(): Attempt;
 }

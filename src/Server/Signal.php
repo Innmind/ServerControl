@@ -16,6 +16,7 @@ enum Signal
     case alarm;
     case terminate;
 
+    #[\NoDiscard]
     public function toInt(): int
     {
         return match ($this) {
@@ -32,6 +33,7 @@ enum Signal
     /**
      * @return non-empty-string
      */
+    #[\NoDiscard]
     public function toString(): string
     {
         return (string) $this->toInt();

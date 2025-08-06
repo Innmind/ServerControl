@@ -19,6 +19,7 @@ final class ServerFactory
     /**
      * @throws UnsupportedOperatingSystem For windows system
      */
+    #[\NoDiscard]
     public static function build(
         Clock $clock,
         IO $io,

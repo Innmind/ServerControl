@@ -19,16 +19,19 @@ final class Chunk
     /**
      * @psalm-pure
      */
+    #[\NoDiscard]
     public static function of(Str $data, Type $type): self
     {
         return new self($data, $type);
     }
 
+    #[\NoDiscard]
     public function data(): Str
     {
         return $this->data;
     }
 
+    #[\NoDiscard]
     public function type(): Type
     {
         return $this->type;

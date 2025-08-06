@@ -14,10 +14,12 @@ interface Processes
     /**
      * @return Attempt<Process>
      */
+    #[\NoDiscard]
     public function execute(Command $command): Attempt;
 
     /**
      * @return Attempt<SideEffect>
      */
+    #[\NoDiscard]
     public function kill(Pid $pid, Signal $signal): Attempt;
 }

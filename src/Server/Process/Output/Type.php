@@ -11,6 +11,7 @@ enum Type
     case output;
     case error;
 
+    #[\NoDiscard]
     public function toString(): string
     {
         return match ($this) {
