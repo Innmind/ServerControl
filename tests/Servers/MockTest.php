@@ -40,7 +40,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillReboot()
     {
         $mock = Mock::new($this->assert())
@@ -60,7 +59,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillFailToReboot()
     {
         $mock = Mock::new($this->assert())
@@ -82,7 +80,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testUnexpectedReboot()
     {
         $mock = Mock::new($this->assert());
@@ -100,7 +97,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testUncalledReboot()
     {
         $mock = Mock::new($this->assert())
@@ -119,7 +115,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillShutdown()
     {
         $mock = Mock::new($this->assert())
@@ -139,7 +134,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillFailToShutdown()
     {
         $mock = Mock::new($this->assert())
@@ -161,7 +155,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testUnexpectedShutdown()
     {
         $mock = Mock::new($this->assert());
@@ -179,7 +172,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testUncalledShutdown()
     {
         $mock = Mock::new($this->assert())
@@ -198,7 +190,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillMountVolume()
     {
         $mock = Mock::new($this->assert())
@@ -219,7 +210,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillMountVolumeWithWrongName()
     {
         $mock = Mock::new($this->assert())
@@ -240,7 +230,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillMountVolumeWithWrongPath()
     {
         $mock = Mock::new($this->assert())
@@ -261,7 +250,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillFailToMountVolume()
     {
         $mock = Mock::new($this->assert())
@@ -284,7 +272,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillFailToMountVolumeWithWrongName()
     {
         $mock = Mock::new($this->assert())
@@ -305,7 +292,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillFailToMountVolumeWithWrongPath()
     {
         $mock = Mock::new($this->assert())
@@ -326,7 +312,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testUnexpectedMountVolume()
     {
         $mock = Mock::new($this->assert());
@@ -346,7 +331,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testUncalledMountVolume()
     {
         $mock = Mock::new($this->assert())
@@ -365,7 +349,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillUnmountVolume()
     {
         $mock = Mock::new($this->assert())
@@ -386,7 +369,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillUnmountVolumeWithWrongName()
     {
         $mock = Mock::new($this->assert())
@@ -407,7 +389,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillFailToUnmountVolume()
     {
         $mock = Mock::new($this->assert())
@@ -430,7 +411,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillFailToUnmountVolumeWithWrongName()
     {
         $mock = Mock::new($this->assert())
@@ -451,7 +431,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testUnexpectedUnmountVolume()
     {
         $mock = Mock::new($this->assert());
@@ -471,7 +450,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testUncalledUnmountVolume()
     {
         $mock = Mock::new($this->assert())
@@ -490,7 +468,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testProcessKillIsAlwaysSuccessful()
     {
         $mock = Mock::new($this->assert());
@@ -509,7 +486,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillExecute()
     {
         $expected = Command::foreground('echo');
@@ -546,7 +522,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillExecuteSuccess()
     {
         $expected = Command::foreground('echo');
@@ -581,7 +556,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillExecuteSignaled()
     {
         $expected = Command::foreground('echo');
@@ -616,7 +590,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillExecuteTimedOut()
     {
         $expected = Command::foreground('echo');
@@ -651,7 +624,6 @@ class MockTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    #[Group('wip')]
     public function testWillExecuteFailed()
     {
         $expected = Command::foreground('echo');
