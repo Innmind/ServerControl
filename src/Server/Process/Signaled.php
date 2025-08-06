@@ -19,6 +19,7 @@ final class Signaled
     /**
      * @return Sequence<Output\Chunk>
      */
+    #[\NoDiscard]
     public function output(): Sequence
     {
         return $this->output;

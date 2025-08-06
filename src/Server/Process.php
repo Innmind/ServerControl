@@ -52,6 +52,7 @@ final class Process
      *
      * @return Maybe<Pid>
      */
+    #[\NoDiscard]
     public function pid(): Maybe
     {
         return $this->implementation->pid();
@@ -60,6 +61,7 @@ final class Process
     /**
      * @return Sequence<Output\Chunk>
      */
+    #[\NoDiscard]
     public function output(): Sequence
     {
         return $this->implementation->output();
@@ -73,6 +75,7 @@ final class Process
      *
      * @return Either<TimedOut|Failed|Signaled, Success>
      */
+    #[\NoDiscard]
     public function wait(): Either
     {
         return $this->implementation->wait();

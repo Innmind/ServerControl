@@ -17,6 +17,7 @@ final class ExitCode
     ) {
     }
 
+    #[\NoDiscard]
     public function successful(): bool
     {
         return $this->value === 0;
@@ -25,6 +26,7 @@ final class ExitCode
     /**
      * @return int<0, 255>
      */
+    #[\NoDiscard]
     public function toInt(): int
     {
         return $this->value;
@@ -33,6 +35,7 @@ final class ExitCode
     /**
      * @return non-empty-string
      */
+    #[\NoDiscard]
     public function toString(): string
     {
         return (string) $this->value;
