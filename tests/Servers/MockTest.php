@@ -7,9 +7,19 @@ use Innmind\Server\Control\{
     Servers\Mock,
     Server,
     Server\Volumes,
+    Server\Command,
+    Server\Process\Success,
+    Server\Process\Signaled,
+    Server\Process\TimedOut,
+    Server\Process\Failed,
+    Server\Process\Pid,
+    Server\Signal,
 };
 use Innmind\Url\Path;
-use Innmind\Immutable\SideEffect;
+use Innmind\Immutable\{
+    Sequence,
+    SideEffect,
+};
 use Innmind\BlackBox\{
     PHPUnit\Framework\TestCase,
     Runner\Assert\Failure,
@@ -476,5 +486,200 @@ class MockTest extends TestCase
         }
 
         $this->fail('It should throw');
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testProcessKillIsAlwaysSuccessful()
+    {
+        $mock = Mock::new($this->assert());
+
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $mock
+                ->processes()
+                ->kill(
+                    new Pid(2),
+                    Signal::kill,
+                )
+                ->unwrap(),
+        );
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testWillExecute()
+    {
+        $expected = Command::foreground('echo');
+
+        $mock = Mock::new($this->assert())
+            ->willExecute(
+                fn($command) => $this->assertSame($expected, $command),
+            );
+
+        $process = $mock
+            ->processes()
+            ->execute($expected)
+            ->unwrap();
+
+        $this->assertSame(2, $process->pid()->match(
+            static fn($pid) => $pid->toInt(),
+            static fn() => null,
+        ));
+        $this->assertInstanceOf(
+            Success::class,
+            $process
+                ->wait()
+                ->match(
+                    static fn($success) => $success,
+                    static fn($error) => $error,
+                ),
+        );
+        $this->assertCount(0, $process->output());
+        $this
+            ->assert()
+            ->not()
+            ->throws(static fn() => $mock->assert());
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testWillExecuteSuccess()
+    {
+        $expected = Command::foreground('echo');
+        $output = Sequence::of();
+
+        $mock = Mock::new($this->assert())
+            ->willExecute(
+                fn($command) => $this->assertSame($expected, $command),
+                static fn($_, $build) => $build->success($output),
+            );
+
+        $process = $mock
+            ->processes()
+            ->execute($expected)
+            ->unwrap();
+
+        $this->assertInstanceOf(
+            Success::class,
+            $process
+                ->wait()
+                ->match(
+                    static fn($success) => $success,
+                    static fn($error) => $error,
+                ),
+        );
+        $this->assertSame($output, $process->output());
+        $this
+            ->assert()
+            ->not()
+            ->throws(static fn() => $mock->assert());
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testWillExecuteSignaled()
+    {
+        $expected = Command::foreground('echo');
+        $output = Sequence::of();
+
+        $mock = Mock::new($this->assert())
+            ->willExecute(
+                fn($command) => $this->assertSame($expected, $command),
+                static fn($_, $build) => $build->signaled($output),
+            );
+
+        $process = $mock
+            ->processes()
+            ->execute($expected)
+            ->unwrap();
+
+        $this->assertInstanceOf(
+            Signaled::class,
+            $process
+                ->wait()
+                ->match(
+                    static fn($success) => $success,
+                    static fn($error) => $error,
+                ),
+        );
+        $this->assertSame($output, $process->output());
+        $this
+            ->assert()
+            ->not()
+            ->throws(static fn() => $mock->assert());
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testWillExecuteTimedOut()
+    {
+        $expected = Command::foreground('echo');
+        $output = Sequence::of();
+
+        $mock = Mock::new($this->assert())
+            ->willExecute(
+                fn($command) => $this->assertSame($expected, $command),
+                static fn($_, $build) => $build->timedOut($output),
+            );
+
+        $process = $mock
+            ->processes()
+            ->execute($expected)
+            ->unwrap();
+
+        $this->assertInstanceOf(
+            TimedOut::class,
+            $process
+                ->wait()
+                ->match(
+                    static fn($success) => $success,
+                    static fn($error) => $error,
+                ),
+        );
+        $this->assertSame($output, $process->output());
+        $this
+            ->assert()
+            ->not()
+            ->throws(static fn() => $mock->assert());
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    #[Group('wip')]
+    public function testWillExecuteFailed()
+    {
+        $expected = Command::foreground('echo');
+        $output = Sequence::of();
+
+        $mock = Mock::new($this->assert())
+            ->willExecute(
+                fn($command) => $this->assertSame($expected, $command),
+                static fn($_, $build) => $build->failed(1, $output),
+            );
+
+        $process = $mock
+            ->processes()
+            ->execute($expected)
+            ->unwrap();
+
+        $result = $process
+            ->wait()
+            ->match(
+                static fn($success) => $success,
+                static fn($error) => $error,
+            );
+        $this->assertInstanceOf(Failed::class, $result);
+        $this->assertSame(1, $result->exitCode()->toInt());
+        $this->assertSame($output, $process->output());
+        $this
+            ->assert()
+            ->not()
+            ->throws(static fn() => $mock->assert());
     }
 }

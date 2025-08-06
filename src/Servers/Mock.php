@@ -7,6 +7,7 @@ use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Volumes,
+    Server\Command,
 };
 use Innmind\Immutable\Attempt;
 use Innmind\BlackBox\Runner\Assert;
@@ -27,6 +28,7 @@ final class Mock implements Server
     #[\Override]
     public function processes(): Processes
     {
+        return Mock\Processes::new($this->actions);
     }
 
     #[\Override]
@@ -122,6 +124,24 @@ final class Mock implements Server
         return new self(
             $this->assert,
             $this->actions->add(Mock\UnmountVolume::fail($name)),
+        );
+    }
+
+    /**
+     * @param callable(Command): void $assert
+     * @param ?callable(Command, Mock\ProcessBuilder): Mock\ProcessBuilder $build
+     */
+    #[\NoDiscard]
+    public function willExecute(
+        callable $assert,
+        ?callable $build = null,
+    ): self {
+        return new self(
+            $this->assert,
+            $this->actions->add(Mock\Execute::of(
+                $assert,
+                $build ?? static fn(Command $command, Mock\ProcessBuilder $build) => $build,
+            )),
         );
     }
 
