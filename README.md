@@ -167,6 +167,15 @@ $server = Mock::new($assert)
                 Type::output,
             )),
         ),
+    )
+    ->willExecute(
+        static fn(Command $command) => $assert->same(
+            "echo 'foobar'",
+            $command->toString(),
+        ),
+        static fn(Command $command, ProcessBuilder $build) => $build->success([
+            ['foobar', 'output'],
+        ]),
     );
 ```
 

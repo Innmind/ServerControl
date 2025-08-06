@@ -19,6 +19,8 @@ use Innmind\Url\Path;
 use Innmind\Immutable\{
     Sequence,
     SideEffect,
+    Str,
+    Monoid\Concat,
 };
 use Innmind\BlackBox\{
     PHPUnit\Framework\TestCase,
@@ -548,6 +550,58 @@ class MockTest extends TestCase
                 ),
         );
         $this->assertSame($output, $process->output());
+        $this
+            ->assert()
+            ->not()
+            ->throws(static fn() => $mock->assert());
+    }
+
+    #[Group('ci')]
+    #[Group('local')]
+    public function testWillExecuteSuccessWithCustomOutput()
+    {
+        $expected = Command::foreground('echo');
+
+        $mock = Mock::new($this->assert())
+            ->willExecute(
+                fn($command) => $this->assertSame($expected, $command),
+                static fn($_, $build) => $build->success([
+                    ['foo', 'output'],
+                    ['bar', 'error'],
+                ]),
+            );
+
+        $process = $mock
+            ->processes()
+            ->execute($expected)
+            ->unwrap();
+
+        $this->assertInstanceOf(
+            Success::class,
+            $process
+                ->wait()
+                ->match(
+                    static fn($success) => $success,
+                    static fn($error) => $error,
+                ),
+        );
+        $this->assertSame(
+            'foobar',
+            $process
+                ->output()
+                ->map(static fn($chunk) => $chunk->data())
+                ->fold(new Concat)
+                ->toString(),
+        );
+        $this->assertSame(
+            'outputerror',
+            $process
+                ->output()
+                ->map(static fn($chunk) => $chunk->type()->name)
+                ->map(Str::of(...))
+                ->fold(new Concat)
+                ->toString(),
+        );
         $this
             ->assert()
             ->not()
