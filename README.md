@@ -127,3 +127,48 @@ use Psr\Log\LoggerInterface;
 
 $server = Logger::psr($server, /** an instance of LoggerInterface */);
 ```
+
+### Mocking
+
+In order to simplify testing code this library exposes a `Mock` server that can be configured like this:
+
+```php
+use Innmind\Server\Control\{
+    Servers\Mock,
+    Servers\Mock\ProcessBuilder,
+    Server\Command,
+    Server\Process\Output\Chunk,
+    Server\Process\Output\Type,
+};
+use Innmind\Immutable\{
+    Sequence,
+    Str,
+};
+use Innmind\BlackBox\Runner\Assert;
+
+$assert = /* an instance of Assert */;
+$server = Mock::new($assert)
+    ->willReboot()
+    ->willFailToReboot()
+    ->willShutdown()
+    ->willFailToShutdown()
+    ->willMountVolume('volumeName', '/mount/endpoint')
+    ->willFailToMountVolume('volumeName', '/mount/endpoint')
+    ->willUnmountVolume('volumeName')
+    ->willFailToUnmountVolume('volumeName')
+    ->willExecute(
+        static fn(Command $command) => $assert->same(
+            "echo 'foo'",
+            $command->toString(),
+        ),
+        static fn(Command $command, ProcessBuilder $build) => $build->success(
+            Sequence::of(Chunk::of(
+                Str::of('foo'),
+                Type::output,
+            )),
+        ),
+    );
+```
+
+> [!IMPORTANT]
+> The order in which you call the `will*` methods is the order in which the code you test needs to make these actions.
