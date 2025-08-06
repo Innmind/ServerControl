@@ -5,7 +5,6 @@ namespace Innmind\Server\Control\Servers\Mock;
 
 use Innmind\Server\Control\Server\{
     Processes as ProcessesInterface,
-    Process,
     Process\Pid,
     Command,
     Signal,
@@ -30,9 +29,6 @@ final class Processes implements ProcessesInterface
         return new self($actions);
     }
 
-    /**
-     * @return Attempt<Process>
-     */
     #[\Override]
     public function execute(Command $command): Attempt
     {
@@ -44,9 +40,6 @@ final class Processes implements ProcessesInterface
         );
     }
 
-    /**
-     * @return Attempt<SideEffect>
-     */
     #[\Override]
     public function kill(Pid $pid, Signal $signal): Attempt
     {
