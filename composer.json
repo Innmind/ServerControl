@@ -15,13 +15,16 @@
     },
     "require": {
         "php": "~8.4",
-        "innmind/immutable": "~5.12",
-        "innmind/url": "~4.0",
+        "innmind/immutable": "dev-next",
+        "innmind/url": "dev-next",
         "psr/log": "~3.0",
-        "innmind/time-continuum": "^4.1.1",
-        "innmind/filesystem": "~8.0",
-        "innmind/time-warp": "~4.0",
-        "innmind/io": "~3.1"
+        "innmind/time-continuum": "dev-next",
+        "innmind/filesystem": "dev-next",
+        "innmind/time-warp": "dev-next",
+        "innmind/io": "dev-next",
+        "innmind/media-type": "dev-next",
+        "innmind/validation": "dev-next",
+        "innmind/ip": "dev-next"
     },
     "autoload": {
         "psr-4": {

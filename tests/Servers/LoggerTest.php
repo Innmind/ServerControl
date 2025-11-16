@@ -14,7 +14,7 @@ use Innmind\Server\Control\{
     Server\Signal,
 };
 use Innmind\TimeContinuum\Clock;
-use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 use Innmind\Immutable\{
     Attempt,
@@ -174,7 +174,7 @@ class LoggerTest extends TestCase
         return Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
     }
 }

@@ -14,7 +14,7 @@ use Innmind\Server\Control\{
     Exception\ProcessFailed,
 };
 use Innmind\TimeContinuum\Clock;
-use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
@@ -215,7 +215,7 @@ class UnixTest extends TestCase
         $processes = Processes\Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
 
         return new class($processes, $this, $commands) implements Processes {

@@ -13,7 +13,7 @@ use Innmind\TimeContinuum\{
     Clock,
     Period,
 };
-use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 use Innmind\Immutable\Monoid\Concat;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
@@ -28,7 +28,7 @@ class BackgroundTest extends TestCase
         $process = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::background('ps'),
         );
@@ -46,7 +46,7 @@ class BackgroundTest extends TestCase
         $ps = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::background('ps'),
         );
@@ -65,7 +65,7 @@ class BackgroundTest extends TestCase
         $slow = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::background('php fixtures/slow.php'),
         );
@@ -90,7 +90,7 @@ class BackgroundTest extends TestCase
         $slow = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::background('php fixtures/slow.php'),
         );

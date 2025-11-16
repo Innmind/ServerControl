@@ -177,7 +177,7 @@ final class Started
             }
 
             /** @var Sequence<Either<ExitCode|'signaled'|'timed-out', SideEffect>> */
-            yield Sequence::of(Either::right(new SideEffect));
+            yield Sequence::of(Either::right(SideEffect::identity));
         })->flatMap(static fn($chunks) => $chunks);
     }
 

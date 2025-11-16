@@ -13,7 +13,7 @@ use Innmind\Server\Control\Server\{
     Process\Pid
 };
 use Innmind\TimeContinuum\Clock;
-use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 use Innmind\Url\Path;
 use Psr\Log\NullLogger;
@@ -88,7 +88,7 @@ class LoggerTest extends TestCase
         return Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
     }
 }

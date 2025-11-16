@@ -515,7 +515,7 @@ class MockTest extends TestCase
                     static fn($error) => $error,
                 ),
         );
-        $this->assertCount(0, $process->output());
+        $this->assertSame(0, $process->output()->size());
         $this
             ->assert()
             ->not()

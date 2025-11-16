@@ -10,7 +10,7 @@ use Innmind\Server\Control\{
     Server\Volumes,
 };
 use Innmind\TimeContinuum\Clock;
-use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
@@ -24,7 +24,7 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(Server::class, Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         ));
     }
 
@@ -35,7 +35,7 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(Processes::class, Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         )->processes());
     }
 
@@ -46,7 +46,7 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(Volumes::class, Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         )->volumes());
     }
 }

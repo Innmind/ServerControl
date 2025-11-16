@@ -13,7 +13,7 @@ use Innmind\TimeContinuum\{
     Clock,
     Period,
 };
-use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
@@ -79,7 +79,7 @@ class ScriptTest extends TestCase
         return Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
     }
 }

@@ -16,7 +16,7 @@ use Innmind\TimeContinuum\{
     Clock,
     Period,
 };
-use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 use Innmind\Immutable\{
     SideEffect,
@@ -34,7 +34,7 @@ class UnixTest extends TestCase
         $this->assertInstanceOf(Processes::class, Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         ));
     }
 
@@ -45,7 +45,7 @@ class UnixTest extends TestCase
         $processes = Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
         $start = \time();
         $process = $processes->execute(
@@ -66,7 +66,7 @@ class UnixTest extends TestCase
         $processes = Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
         $start = \time();
         $process = $processes->execute(
@@ -88,7 +88,7 @@ class UnixTest extends TestCase
         $processes = Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
         $process = $processes->execute(
             Command::foreground('cat')->withInput(Content::oneShot(
@@ -120,7 +120,7 @@ class UnixTest extends TestCase
         $processes = Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
         $start = \time();
         $process = $processes->execute(
@@ -153,7 +153,7 @@ class UnixTest extends TestCase
         $processes = Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
         $start = \time();
         $process = $processes->execute(
@@ -181,7 +181,7 @@ class UnixTest extends TestCase
         $processes = Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
         $processes
             ->execute(
@@ -206,7 +206,7 @@ class UnixTest extends TestCase
         $processes = Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
         $process = $processes
             ->execute(
@@ -230,7 +230,7 @@ class UnixTest extends TestCase
         $processes = Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
         $process = $processes
             ->execute(
@@ -257,7 +257,7 @@ class UnixTest extends TestCase
         $processes = Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
         $tail = $processes->execute(
             Command::foreground('tail')
@@ -284,7 +284,7 @@ class UnixTest extends TestCase
         $processes = Unix::of(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
 
         $this->assertTrue(

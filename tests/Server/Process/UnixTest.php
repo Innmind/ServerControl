@@ -15,7 +15,7 @@ use Innmind\TimeContinuum\{
     Clock,
     Period,
 };
-use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\TimeWarp\Halt;
 use Innmind\Url\Path;
 use Innmind\IO\IO;
 use Innmind\Immutable\{
@@ -40,7 +40,7 @@ class UnixTest extends TestCase
         $cat = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('echo')->withArgument('hello'),
         );
@@ -71,7 +71,7 @@ class UnixTest extends TestCase
                 $cat = new Unix(
                     Clock::live(),
                     IO::fromAmbientAuthority(),
-                    Usleep::new(),
+                    Halt::new(),
                     Period::second(1),
                     Command::foreground('echo')->withArgument($echo),
                 );
@@ -94,7 +94,7 @@ class UnixTest extends TestCase
         $slow = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
@@ -122,7 +122,7 @@ class UnixTest extends TestCase
         $slow = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
@@ -161,7 +161,7 @@ class UnixTest extends TestCase
         $slow = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
@@ -196,7 +196,7 @@ class UnixTest extends TestCase
         $cat = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('echo')->withArgument('hello'),
         );
@@ -221,7 +221,7 @@ class UnixTest extends TestCase
         $cat = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/fails.php')
@@ -249,7 +249,7 @@ class UnixTest extends TestCase
         $cat = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('cat')->withInput(Content::oneShot(
                 IO::fromAmbientAuthority()
@@ -277,7 +277,7 @@ class UnixTest extends TestCase
         $cat = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('cat')
                 ->withInput(Content::oneShot(
