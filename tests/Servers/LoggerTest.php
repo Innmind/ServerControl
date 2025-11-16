@@ -4,22 +4,15 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Servers;
 
 use Innmind\Server\Control\{
-    Servers\Logger,
     Server,
     Server\Processes,
-    Server\Processes\Unix,
-    Server\Process\Pid,
     Server\Command,
     Server\Volumes,
-    Server\Signal,
 };
 use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
-use Innmind\Immutable\{
-    Attempt,
-    SideEffect,
-};
+use Innmind\Immutable\SideEffect;
 use Psr\Log\NullLogger;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
@@ -28,30 +21,17 @@ class LoggerTest extends TestCase
 {
     #[Group('ci')]
     #[Group('local')]
-    public function testInterface()
-    {
-        $this->assertInstanceOf(
-            Server::class,
-            Logger::psr(
-                $this->server(),
-                new NullLogger,
-            ),
-        );
-    }
-
-    #[Group('ci')]
-    #[Group('local')]
     public function testProcesses()
     {
         $server = $this->server('ls');
 
-        $logger = Logger::psr(
+        $logger = Server::logger(
             $server,
             new NullLogger,
         );
 
         $this->assertInstanceOf(
-            Processes\Logger::class,
+            Processes::class,
             $logger->processes(),
         );
         $logger->processes()->execute(Command::foreground('ls'));
@@ -63,7 +43,7 @@ class LoggerTest extends TestCase
     {
         $server = $this->server('which diskutil', "diskutil 'unmount' '/dev'");
 
-        $logger = Logger::psr(
+        $logger = Server::logger(
             $server,
             new NullLogger,
         );
@@ -81,7 +61,7 @@ class LoggerTest extends TestCase
     {
         $server = $this->server('sudo shutdown -r now');
 
-        $logger = Logger::psr(
+        $logger = Server::logger(
             $server,
             new NullLogger,
         );
@@ -101,7 +81,7 @@ class LoggerTest extends TestCase
     {
         $server = $this->server('sudo shutdown -h now');
 
-        $logger = Logger::psr(
+        $logger = Server::logger(
             $server,
             new NullLogger,
         );
@@ -117,64 +97,23 @@ class LoggerTest extends TestCase
 
     private function server(string ...$commands): Server
     {
-        return new class($this->processes(), $this, $commands) implements Server {
-            private $inner;
-
-            public function __construct(
-                private $processes,
-                private $test,
-                private $commands,
-            ) {
-            }
-
-            public function processes(): Processes
-            {
-                return $this->inner ??= new class($this->processes, $this->test, $this->commands) implements Processes {
-                    public function __construct(
-                        private $processes,
-                        private $test,
-                        private $commands,
-                    ) {
-                    }
-
-                    public function execute(Command $command): Attempt
-                    {
-                        $expected = \array_shift($this->commands);
-                        $this->test->assertNotNull($expected);
-                        $this->test->assertSame(
-                            $expected,
-                            $command->toString(),
-                        );
-
-                        return $this->processes->execute(Command::foreground('echo'));
-                    }
-
-                    public function kill(Pid $pid, Signal $signal): Attempt
-                    {
-                    }
-                };
-            }
-
-            public function volumes(): Volumes
-            {
-            }
-
-            public function reboot(): Attempt
-            {
-            }
-
-            public function shutdown(): Attempt
-            {
-            }
-        };
-    }
-
-    private function processes(): Unix
-    {
-        return Unix::of(
+        $processes = Server::new(
             Clock::live(),
             IO::fromAmbientAuthority(),
             Halt::new(),
+        )->processes();
+
+        return Server::via(
+            function($command) use ($processes, &$commands) {
+                $expected = \array_shift($commands);
+                $this->assertNotNull($expected);
+                $this->assertSame(
+                    $expected,
+                    $command->toString(),
+                );
+
+                return $processes->execute(Command::foreground('echo'));
+            },
         );
     }
 }

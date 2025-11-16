@@ -1,15 +1,13 @@
 <?php
 declare(strict_types = 1);
 
-namespace Tests\Innmind\Server\Control\Server\Volumes;
+namespace Tests\Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\{
-    Server\Volumes\Unix,
-    Server\Volumes\Name,
-    Server\Volumes,
+    Server,
     Server\Processes,
-    Server\Process\Pid,
-    Server\Signal,
+    Server\Volumes,
+    Server\Volumes\Name,
     Server\Command,
     Exception\ProcessFailed,
 };
@@ -17,32 +15,17 @@ use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 use Innmind\Url\Path;
-use Innmind\Immutable\{
-    Attempt,
-    SideEffect,
-};
+use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 
-class UnixTest extends TestCase
+class VolumesTest extends TestCase
 {
-    #[Group('ci')]
-    #[Group('local')]
-    public function testInterface()
-    {
-        $this->assertInstanceOf(
-            Volumes::class,
-            new Unix(
-                $this->processes(),
-            ),
-        );
-    }
-
     #[Group('ci')]
     #[Group('local')]
     public function testMountOSXVolume()
     {
-        $volumes = new Unix(
+        $volumes = Volumes::of(
             $this->processes(
                 ['which diskutil', true],
                 ["diskutil 'mount' '/dev/disk1s2'", true],
@@ -65,7 +48,7 @@ class UnixTest extends TestCase
     #[Group('local')]
     public function testThrowWhenFailToMountOSXVolume()
     {
-        $volumes = new Unix(
+        $volumes = Volumes::of(
             $this->processes(
                 ['which diskutil', true],
                 ["diskutil 'mount' '/dev/disk1s2'", false],
@@ -88,7 +71,7 @@ class UnixTest extends TestCase
     #[Group('local')]
     public function testUnmountOSXVolume()
     {
-        $volumes = new Unix(
+        $volumes = Volumes::of(
             $this->processes(
                 ['which diskutil', true],
                 ["diskutil 'unmount' '/dev/disk1s2'", true],
@@ -108,7 +91,7 @@ class UnixTest extends TestCase
     #[Group('local')]
     public function testReturnErrorWhenFailToUnmountOSXVolume()
     {
-        $volumes = new Unix(
+        $volumes = Volumes::of(
             $this->processes(
                 ['which diskutil', true],
                 ["diskutil 'unmount' '/dev/disk1s2'", false],
@@ -128,7 +111,7 @@ class UnixTest extends TestCase
     #[Group('local')]
     public function testMountLinuxVolume()
     {
-        $volumes = new Unix(
+        $volumes = Volumes::of(
             $this->processes(
                 ['which diskutil', false],
                 ["mount '/dev/disk1s2' '/somewhere'", true],
@@ -151,7 +134,7 @@ class UnixTest extends TestCase
     #[Group('local')]
     public function testReturnErrorWhenFailToMountLinuxVolume()
     {
-        $volumes = new Unix(
+        $volumes = Volumes::of(
             $this->processes(
                 ['which diskutil', false],
                 ["mount '/dev/disk1s2' '/somewhere'", false],
@@ -174,7 +157,7 @@ class UnixTest extends TestCase
     #[Group('local')]
     public function testUnmountLinuxVolume()
     {
-        $volumes = new Unix(
+        $volumes = Volumes::of(
             $this->processes(
                 ['which diskutil', false],
                 ["umount '/dev/disk1s2'", true],
@@ -194,7 +177,7 @@ class UnixTest extends TestCase
     #[Group('local')]
     public function testReturnErrorWhenFailToUnmountLinuxVolume()
     {
-        $volumes = new Unix(
+        $volumes = Volumes::of(
             $this->processes(
                 ['which diskutil', false],
                 ["umount '/dev/disk1s2'", false],
@@ -212,39 +195,27 @@ class UnixTest extends TestCase
 
     private function processes(array ...$commands): Processes
     {
-        $processes = Processes\Unix::of(
+        $processes = Server::new(
             Clock::live(),
             IO::fromAmbientAuthority(),
             Halt::new(),
-        );
+        )->processes();
 
-        return new class($processes, $this, $commands) implements Processes {
-            public function __construct(
-                private $processes,
-                private $test,
-                private $commands,
-            ) {
-            }
-
-            public function execute(Command $command): Attempt
-            {
-                $expected = \array_shift($this->commands);
-                $this->test->assertNotNull($expected);
+        return Server::via(
+            function($command) use ($processes, &$commands) {
+                $expected = \array_shift($commands);
+                $this->assertNotNull($expected);
                 [$expected, $success] = $expected;
-                $this->test->assertSame(
+                $this->assertSame(
                     $expected,
                     $command->toString(),
                 );
 
-                return $this->processes->execute(Command::foreground(match ($success) {
+                return $processes->execute(Command::foreground(match ($success) {
                     true => 'echo',
                     false => 'unknown',
                 }));
-            }
-
-            public function kill(Pid $pid, Signal $signal): Attempt
-            {
-            }
-        };
+            },
+        )->processes();
     }
 }

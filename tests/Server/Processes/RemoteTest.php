@@ -3,13 +3,12 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Processes;
 
-use Innmind\Server\Control\Server\{
-    Processes\Remote,
-    Processes,
-    Process,
-    Command,
-    Signal,
-    Process\Pid,
+use Innmind\Server\Control\{
+    Server,
+    Server\Process,
+    Server\Command,
+    Server\Signal,
+    Server\Process\Pid,
 };
 use Innmind\TimeContinuum\Clock;
 use Innmind\TimeWarp\Halt;
@@ -20,10 +19,7 @@ use Innmind\Url\{
     Authority\Port,
     Authority\UserInformation\User
 };
-use Innmind\Immutable\{
-    Attempt,
-    SideEffect,
-};
+use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;
 
@@ -31,27 +27,13 @@ class RemoteTest extends TestCase
 {
     #[Group('ci')]
     #[Group('local')]
-    public function testInterface()
-    {
-        $this->assertInstanceOf(
-            Processes::class,
-            new Remote(
-                $this->processes(),
-                User::none(),
-                Host::of('example.com'),
-            ),
-        );
-    }
-
-    #[Group('ci')]
-    #[Group('local')]
     public function testExecute()
     {
-        $remote = new Remote(
-            $this->processes("ssh 'foo@example.com' 'ls '\''-l'\'''"),
+        $remote = Server::remote(
+            $this->server("ssh 'foo@example.com' 'ls '\''-l'\'''"),
             User::of('foo'),
             Host::of('example.com'),
-        );
+        )->processes();
 
         $this->assertInstanceOf(
             Process::class,
@@ -65,12 +47,12 @@ class RemoteTest extends TestCase
     #[Group('local')]
     public function testExecuteViaSpecificPort()
     {
-        $remote = new Remote(
-            $this->processes("ssh '-p' '24' 'foo@example.com' 'ls '\''-l'\'''"),
+        $remote = Server::remote(
+            $this->server("ssh '-p' '24' 'foo@example.com' 'ls '\''-l'\'''"),
             User::of('foo'),
             Host::of('example.com'),
             Port::of(24),
-        );
+        )->processes();
 
         $this->assertInstanceOf(
             Process::class,
@@ -84,11 +66,11 @@ class RemoteTest extends TestCase
     #[Group('local')]
     public function testExecuteWithWorkingDirectory()
     {
-        $remote = new Remote(
-            $this->processes("ssh 'foo@example.com' 'cd /tmp/foo && ls '\''-l'\'''"),
+        $remote = Server::remote(
+            $this->server("ssh 'foo@example.com' 'cd /tmp/foo && ls '\''-l'\'''"),
             User::of('foo'),
             Host::of('example.com'),
-        );
+        )->processes();
 
         $this->assertInstanceOf(
             Process::class,
@@ -104,11 +86,11 @@ class RemoteTest extends TestCase
     #[Group('local')]
     public function testKill()
     {
-        $remote = new Remote(
-            $this->processes("ssh 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''"),
+        $remote = Server::remote(
+            $this->server("ssh 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''"),
             User::of('foo'),
             Host::of('example.com'),
-        );
+        )->processes();
 
         $this->assertInstanceOf(
             SideEffect::class,
@@ -123,12 +105,12 @@ class RemoteTest extends TestCase
     #[Group('local')]
     public function testKillViaSpecificPort()
     {
-        $remote = new Remote(
-            $this->processes("ssh '-p' '24' 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''"),
+        $remote = Server::remote(
+            $this->server("ssh '-p' '24' 'foo@example.com' 'kill '\''-9'\'' '\''42'\'''"),
             User::of('foo'),
             Host::of('example.com'),
             Port::of(24),
-        );
+        )->processes();
 
         $this->assertInstanceOf(
             SideEffect::class,
@@ -139,37 +121,25 @@ class RemoteTest extends TestCase
         );
     }
 
-    private function processes(string ...$commands): Processes
+    private function server(string ...$commands): Server
     {
-        $processes = Processes\Unix::of(
+        $processes = Server::new(
             Clock::live(),
             IO::fromAmbientAuthority(),
             Halt::new(),
-        );
+        )->processes();
 
-        return new class($processes, $this, $commands) implements Processes {
-            public function __construct(
-                private $processes,
-                private $test,
-                private $commands,
-            ) {
-            }
-
-            public function execute(Command $command): Attempt
-            {
-                $expected = \array_shift($this->commands);
-                $this->test->assertNotNull($expected);
-                $this->test->assertSame(
+        return Server::via(
+            function($command) use ($processes, &$commands) {
+                $expected = \array_shift($commands);
+                $this->assertNotNull($expected);
+                $this->assertSame(
                     $expected,
                     $command->toString(),
                 );
 
-                return $this->processes->execute(Command::foreground('echo'));
-            }
-
-            public function kill(Pid $pid, Signal $signal): Attempt
-            {
-            }
-        };
+                return $processes->execute(Command::foreground('echo'));
+            },
+        );
     }
 }
