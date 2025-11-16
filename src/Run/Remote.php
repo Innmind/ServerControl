@@ -1,39 +1,33 @@
 <?php
 declare(strict_types = 1);
 
-namespace Innmind\Server\Control\Server\Processes;
+namespace Innmind\Server\Control\Run;
 
 use Innmind\Server\Control\{
-    Server\Processes,
     Server\Command,
-    Server\Signal,
-    Server\Process\Pid,
 };
 use Innmind\Url\Authority\{
     Host,
     Port,
     UserInformation\User,
 };
-use Innmind\Immutable\{
-    Attempt,
-    SideEffect,
-};
+use Innmind\Immutable\Attempt;
 
-final class Remote implements Processes
+/**
+ * @internal
+ */
+final class Remote implements Implementation
 {
-    private Processes $processes;
+    private Implementation $run;
     private Command $command;
 
-    /**
-     * @internal
-     */
-    public function __construct(
-        Processes $processes,
+    private function __construct(
+        Implementation $run,
         User $user,
         Host $host,
         ?Port $port = null,
     ) {
-        $this->processes = $processes;
+        $this->run = $run;
         $command = Command::foreground('ssh');
 
         if ($port instanceof Port) {
@@ -48,7 +42,7 @@ final class Remote implements Processes
     }
 
     #[\Override]
-    public function execute(Command $command): Attempt
+    public function __invoke(Command $command): Attempt
     {
         /** @psalm-suppress ArgumentTypeCoercion Due psalm not understing that $bash cannot be empty */
         $command = $command
@@ -63,22 +57,25 @@ final class Remote implements Processes
                 static fn() => $command,
             );
 
-        return $this
-            ->processes
-            ->execute(
-                $this->command->withArgument($command->toString()),
-            );
+        return ($this->run)(
+            $this->command->withArgument($command->toString()),
+        );
     }
 
-    #[\Override]
-    public function kill(Pid $pid, Signal $signal): Attempt
-    {
-        return $this
-            ->execute(
-                $command = Command::foreground('kill')
-                    ->withShortOption($signal->toString())
-                    ->withArgument($pid->toString()),
-            )
-            ->map(static fn() => SideEffect::identity());
+    /**
+     * @internal
+     */
+    public static function of(
+        Implementation $run,
+        User $user,
+        Host $host,
+        ?Port $port = null,
+    ): self {
+        return new self(
+            $run,
+            $user,
+            $host,
+            $port,
+        );
     }
 }

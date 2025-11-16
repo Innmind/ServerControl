@@ -4,10 +4,6 @@ declare(strict_types = 1);
 namespace Innmind\Server\Control;
 
 use Innmind\Server\Control\{
-    Servers\Implementation,
-    Servers\Unix,
-    Servers\Remote,
-    Servers\Logger,
     Server\Processes,
     Server\Volumes,
     Server\Script,
@@ -33,7 +29,7 @@ use Psr\Log\LoggerInterface;
 final class Server
 {
     private function __construct(
-        private Implementation $implementation,
+        private Run\Implementation $run,
     ) {
     }
 
@@ -46,7 +42,7 @@ final class Server
         Halt $halt,
         ?Period $grace = null,
     ): self {
-        return new self(Unix::of(
+        return new self(Run\Unix::of(
             $clock,
             $io,
             $halt,
@@ -60,8 +56,8 @@ final class Server
         Host $host,
         ?Port $port = null,
     ): self {
-        return new self(Remote::of(
-            $server->implementation,
+        return new self(Run\Remote::of(
+            $server->run,
             $user,
             $host,
             $port,
@@ -70,8 +66,8 @@ final class Server
 
     public static function logger(self $server, LoggerInterface $logger): self
     {
-        return new self(Logger::psr(
-            $server->implementation,
+        return new self(Run\Logger::psr(
+            $server->run,
             $logger,
         ));
     }
@@ -79,7 +75,7 @@ final class Server
     #[\NoDiscard]
     public function processes(): Processes
     {
-        return $this->implementation->processes();
+        return Processes::of($this->run);
     }
 
     #[\NoDiscard]

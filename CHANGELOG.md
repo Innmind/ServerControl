@@ -7,6 +7,7 @@
 - Requires PHP `8.4`
 - `Innmind\Server\Control\Server` is now a final class, all previous implementations are now flagged as internal
 - `Innmind\Server\Control\Server\Volumes` is now a final class
+- `Innmind\Server\Control\Server\Processes` is now a final class
 
 ## 6.1.0 - 2025-08-06
 
