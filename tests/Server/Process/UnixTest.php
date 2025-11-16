@@ -59,15 +59,15 @@ class UnixTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    public function testOutput()
+    public function testOutput(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Set::strings()
                     ->madeOf(Set::strings()->chars()->ascii()->filter(static fn($char) => $char !== '\\'))
                     ->between(1, 126),
             )
-            ->then(function($echo) {
+            ->prove(function($echo) {
                 $cat = new Unix(
                     Clock::live(),
                     IO::fromAmbientAuthority(),

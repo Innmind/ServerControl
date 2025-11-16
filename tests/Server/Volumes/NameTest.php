@@ -17,11 +17,11 @@ class NameTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    public function testInterface()
+    public function testInterface(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set::strings()->atLeast(1))
-            ->then(function($name) {
+            ->prove(function($name) {
                 $this->assertSame($name, Name::of($name)->toString());
             });
     }
