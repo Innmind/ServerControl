@@ -4,10 +4,8 @@ declare(strict_types = 1);
 namespace Innmind\Server\Control\Servers;
 
 use Innmind\Server\Control\{
-    Server,
     Server\Processes,
     Server\Volumes,
-    Server\Command,
 };
 use Innmind\TimeContinuum\{
     Clock,
@@ -15,9 +13,11 @@ use Innmind\TimeContinuum\{
 };
 use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
-use Innmind\Immutable\Attempt;
 
-final class Unix implements Server
+/**
+ * @internal
+ */
+final class Unix implements Implementation
 {
     private Processes $processes;
     private Volumes $volumes;
@@ -59,17 +59,5 @@ final class Unix implements Server
     public function volumes(): Volumes
     {
         return $this->volumes;
-    }
-
-    #[\Override]
-    public function reboot(): Attempt
-    {
-        return Server\Script::of(Command::foreground('sudo shutdown -r now'))($this);
-    }
-
-    #[\Override]
-    public function shutdown(): Attempt
-    {
-        return Server\Script::of(Command::foreground('sudo shutdown -h now'))($this);
     }
 }

@@ -4,25 +4,25 @@ declare(strict_types = 1);
 namespace Innmind\Server\Control\Servers;
 
 use Innmind\Server\Control\{
-    Server,
     Server\Processes,
     Server\Volumes,
-    Server\Command,
 };
 use Innmind\Url\Authority\{
     Host,
     Port,
     UserInformation\User,
 };
-use Innmind\Immutable\Attempt;
 
-final class Remote implements Server
+/**
+ * @internal
+ */
+final class Remote implements Implementation
 {
     private Processes $processes;
     private Volumes $volumes;
 
     private function __construct(
-        Server $server,
+        Implementation $server,
         User $user,
         Host $host,
         ?Port $port = null,
@@ -37,7 +37,7 @@ final class Remote implements Server
     }
 
     public static function of(
-        Server $server,
+        Implementation $server,
         User $user,
         Host $host,
         ?Port $port = null,
@@ -55,17 +55,5 @@ final class Remote implements Server
     public function volumes(): Volumes
     {
         return $this->volumes;
-    }
-
-    #[\Override]
-    public function reboot(): Attempt
-    {
-        return Server\Script::of(Command::foreground('sudo shutdown -r now'))($this);
-    }
-
-    #[\Override]
-    public function shutdown(): Attempt
-    {
-        return Server\Script::of(Command::foreground('sudo shutdown -h now'))($this);
     }
 }

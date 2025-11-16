@@ -4,21 +4,21 @@ declare(strict_types = 1);
 namespace Innmind\Server\Control\Servers;
 
 use Innmind\Server\Control\{
-    Server,
     Server\Processes,
     Server\Volumes,
-    Server\Command,
 };
-use Innmind\Immutable\Attempt;
 use Psr\Log\LoggerInterface;
 
-final class Logger implements Server
+/**
+ * @internal
+ */
+final class Logger implements Implementation
 {
     private Processes $processes;
     private Volumes $volumes;
 
     private function __construct(
-        Server $server,
+        Implementation $server,
         LoggerInterface $logger,
     ) {
         $this->processes = Processes\Logger::psr(
@@ -28,7 +28,7 @@ final class Logger implements Server
         $this->volumes = new Volumes\Unix($this->processes);
     }
 
-    public static function psr(Server $server, LoggerInterface $logger): self
+    public static function psr(Implementation $server, LoggerInterface $logger): self
     {
         return new self($server, $logger);
     }
@@ -43,17 +43,5 @@ final class Logger implements Server
     public function volumes(): Volumes
     {
         return $this->volumes;
-    }
-
-    #[\Override]
-    public function reboot(): Attempt
-    {
-        return Server\Script::of(Command::foreground('sudo shutdown -r now'))($this);
-    }
-
-    #[\Override]
-    public function shutdown(): Attempt
-    {
-        return Server\Script::of(Command::foreground('sudo shutdown -h now'))($this);
     }
 }

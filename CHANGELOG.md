@@ -5,6 +5,7 @@
 ### Changed
 
 - Requires PHP `8.4`
+- `Innmind\Server\Control\Server` is now a final class, all previous implementations are now flagged as internal
 
 ## 6.1.0 - 2025-08-06
 
