@@ -85,7 +85,7 @@ final class Server
     #[\NoDiscard]
     public function volumes(): Volumes
     {
-        return $this->implementation->volumes();
+        return Volumes::of($this->processes());
     }
 
     /**

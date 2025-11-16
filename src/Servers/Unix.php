@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Servers;
 
-use Innmind\Server\Control\{
-    Server\Processes,
-    Server\Volumes,
-};
+use Innmind\Server\Control\Server\Processes;
 use Innmind\TimeContinuum\{
     Clock,
     Period,
@@ -20,7 +17,6 @@ use Innmind\IO\IO;
 final class Unix implements Implementation
 {
     private Processes $processes;
-    private Volumes $volumes;
 
     private function __construct(
         Clock $clock,
@@ -34,7 +30,6 @@ final class Unix implements Implementation
             $halt,
             $grace,
         );
-        $this->volumes = new Volumes\Unix($this->processes);
     }
 
     /**
@@ -53,11 +48,5 @@ final class Unix implements Implementation
     public function processes(): Processes
     {
         return $this->processes;
-    }
-
-    #[\Override]
-    public function volumes(): Volumes
-    {
-        return $this->volumes;
     }
 }

@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Servers;
 
-use Innmind\Server\Control\{
-    Server\Processes,
-    Server\Volumes,
-};
+use Innmind\Server\Control\Server\Processes;
 use Innmind\Url\Authority\{
     Host,
     Port,
@@ -19,7 +16,6 @@ use Innmind\Url\Authority\{
 final class Remote implements Implementation
 {
     private Processes $processes;
-    private Volumes $volumes;
 
     private function __construct(
         Implementation $server,
@@ -33,7 +29,6 @@ final class Remote implements Implementation
             $host,
             $port,
         );
-        $this->volumes = new Volumes\Unix($this->processes);
     }
 
     public static function of(
@@ -49,11 +44,5 @@ final class Remote implements Implementation
     public function processes(): Processes
     {
         return $this->processes;
-    }
-
-    #[\Override]
-    public function volumes(): Volumes
-    {
-        return $this->volumes;
     }
 }
