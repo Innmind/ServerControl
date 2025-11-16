@@ -6,6 +6,7 @@ namespace Innmind\Server\Control;
 use Innmind\Server\Control\{
     Server\Processes,
     Server\Volumes,
+    Server\Process,
     Server\Script,
     Server\Command,
 };
@@ -70,6 +71,16 @@ final class Server
             $server->run,
             $logger,
         ));
+    }
+
+    /**
+     * @internal
+     *
+     * @param callable(Command): Attempt<Process> $run
+     */
+    public static function via(callable $run): self
+    {
+        return new self(Run\Via::of($run));
     }
 
     #[\NoDiscard]
