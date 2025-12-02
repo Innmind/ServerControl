@@ -12,7 +12,12 @@ use Innmind\Server\Control\{
 };
 use Innmind\TimeContinuum\Period;
 use Innmind\Filesystem\File\Content;
-use Innmind\Url\Path;
+use Innmind\Url\{
+    Path,
+    Authority\Host,
+    Authority\Port,
+    Authority\UserInformation\User,
+};
 use Innmind\Immutable\{
     Sequence,
     Map,
@@ -233,6 +238,36 @@ final class Command
         $self->streamOutput = true;
 
         return $self;
+    }
+
+    #[\NoDiscard]
+    public function overSsh(User $user, Host $host, ?Port $port = null): self
+    {
+        $ssh = self::foreground('ssh');
+
+        if ($port instanceof Port) {
+            $ssh = $ssh->withShortOption('p', $port->toString());
+        }
+
+        $ssh = $ssh->withArgument(\sprintf(
+            '%s@%s',
+            $user->toString(),
+            $host->toString(),
+        ));
+
+        $self = $this
+            ->workingDirectory()
+            ->map(fn($path) => \sprintf(
+                'cd %s && %s',
+                $path->toString(),
+                $this->toString(),
+            ))
+            ->match(
+                static fn($bash) => self::foreground($bash),
+                fn() => $this,
+            );
+
+        return $ssh->withArgument($self->toString());
     }
 
     /**
