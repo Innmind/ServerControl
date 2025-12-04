@@ -18,23 +18,47 @@ use Innmind\Immutable\Attempt;
  */
 final class Remote implements Implementation
 {
+    private Implementation $run;
+    private Command $command;
+
     private function __construct(
-        private Implementation $run,
-        private User $user,
-        private Host $host,
-        private ?Port $port = null,
+        Implementation $run,
+        User $user,
+        Host $host,
+        ?Port $port = null,
     ) {
+        $this->run = $run;
+        $command = Command::foreground('ssh');
+
+        if ($port instanceof Port) {
+            $command = $command->withShortOption('p', $port->toString());
+        }
+
+        $this->command = $command->withArgument(\sprintf(
+            '%s@%s',
+            $user->toString(),
+            $host->toString(),
+        ));
     }
 
     #[\Override]
     public function __invoke(Command $command): Attempt
     {
+        /** @psalm-suppress ArgumentTypeCoercion Due psalm not understing that $bash cannot be empty */
+        $command = $command
+            ->workingDirectory()
+            ->map(static fn($path) => \sprintf(
+                'cd %s && %s',
+                $path->toString(),
+                $command->toString(),
+            ))
+            ->match(
+                static fn($bash) => Command::foreground($bash),
+                static fn() => $command,
+            );
+
         return ($this->run)(
-            $command->overSsh(
-                $this->user,
-                $this->host,
-                $this->port,
-            ),
+            $this->command->withArgument($command->toString()),
         );
     }
 

@@ -2,10 +2,6 @@
 
 ## [Unreleased]
 
-### Added
-
-- `Innmind\Server\Control\Server\Command::overSsh()`
-
 ### Changed
 
 - Requires PHP `8.4`
