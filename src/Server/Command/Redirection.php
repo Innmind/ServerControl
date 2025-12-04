@@ -57,6 +57,6 @@ final class Redirection
         return (match ($this->append) {
             true => '>>',
             false => '>',
-        }).' '.(new Str($this->path->toString()))->toString();
+        }).' '.Str::escape($this->path->toString());
     }
 }

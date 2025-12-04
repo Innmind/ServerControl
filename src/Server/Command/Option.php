@@ -64,15 +64,15 @@ final class Option
             $string .= '='.$this->value;
         }
 
-        return (new Str($string))->toString();
+        return Str::escape($string);
     }
 
     private function shortString(): string
     {
-        $string = (new Str('-'.$this->key))->toString();
+        $string = Str::escape('-'.$this->key);
 
         if (\is_string($this->value)) {
-            $string .= ' '.(new Str($this->value))->toString();
+            $string .= ' '.Str::escape($this->value);
         }
 
         return $string;

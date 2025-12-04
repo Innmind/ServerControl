@@ -20,6 +20,6 @@ final class Argument
 
     public function toString(): string
     {
-        return (new Str($this->value))->toString();
+        return Str::escape($this->value);
     }
 }

@@ -6,31 +6,21 @@ namespace Innmind\Server\Control\Server\Command;
 use Innmind\Immutable\Str as S;
 
 /**
- * @psalm-immutable
  * @internal
  */
 final class Str
 {
-    private string $value;
-
-    public function __construct(string $string)
-    {
-        $this->value = $this->escape(S::of($string))->toString();
-    }
-
-    public function toString(): string
-    {
-        return $this->value;
-    }
-
     /**
+     * @psalm-pure
+     * @internal
      * @see Symfony\Component\Process\Process::escapeArgument()
      */
-    private function escape(S $string): S
+    public static function escape(string $string): string
     {
-        return $string
+        return S::of($string)
             ->replace("'", "'\\''")
             ->prepend("'")
-            ->append("'");
+            ->append("'")
+            ->toString();
     }
 }

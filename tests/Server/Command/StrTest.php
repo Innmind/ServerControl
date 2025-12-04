@@ -17,7 +17,7 @@ class StrTest extends TestCase
     #[Group('local')]
     public function testInterface(string $str, string $expected)
     {
-        $this->assertSame($expected, (new Str($str))->toString());
+        $this->assertSame($expected, Str::escape($str));
     }
 
     public static function cases(): array
