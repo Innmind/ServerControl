@@ -15,7 +15,7 @@ final class Option
     private function __construct(
         private bool $long,
         private string $key,
-        private ?string $value = null,
+        private ?string $value,
     ) {
     }
 
@@ -35,6 +35,16 @@ final class Option
     public static function short(string $key, ?string $value = null): self
     {
         return new self(false, $key, $value);
+    }
+
+    public function key(): string
+    {
+        return $this->key;
+    }
+
+    public function value(): ?string
+    {
+        return $this->value;
     }
 
     public function toString(): string

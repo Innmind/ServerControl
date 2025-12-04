@@ -11,15 +11,17 @@ use Innmind\Url\Path;
  */
 final class Overwrite
 {
-    private string $value;
-
-    public function __construct(Path $path)
+    public function __construct(private Path $path)
     {
-        $this->value = '> '.(new Argument($path->toString()))->toString();
+    }
+
+    public function path(): Path
+    {
+        return $this->path;
     }
 
     public function toString(): string
     {
-        return $this->value;
+        return '> '.(new Argument($this->path->toString()))->toString();
     }
 }

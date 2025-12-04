@@ -9,15 +9,17 @@ namespace Innmind\Server\Control\Server\Command;
  */
 final class Argument
 {
-    private string $value;
-
-    public function __construct(string $value)
+    public function __construct(private string $value)
     {
-        $this->value = (new Str($value))->toString();
+    }
+
+    public function unescaped(): string
+    {
+        return $this->value;
     }
 
     public function toString(): string
     {
-        return $this->value;
+        return (new Str($this->value))->toString();
     }
 }
