@@ -22,7 +22,7 @@ final class Definition implements Implementation
 {
     /**
      * @param non-empty-string $executable
-     * @param Sequence<Parameter> $parameters
+     * @param Sequence<Argument|Option> $parameters
      * @param Map<string, string> $environment
      * @param Maybe<Path> $workingDirectory
      * @param Maybe<Content> $input
@@ -284,7 +284,7 @@ final class Definition implements Implementation
     }
 
     /**
-     * @return Sequence<Parameter>
+     * @return Sequence<Argument|Option>
      */
     #[\NoDiscard]
     public function parameters(): Sequence
@@ -340,7 +340,10 @@ final class Definition implements Implementation
     #[\Override]
     public function toString(): string
     {
-        /** @var non-empty-string */
+        /**
+         * @psalm-suppress InvalidArgument Due to append
+         * @var non-empty-string
+         */
         return $this
             ->parameters
             ->append($this->redirection->toSequence())

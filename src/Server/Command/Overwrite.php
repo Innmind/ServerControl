@@ -9,7 +9,7 @@ use Innmind\Url\Path;
  * @psalm-immutable
  * @internal
  */
-final class Overwrite implements Parameter
+final class Overwrite
 {
     private string $value;
 
@@ -18,7 +18,6 @@ final class Overwrite implements Parameter
         $this->value = '> '.(new Argument($path->toString()))->toString();
     }
 
-    #[\Override]
     public function toString(): string
     {
         return $this->value;

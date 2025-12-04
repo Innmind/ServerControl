@@ -7,7 +7,7 @@ namespace Innmind\Server\Control\Server\Command;
  * @psalm-immutable
  * @internal
  */
-final class Option implements Parameter
+final class Option
 {
     /**
      * @param non-empty-string $key
@@ -37,7 +37,6 @@ final class Option implements Parameter
         return new self(false, $key, $value);
     }
 
-    #[\Override]
     public function toString(): string
     {
         if ($this->long) {

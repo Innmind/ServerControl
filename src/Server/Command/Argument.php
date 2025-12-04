@@ -7,7 +7,7 @@ namespace Innmind\Server\Control\Server\Command;
  * @psalm-immutable
  * @internal
  */
-final class Argument implements Parameter
+final class Argument
 {
     private string $value;
 
@@ -16,7 +16,6 @@ final class Argument implements Parameter
         $this->value = (new Str($value))->toString();
     }
 
-    #[\Override]
     public function toString(): string
     {
         return $this->value;

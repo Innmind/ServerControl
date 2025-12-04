@@ -9,7 +9,7 @@ use Innmind\Url\Path;
  * @psalm-immutable
  * @internal
  */
-final class Append implements Parameter
+final class Append
 {
     private string $value;
 
@@ -18,7 +18,6 @@ final class Append implements Parameter
         $this->value = '>> '.(new Argument($path->toString()))->toString();
     }
 
-    #[\Override]
     public function toString(): string
     {
         return $this->value;
