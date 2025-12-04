@@ -207,7 +207,7 @@ class CommandTest extends TestCase
         $this->assertSame("cat 'foo.txt'", $commandB->toString());
         $this->assertSame("wc > 'count.txt'", $commandC->toString());
         $this->assertSame(
-            "echo 'bar' >> 'foo.txt' | 'cat' 'foo.txt' | 'wc' > 'count.txt'",
+            "echo 'bar' >> 'foo.txt' | cat 'foo.txt' | wc > 'count.txt'",
             $command->toString(),
         );
     }
