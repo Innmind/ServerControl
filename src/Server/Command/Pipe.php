@@ -32,6 +32,18 @@ final class Pipe implements Implementation
         return new self($a, $b);
     }
 
+    #[\NoDiscard]
+    public function a(): Implementation
+    {
+        return $this->a;
+    }
+
+    #[\NoDiscard]
+    public function b(): Implementation
+    {
+        return $this->b;
+    }
+
     #[\Override]
     #[\NoDiscard]
     public function withArgument(string $value): self
