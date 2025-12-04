@@ -26,7 +26,7 @@ final class Definition implements Implementation
      * @param Map<string, string> $environment
      * @param Maybe<Path> $workingDirectory
      * @param Maybe<Content> $input
-     * @param Maybe<Append>|Maybe<Overwrite> $redirection
+     * @param Maybe<Redirection> $redirection
      * @param Maybe<Period> $timeout
      */
     private function __construct(
@@ -55,7 +55,7 @@ final class Definition implements Implementation
         $workingDirectory = Maybe::nothing();
         /** @var Maybe<Content> */
         $input = Maybe::nothing();
-        /** @var Maybe<Append>|Maybe<Overwrite> */
+        /** @var Maybe<Redirection> */
         $redirection = Maybe::nothing();
         /** @var Maybe<Period> */
         $timeout = Maybe::nothing();
@@ -86,7 +86,7 @@ final class Definition implements Implementation
         $workingDirectory = Maybe::nothing();
         /** @var Maybe<Content> */
         $input = Maybe::nothing();
-        /** @var Maybe<Append>|Maybe<Overwrite> */
+        /** @var Maybe<Redirection> */
         $redirection = Maybe::nothing();
         /** @var Maybe<Period> */
         $timeout = Maybe::nothing();
@@ -217,7 +217,7 @@ final class Definition implements Implementation
             $this->environment,
             $this->workingDirectory,
             $this->input,
-            Maybe::just(new Overwrite($path)),
+            Maybe::just(Redirection::overwrite($path)),
             $this->timeout,
             $this->streamOutput,
         );
@@ -234,7 +234,7 @@ final class Definition implements Implementation
             $this->environment,
             $this->workingDirectory,
             $this->input,
-            Maybe::just(new Append($path)),
+            Maybe::just(Redirection::append($path)),
             $this->timeout,
             $this->streamOutput,
         );
@@ -293,7 +293,7 @@ final class Definition implements Implementation
     }
 
     /**
-     * @return Maybe<Overwrite>|Maybe<Append>
+     * @return Maybe<Redirection>
      */
     #[\NoDiscard]
     public function redirection(): Maybe
