@@ -21,11 +21,17 @@ final class Logger implements Implementation
     }
 
     #[\Override]
-    public function __invoke(Command $command): Attempt
+    public function __invoke(Command|Command\OverSsh $command): Attempt
     {
+        $toLog = $command;
+
+        if ($toLog instanceof Command\OverSsh) {
+            $toLog = $toLog->normalize();
+        }
+
         $this->logger->info('About to execute the {command}', [
-            'command' => $command->toString(),
-            'workingDirectory' => $command->workingDirectory()->match(
+            'command' => $toLog->toString(),
+            'workingDirectory' => $toLog->workingDirectory()->match(
                 static fn($path) => $path->toString(),
                 static fn() => null,
             ),

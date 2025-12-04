@@ -15,7 +15,7 @@ use Innmind\Immutable\Attempt;
 final class Via implements Implementation
 {
     /**
-     * @param \Closure(Command): Attempt<Process> $run
+     * @param \Closure(Command|Command\OverSsh): Attempt<Process> $run
      */
     private function __construct(
         private \Closure $run,
@@ -23,7 +23,7 @@ final class Via implements Implementation
     }
 
     #[\Override]
-    public function __invoke(Command $command): Attempt
+    public function __invoke(Command|Command\OverSsh $command): Attempt
     {
         return ($this->run)($command);
     }
@@ -31,7 +31,7 @@ final class Via implements Implementation
     /**
      * @internal
      *
-     * @param callable(Command): Attempt<Process> $run
+     * @param callable(Command|Command\OverSsh): Attempt<Process> $run
      */
     public static function of(callable $run): self
     {

@@ -29,8 +29,12 @@ final class Unix implements Implementation
     }
 
     #[\Override]
-    public function __invoke(Command $command): Attempt
+    public function __invoke(Command|Command\OverSsh $command): Attempt
     {
+        if ($command instanceof Command\OverSsh) {
+            $command = $command->normalize();
+        }
+
         return Attempt::of(function() use ($command) {
             $process = new Process\Unix(
                 $this->clock,

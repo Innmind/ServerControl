@@ -76,7 +76,7 @@ final class Server
     /**
      * @internal
      *
-     * @param callable(Command): Attempt<Process> $run
+     * @param callable(Command|Command\OverSsh): Attempt<Process> $run
      */
     public static function via(callable $run): self
     {

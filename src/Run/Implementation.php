@@ -17,5 +17,5 @@ interface Implementation
     /**
      * @return Attempt<Process>
      */
-    public function __invoke(Command $command): Attempt;
+    public function __invoke(Command|Command\OverSsh $command): Attempt;
 }
