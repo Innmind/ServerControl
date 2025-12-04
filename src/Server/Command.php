@@ -25,42 +25,26 @@ use Innmind\Immutable\{
  */
 final class Command
 {
-    /** @var non-empty-string */
-    private string $executable;
-    /** @var Sequence<Command\Parameter> */
-    private Sequence $parameters;
-    /** @var Map<string, string> */
-    private Map $environment;
-    /** @var Maybe<Path> */
-    private Maybe $workingDirectory;
-    /** @var Maybe<Content> */
-    private Maybe $input;
-    /** @var Maybe<Append>|Maybe<Overwrite> */
-    private Maybe $redirection;
-    private bool $background = false;
-    /** @var Maybe<Period> */
-    private Maybe $timeout;
-    private bool $streamOutput = false;
-
     /**
      * @param non-empty-string $executable
+     * @param Sequence<Command\Parameter> $parameters
+     * @param Map<string, string> $environment
+     * @param Maybe<Path> $workingDirectory
+     * @param Maybe<Content> $input
+     * @param Maybe<Append>|Maybe<Overwrite> $redirection
+     * @param Maybe<Period> $timeout
      */
-    private function __construct(bool $background, string $executable)
-    {
-        $this->executable = $executable;
-        $this->background = $background;
-        /** @var Sequence<Command\Parameter> */
-        $this->parameters = Sequence::of();
-        /** @var Map<string, string> */
-        $this->environment = Map::of();
-        /** @var Maybe<Path> */
-        $this->workingDirectory = Maybe::nothing();
-        /** @var Maybe<Content> */
-        $this->input = Maybe::nothing();
-        /** @var Maybe<Append>|Maybe<Overwrite> */
-        $this->redirection = Maybe::nothing();
-        /** @var Maybe<Period> */
-        $this->timeout = Maybe::nothing();
+    private function __construct(
+        private bool $background,
+        private string $executable,
+        private Sequence $parameters,
+        private Map $environment,
+        private Maybe $workingDirectory,
+        private Maybe $input,
+        private Maybe $redirection,
+        private Maybe $timeout,
+        private bool $streamOutput,
+    ) {
     }
 
     /**
@@ -77,7 +61,26 @@ final class Command
     #[\NoDiscard]
     public static function background(string $executable): self
     {
-        return new self(true, $executable);
+        /** @var Maybe<Path> */
+        $workingDirectory = Maybe::nothing();
+        /** @var Maybe<Content> */
+        $input = Maybe::nothing();
+        /** @var Maybe<Append>|Maybe<Overwrite> */
+        $redirection = Maybe::nothing();
+        /** @var Maybe<Period> */
+        $timeout = Maybe::nothing();
+
+        return new self(
+            true,
+            $executable,
+            Sequence::of(),
+            Map::of(),
+            $workingDirectory,
+            $input,
+            $redirection,
+            $timeout,
+            false,
+        );
     }
 
     /**
@@ -91,16 +94,42 @@ final class Command
     #[\NoDiscard]
     public static function foreground(string $executable): self
     {
-        return new self(false, $executable);
+        /** @var Maybe<Path> */
+        $workingDirectory = Maybe::nothing();
+        /** @var Maybe<Content> */
+        $input = Maybe::nothing();
+        /** @var Maybe<Append>|Maybe<Overwrite> */
+        $redirection = Maybe::nothing();
+        /** @var Maybe<Period> */
+        $timeout = Maybe::nothing();
+
+        return new self(
+            false,
+            $executable,
+            Sequence::of(),
+            Map::of(),
+            $workingDirectory,
+            $input,
+            $redirection,
+            $timeout,
+            false,
+        );
     }
 
     #[\NoDiscard]
     public function withArgument(string $value): self
     {
-        $self = clone $this;
-        $self->parameters = ($this->parameters)(new Argument($value));
-
-        return $self;
+        return new self(
+            $this->background,
+            $this->executable,
+            ($this->parameters)(new Argument($value)),
+            $this->environment,
+            $this->workingDirectory,
+            $this->input,
+            $this->redirection,
+            $this->timeout,
+            $this->streamOutput,
+        );
     }
 
     /**
@@ -109,10 +138,17 @@ final class Command
     #[\NoDiscard]
     public function withOption(string $key, ?string $value = null): self
     {
-        $self = clone $this;
-        $self->parameters = ($this->parameters)(Option::long($key, $value));
-
-        return $self;
+        return new self(
+            $this->background,
+            $this->executable,
+            ($this->parameters)(Option::long($key, $value)),
+            $this->environment,
+            $this->workingDirectory,
+            $this->input,
+            $this->redirection,
+            $this->timeout,
+            $this->streamOutput,
+        );
     }
 
     /**
@@ -121,10 +157,17 @@ final class Command
     #[\NoDiscard]
     public function withShortOption(string $key, ?string $value = null): self
     {
-        $self = clone $this;
-        $self->parameters = ($this->parameters)(Option::short($key, $value));
-
-        return $self;
+        return new self(
+            $this->background,
+            $this->executable,
+            ($this->parameters)(Option::short($key, $value)),
+            $this->environment,
+            $this->workingDirectory,
+            $this->input,
+            $this->redirection,
+            $this->timeout,
+            $this->streamOutput,
+        );
     }
 
     /**
@@ -133,10 +176,17 @@ final class Command
     #[\NoDiscard]
     public function withEnvironment(string $key, string $value): self
     {
-        $self = clone $this;
-        $self->environment = ($this->environment)($key, $value);
-
-        return $self;
+        return new self(
+            $this->background,
+            $this->executable,
+            $this->parameters,
+            ($this->environment)($key, $value),
+            $this->workingDirectory,
+            $this->input,
+            $this->redirection,
+            $this->timeout,
+            $this->streamOutput,
+        );
     }
 
     /**
@@ -145,75 +195,121 @@ final class Command
     #[\NoDiscard]
     public function withEnvironments(Map $values): self
     {
-        $self = clone $this;
-        $self->environment = $this->environment->merge($values);
-
-        return $self;
+        return new self(
+            $this->background,
+            $this->executable,
+            $this->parameters,
+            $this->environment->merge($values),
+            $this->workingDirectory,
+            $this->input,
+            $this->redirection,
+            $this->timeout,
+            $this->streamOutput,
+        );
     }
 
     #[\NoDiscard]
     public function withWorkingDirectory(Path $path): self
     {
-        $self = clone $this;
-        $self->workingDirectory = Maybe::just($path);
-
-        return $self;
+        return new self(
+            $this->background,
+            $this->executable,
+            $this->parameters,
+            $this->environment,
+            Maybe::just($path),
+            $this->input,
+            $this->redirection,
+            $this->timeout,
+            $this->streamOutput,
+        );
     }
 
     #[\NoDiscard]
     public function withInput(Content $input): self
     {
-        $self = clone $this;
-        $self->input = Maybe::just($input);
-
-        return $self;
+        return new self(
+            $this->background,
+            $this->executable,
+            $this->parameters,
+            $this->environment,
+            $this->workingDirectory,
+            Maybe::just($input),
+            $this->redirection,
+            $this->timeout,
+            $this->streamOutput,
+        );
     }
 
     #[\NoDiscard]
     public function overwrite(Path $path): self
     {
-        $self = clone $this;
-        $self->redirection = Maybe::just(new Overwrite($path));
-
-        return $self;
+        return new self(
+            $this->background,
+            $this->executable,
+            $this->parameters,
+            $this->environment,
+            $this->workingDirectory,
+            $this->input,
+            Maybe::just(new Overwrite($path)),
+            $this->timeout,
+            $this->streamOutput,
+        );
     }
 
     #[\NoDiscard]
     public function append(Path $path): self
     {
-        $self = clone $this;
-        $self->redirection = Maybe::just(new Append($path));
-
-        return $self;
+        return new self(
+            $this->background,
+            $this->executable,
+            $this->parameters,
+            $this->environment,
+            $this->workingDirectory,
+            $this->input,
+            Maybe::just(new Append($path)),
+            $this->timeout,
+            $this->streamOutput,
+        );
     }
 
     #[\NoDiscard]
     public function pipe(self $command): self
     {
-        $self = clone $this;
-
-        $self->parameters = $this
-            ->redirection
-            ->match(
-                fn($redirection) => ($this->parameters)($redirection),
-                fn() => $this->parameters,
-            )
-            ->add(new Pipe)
-            ->add(new Argument($command->executable))
-            ->append($command->parameters);
-        $self->environment = $this->environment->merge($command->environment);
-        $self->redirection = $command->redirection;
-
-        return $self;
+        return new self(
+            $this->background,
+            $this->executable,
+            $this
+                ->redirection
+                ->match(
+                    $this->parameters,
+                    fn() => $this->parameters,
+                )
+                ->add(new Pipe)
+                ->add(new Argument($command->executable))
+                ->append($command->parameters),
+            $this->environment->merge($command->environment),
+            $this->workingDirectory,
+            $this->input,
+            $command->redirection,
+            $this->timeout,
+            $this->streamOutput,
+        );
     }
 
     #[\NoDiscard]
     public function timeoutAfter(Period $timeout): self
     {
-        $self = clone $this;
-        $self->timeout = Maybe::just($timeout);
-
-        return $self;
+        return new self(
+            $this->background,
+            $this->executable,
+            $this->parameters,
+            $this->environment,
+            $this->workingDirectory,
+            $this->input,
+            $this->redirection,
+            Maybe::just($timeout),
+            $this->streamOutput,
+        );
     }
 
     /**
@@ -229,10 +325,17 @@ final class Command
     #[\NoDiscard]
     public function streamOutput(): self
     {
-        $self = clone $this;
-        $self->streamOutput = true;
-
-        return $self;
+        return new self(
+            $this->background,
+            $this->executable,
+            $this->parameters,
+            $this->environment,
+            $this->workingDirectory,
+            $this->input,
+            $this->redirection,
+            $this->timeout,
+            true,
+        );
     }
 
     /**
