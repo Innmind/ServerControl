@@ -247,4 +247,14 @@ final class Command
     {
         return $this->implementation->toString();
     }
+
+    /**
+     * This method is only to be used by innmind/testing
+     *
+     * @internal
+     */
+    public function internal(): Implementation
+    {
+        return $this->implementation;
+    }
 }

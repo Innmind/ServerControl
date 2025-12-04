@@ -274,6 +274,33 @@ final class Definition implements Implementation
         );
     }
 
+    /**
+     * @return non-empty-string
+     */
+    #[\NoDiscard]
+    public function executable(): string
+    {
+        return $this->executable;
+    }
+
+    /**
+     * @return Sequence<Parameter>
+     */
+    #[\NoDiscard]
+    public function parameters(): Sequence
+    {
+        return $this->parameters;
+    }
+
+    /**
+     * @return Maybe<Overwrite>|Maybe<Append>
+     */
+    #[\NoDiscard]
+    public function redirection(): Maybe
+    {
+        return $this->redirection;
+    }
+
     #[\Override]
     public function environment(): Map
     {
