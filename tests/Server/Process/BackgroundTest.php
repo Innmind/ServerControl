@@ -9,11 +9,11 @@ use Innmind\Server\Control\Server\{
     Process\Success,
     Command,
 };
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
     Period,
+    Halt,
 };
-use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\IO\IO;
 use Innmind\Immutable\Monoid\Concat;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
@@ -28,7 +28,7 @@ class BackgroundTest extends TestCase
         $process = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::background('ps'),
         );
@@ -46,7 +46,7 @@ class BackgroundTest extends TestCase
         $ps = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::background('ps'),
         );
@@ -65,7 +65,7 @@ class BackgroundTest extends TestCase
         $slow = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::background('php fixtures/slow.php'),
         );
@@ -77,7 +77,7 @@ class BackgroundTest extends TestCase
             $process
                 ->output()
                 ->map(static fn($chunk) => $chunk->data())
-                ->fold(new Concat)
+                ->fold(Concat::monoid)
                 ->toString(),
         );
         $this->assertTrue((\time() - $start) < 1);
@@ -90,7 +90,7 @@ class BackgroundTest extends TestCase
         $slow = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::background('php fixtures/slow.php'),
         );

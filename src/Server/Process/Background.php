@@ -23,7 +23,7 @@ final class Background
         // wait for the process to be started in the background otherwise the
         // process will be killed
         // this also allows to send any input to the stream
-        $process->output()->memoize();
+        $_ = $process->output()->memoize();
         $this->output = Sequence::of();
 
         // the pid returned by `$process->pid()` is the one for the "foreground"

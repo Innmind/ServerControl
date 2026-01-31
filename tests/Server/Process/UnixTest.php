@@ -3,19 +3,19 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\{
-    Server\Process\Unix,
-    Server\Process\Output\Chunk,
-    Server\Process\Output\Type,
-    Server\Process\ExitCode,
-    Server\Command,
+use Innmind\Server\Control\Server\{
+    Process\Unix,
+    Process\Output\Chunk,
+    Process\Output\Type,
+    Process\ExitCode,
+    Command,
 };
 use Innmind\Filesystem\File\Content;
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
     Period,
+    Halt,
 };
-use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\Url\Path;
 use Innmind\IO\IO;
 use Innmind\Immutable\{
@@ -40,7 +40,7 @@ class UnixTest extends TestCase
         $cat = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('echo')->withArgument('hello'),
         );
@@ -59,19 +59,19 @@ class UnixTest extends TestCase
 
     #[Group('ci')]
     #[Group('local')]
-    public function testOutput()
+    public function testOutput(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(
                 Set::strings()
                     ->madeOf(Set::strings()->chars()->ascii()->filter(static fn($char) => $char !== '\\'))
                     ->between(1, 126),
             )
-            ->then(function($echo) {
+            ->prove(function($echo) {
                 $cat = new Unix(
                     Clock::live(),
                     IO::fromAmbientAuthority(),
-                    Usleep::new(),
+                    Halt::new(),
                     Period::second(1),
                     Command::foreground('echo')->withArgument($echo),
                 );
@@ -94,7 +94,7 @@ class UnixTest extends TestCase
         $slow = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
@@ -122,7 +122,7 @@ class UnixTest extends TestCase
         $slow = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
@@ -161,7 +161,7 @@ class UnixTest extends TestCase
         $slow = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/slow.php')
@@ -196,7 +196,7 @@ class UnixTest extends TestCase
         $cat = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('echo')->withArgument('hello'),
         );
@@ -221,7 +221,7 @@ class UnixTest extends TestCase
         $cat = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('php')
                 ->withArgument('fixtures/fails.php')
@@ -249,7 +249,7 @@ class UnixTest extends TestCase
         $cat = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('cat')->withInput(Content::oneShot(
                 IO::fromAmbientAuthority()
@@ -277,7 +277,7 @@ class UnixTest extends TestCase
         $cat = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('cat')
                 ->withInput(Content::oneShot(

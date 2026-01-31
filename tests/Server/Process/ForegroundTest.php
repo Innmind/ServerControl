@@ -11,11 +11,11 @@ use Innmind\Server\Control\Server\{
     Process\Success,
     Command,
 };
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
     Period,
+    Halt,
 };
-use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\IO\IO;
 use Innmind\Immutable\Monoid\Concat;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
@@ -30,7 +30,7 @@ class ForegroundTest extends TestCase
         $ps = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('ps'),
         );
@@ -48,7 +48,7 @@ class ForegroundTest extends TestCase
         $ps = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('ps'),
         );
@@ -70,7 +70,7 @@ class ForegroundTest extends TestCase
         $slow = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
@@ -79,7 +79,7 @@ class ForegroundTest extends TestCase
 
         $start = \time();
         $count = 0;
-        $process
+        $_ = $process
             ->output()
             ->foreach(function($chunk) use ($start, &$count) {
                 $this->assertSame($count."\n", $chunk->data()->toString());
@@ -95,7 +95,7 @@ class ForegroundTest extends TestCase
             $process
                 ->output()
                 ->map(static fn($chunk) => $chunk->data())
-                ->fold(new Concat)
+                ->fold(Concat::monoid)
                 ->toString(),
         );
         $this->assertSame(6, $count);
@@ -108,7 +108,7 @@ class ForegroundTest extends TestCase
         $fail = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('php fixtures/fails.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
@@ -149,7 +149,7 @@ class ForegroundTest extends TestCase
         $slow = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
@@ -180,7 +180,7 @@ class ForegroundTest extends TestCase
         $slow = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
@@ -200,13 +200,13 @@ class ForegroundTest extends TestCase
         $slow = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
         $process = Process::foreground($slow());
-        $process->output()->memoize();
+        $_ = $process->output()->memoize();
 
         $this->assertInstanceOf(
             Success::class,
@@ -226,7 +226,7 @@ class ForegroundTest extends TestCase
         $slow = new Unix(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
             Period::second(1),
             Command::foreground('php fixtures/slow.php')
                 ->withEnvironment('PATH', $_SERVER['PATH']),
@@ -246,7 +246,7 @@ class ForegroundTest extends TestCase
             $process
                 ->output()
                 ->map(static fn($chunk) => $chunk->data())
-                ->fold(new Concat)
+                ->fold(Concat::monoid)
                 ->toString(),
         );
     }

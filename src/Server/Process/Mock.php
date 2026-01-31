@@ -15,17 +15,13 @@ use Innmind\Immutable\{
  */
 final class Mock
 {
-    /** @var int<2, max> */
-    private static int $processes = 2;
-
-    /** @var int<2, max> */
-    private int $pid;
-    private Success|Failed|Signaled|TimedOut $status;
-
-    public function __construct(Success|Failed|Signaled|TimedOut $status)
-    {
-        $this->pid = self::$processes++;
-        $this->status = $status;
+    /**
+     * @param ?int<2, max> $pid
+     */
+    public function __construct(
+        private ?int $pid,
+        private Success|Failed|Signaled|TimedOut $status,
+    ) {
     }
 
     /**
@@ -33,7 +29,7 @@ final class Mock
      */
     public function pid(): Maybe
     {
-        return Maybe::just(new Pid($this->pid));
+        return Maybe::of($this->pid)->map(static fn($pid) => new Pid($pid));
     }
 
     /**

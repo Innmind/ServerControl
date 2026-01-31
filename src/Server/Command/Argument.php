@@ -7,18 +7,19 @@ namespace Innmind\Server\Control\Server\Command;
  * @psalm-immutable
  * @internal
  */
-final class Argument implements Parameter
+final class Argument
 {
-    private string $value;
-
-    public function __construct(string $value)
+    public function __construct(private string $value)
     {
-        $this->value = (new Str($value))->toString();
     }
 
-    #[\Override]
-    public function toString(): string
+    public function unescaped(): string
     {
         return $this->value;
+    }
+
+    public function toString(): string
+    {
+        return Str::escape($this->value);
     }
 }

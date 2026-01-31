@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\Server\Command;
-use Innmind\TimeContinuum\Period;
+use Innmind\Time\Period;
 use Innmind\Filesystem\File\Content;
 use Innmind\Url\Path;
 use Innmind\Immutable\Map;
@@ -102,7 +102,7 @@ class CommandTest extends TestCase
         $this->assertInstanceOf(Command::class, $command);
         $this->assertSame('bin/console', $command->toString());
         $this->assertInstanceOf(Map::class, $command->environment());
-        $this->assertCount(1, $command->environment());
+        $this->assertSame(1, $command->environment()->size());
         $this->assertSame('prod', $command->environment()->get('SYMFONY_ENV')->match(
             static fn($env) => $env,
             static fn() => null,
@@ -120,7 +120,7 @@ class CommandTest extends TestCase
         $this->assertInstanceOf(Command::class, $command);
         $this->assertSame('bin/console', $command->toString());
         $this->assertInstanceOf(Map::class, $command->environment());
-        $this->assertCount(3, $command->environment());
+        $this->assertSame(3, $command->environment()->size());
         $this->assertSame('prod', $command->environment()->get('SYMFONY_ENV')->match(
             static fn($env) => $env,
             static fn() => null,
@@ -207,7 +207,7 @@ class CommandTest extends TestCase
         $this->assertSame("cat 'foo.txt'", $commandB->toString());
         $this->assertSame("wc > 'count.txt'", $commandC->toString());
         $this->assertSame(
-            "echo 'bar' >> 'foo.txt' | 'cat' 'foo.txt' | 'wc' > 'count.txt'",
+            "echo 'bar' >> 'foo.txt' | cat 'foo.txt' | wc > 'count.txt'",
             $command->toString(),
         );
     }
