@@ -3,15 +3,12 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control;
 
-use Innmind\Server\Control\{
-    Servers\Unix,
-    Exception\UnsupportedOperatingSystem,
-};
-use Innmind\TimeContinuum\{
+use Innmind\Server\Control\Exception\UnsupportedOperatingSystem;
+use Innmind\Time\{
     Clock,
     Period,
+    Halt,
 };
-use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 
 final class ServerFactory
@@ -29,7 +26,7 @@ final class ServerFactory
         switch (\PHP_OS) {
             case 'Darwin':
             case 'Linux':
-                return Unix::of($clock, $io, $halt, $grace);
+                return Server::new($clock, $io, $halt, $grace);
         }
 
         throw new UnsupportedOperatingSystem;

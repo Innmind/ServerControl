@@ -7,7 +7,7 @@ namespace Innmind\Server\Control\Server\Command;
  * @psalm-immutable
  * @internal
  */
-final class Option implements Parameter
+final class Option
 {
     /**
      * @param non-empty-string $key
@@ -15,7 +15,7 @@ final class Option implements Parameter
     private function __construct(
         private bool $long,
         private string $key,
-        private ?string $value = null,
+        private ?string $value,
     ) {
     }
 
@@ -37,7 +37,16 @@ final class Option implements Parameter
         return new self(false, $key, $value);
     }
 
-    #[\Override]
+    public function key(): string
+    {
+        return $this->key;
+    }
+
+    public function value(): ?string
+    {
+        return $this->value;
+    }
+
     public function toString(): string
     {
         if ($this->long) {
@@ -55,15 +64,15 @@ final class Option implements Parameter
             $string .= '='.$this->value;
         }
 
-        return (new Str($string))->toString();
+        return Str::escape($string);
     }
 
     private function shortString(): string
     {
-        $string = (new Str('-'.$this->key))->toString();
+        $string = Str::escape('-'.$this->key);
 
         if (\is_string($this->value)) {
-            $string .= ' '.(new Str($this->value))->toString();
+            $string .= ' '.Str::escape($this->value);
         }
 
         return $string;

@@ -3,17 +3,17 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Processes;
 
-use Innmind\Server\Control\Server\{
-    Processes\Logger,
-    Processes\Unix,
-    Processes,
-    Process,
-    Command,
-    Signal,
-    Process\Pid
+use Innmind\Server\Control\{
+    Server,
+    Server\Process,
+    Server\Command,
+    Server\Signal,
+    Server\Process\Pid,
 };
-use Innmind\TimeContinuum\Clock;
-use Innmind\TimeWarp\Halt\Usleep;
+use Innmind\Time\{
+    Clock,
+    Halt,
+};
 use Innmind\IO\IO;
 use Innmind\Url\Path;
 use Psr\Log\NullLogger;
@@ -24,25 +24,12 @@ class LoggerTest extends TestCase
 {
     #[Group('ci')]
     #[Group('local')]
-    public function testInterface()
-    {
-        $this->assertInstanceOf(
-            Processes::class,
-            Logger::psr(
-                $this->processes(),
-                new NullLogger,
-            ),
-        );
-    }
-
-    #[Group('ci')]
-    #[Group('local')]
     public function testExecute()
     {
-        $logger = Logger::psr(
-            $this->processes(),
+        $logger = Server::logger(
+            $this->server(),
             new NullLogger,
-        );
+        )->processes();
 
         $this->assertInstanceOf(
             Process::class,
@@ -56,10 +43,10 @@ class LoggerTest extends TestCase
     #[Group('local')]
     public function testExecuteWithWorkingDirectory()
     {
-        $logger = Logger::psr(
-            $this->processes(),
+        $logger = Server::logger(
+            $this->server(),
             new NullLogger,
-        );
+        )->processes();
 
         $this->assertInstanceOf(
             Process::class,
@@ -75,20 +62,20 @@ class LoggerTest extends TestCase
     #[Group('local')]
     public function testKill()
     {
-        $logger = Logger::psr(
-            $this->processes(),
+        $logger = Server::logger(
+            $this->server(),
             new NullLogger,
-        );
+        )->processes();
 
         $this->assertNotNull($logger->kill(new Pid(42), Signal::kill));
     }
 
-    private function processes(): Unix
+    private function server(): Server
     {
-        return Unix::of(
+        return Server::new(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
     }
 }

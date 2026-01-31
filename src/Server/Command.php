@@ -3,20 +3,16 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server;
 
-use Innmind\Server\Control\{
-    Server\Command\Argument,
-    Server\Command\Option,
-    Server\Command\Overwrite,
-    Server\Command\Append,
-    Server\Command\Pipe,
+use Innmind\Server\Control\Server\Command\{
+    Implementation,
+    Definition,
+    Pipe,
 };
-use Innmind\TimeContinuum\Period;
+use Innmind\Time\Period;
 use Innmind\Filesystem\File\Content;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Sequence,
     Map,
-    Str,
     Maybe,
 };
 
@@ -25,42 +21,9 @@ use Innmind\Immutable\{
  */
 final class Command
 {
-    /** @var non-empty-string */
-    private string $executable;
-    /** @var Sequence<Command\Parameter> */
-    private Sequence $parameters;
-    /** @var Map<string, string> */
-    private Map $environment;
-    /** @var Maybe<Path> */
-    private Maybe $workingDirectory;
-    /** @var Maybe<Content> */
-    private Maybe $input;
-    /** @var Maybe<Append>|Maybe<Overwrite> */
-    private Maybe $redirection;
-    private bool $background = false;
-    /** @var Maybe<Period> */
-    private Maybe $timeout;
-    private bool $streamOutput = false;
-
-    /**
-     * @param non-empty-string $executable
-     */
-    private function __construct(bool $background, string $executable)
-    {
-        $this->executable = $executable;
-        $this->background = $background;
-        /** @var Sequence<Command\Parameter> */
-        $this->parameters = Sequence::of();
-        /** @var Map<string, string> */
-        $this->environment = Map::of();
-        /** @var Maybe<Path> */
-        $this->workingDirectory = Maybe::nothing();
-        /** @var Maybe<Content> */
-        $this->input = Maybe::nothing();
-        /** @var Maybe<Append>|Maybe<Overwrite> */
-        $this->redirection = Maybe::nothing();
-        /** @var Maybe<Period> */
-        $this->timeout = Maybe::nothing();
+    private function __construct(
+        private Implementation $implementation,
+    ) {
     }
 
     /**
@@ -77,7 +40,7 @@ final class Command
     #[\NoDiscard]
     public static function background(string $executable): self
     {
-        return new self(true, $executable);
+        return new self(Definition::background($executable));
     }
 
     /**
@@ -91,16 +54,15 @@ final class Command
     #[\NoDiscard]
     public static function foreground(string $executable): self
     {
-        return new self(false, $executable);
+        return new self(Definition::foreground($executable));
     }
 
     #[\NoDiscard]
     public function withArgument(string $value): self
     {
-        $self = clone $this;
-        $self->parameters = ($this->parameters)(new Argument($value));
-
-        return $self;
+        return new self(
+            $this->implementation->withArgument($value),
+        );
     }
 
     /**
@@ -109,10 +71,9 @@ final class Command
     #[\NoDiscard]
     public function withOption(string $key, ?string $value = null): self
     {
-        $self = clone $this;
-        $self->parameters = ($this->parameters)(Option::long($key, $value));
-
-        return $self;
+        return new self(
+            $this->implementation->withOption($key, $value),
+        );
     }
 
     /**
@@ -121,10 +82,9 @@ final class Command
     #[\NoDiscard]
     public function withShortOption(string $key, ?string $value = null): self
     {
-        $self = clone $this;
-        $self->parameters = ($this->parameters)(Option::short($key, $value));
-
-        return $self;
+        return new self(
+            $this->implementation->withShortOption($key, $value),
+        );
     }
 
     /**
@@ -133,10 +93,9 @@ final class Command
     #[\NoDiscard]
     public function withEnvironment(string $key, string $value): self
     {
-        $self = clone $this;
-        $self->environment = ($this->environment)($key, $value);
-
-        return $self;
+        return new self(
+            $this->implementation->withEnvironment($key, $value),
+        );
     }
 
     /**
@@ -145,75 +104,64 @@ final class Command
     #[\NoDiscard]
     public function withEnvironments(Map $values): self
     {
-        $self = clone $this;
-        $self->environment = $this->environment->merge($values);
-
-        return $self;
+        return new self(
+            $values->reduce(
+                $this->implementation,
+                static fn(Implementation $self, $key, $value) => $self->withEnvironment(
+                    $key,
+                    $value,
+                ),
+            ),
+        );
     }
 
     #[\NoDiscard]
     public function withWorkingDirectory(Path $path): self
     {
-        $self = clone $this;
-        $self->workingDirectory = Maybe::just($path);
-
-        return $self;
+        return new self(
+            $this->implementation->withWorkingDirectory($path),
+        );
     }
 
     #[\NoDiscard]
     public function withInput(Content $input): self
     {
-        $self = clone $this;
-        $self->input = Maybe::just($input);
-
-        return $self;
+        return new self(
+            $this->implementation->withInput($input),
+        );
     }
 
     #[\NoDiscard]
     public function overwrite(Path $path): self
     {
-        $self = clone $this;
-        $self->redirection = Maybe::just(new Overwrite($path));
-
-        return $self;
+        return new self(
+            $this->implementation->overwrite($path),
+        );
     }
 
     #[\NoDiscard]
     public function append(Path $path): self
     {
-        $self = clone $this;
-        $self->redirection = Maybe::just(new Append($path));
-
-        return $self;
+        return new self(
+            $this->implementation->append($path),
+        );
     }
 
     #[\NoDiscard]
     public function pipe(self $command): self
     {
-        $self = clone $this;
-
-        $self->parameters = $this
-            ->redirection
-            ->match(
-                fn($redirection) => ($this->parameters)($redirection),
-                fn() => $this->parameters,
-            )
-            ->add(new Pipe)
-            ->add(new Argument($command->executable))
-            ->append($command->parameters);
-        $self->environment = $this->environment->merge($command->environment);
-        $self->redirection = $command->redirection;
-
-        return $self;
+        return new self(Pipe::of(
+            $this->implementation,
+            $command->implementation,
+        ));
     }
 
     #[\NoDiscard]
     public function timeoutAfter(Period $timeout): self
     {
-        $self = clone $this;
-        $self->timeout = Maybe::just($timeout);
-
-        return $self;
+        return new self(
+            $this->implementation->timeoutAfter($timeout),
+        );
     }
 
     /**
@@ -229,10 +177,9 @@ final class Command
     #[\NoDiscard]
     public function streamOutput(): self
     {
-        $self = clone $this;
-        $self->streamOutput = true;
-
-        return $self;
+        return new self(
+            $this->implementation->streamOutput(),
+        );
     }
 
     /**
@@ -242,7 +189,7 @@ final class Command
      */
     public function environment(): Map
     {
-        return $this->environment;
+        return $this->implementation->environment();
     }
 
     /**
@@ -252,7 +199,7 @@ final class Command
      */
     public function workingDirectory(): Maybe
     {
-        return $this->workingDirectory;
+        return $this->implementation->workingDirectory();
     }
 
     /**
@@ -262,7 +209,7 @@ final class Command
      */
     public function input(): Maybe
     {
-        return $this->input;
+        return $this->implementation->input();
     }
 
     /**
@@ -270,7 +217,7 @@ final class Command
      */
     public function toBeRunInBackground(): bool
     {
-        return $this->background;
+        return $this->implementation->toBeRunInBackground();
     }
 
     /**
@@ -280,7 +227,7 @@ final class Command
      */
     public function timeout(): Maybe
     {
-        return $this->timeout;
+        return $this->implementation->timeout();
     }
 
     /**
@@ -288,7 +235,7 @@ final class Command
      */
     public function outputToBeStreamed(): bool
     {
-        return $this->streamOutput;
+        return $this->implementation->outputToBeStreamed();
     }
 
     /**
@@ -298,23 +245,16 @@ final class Command
      */
     public function toString(): string
     {
-        $string = $this->executable;
+        return $this->implementation->toString();
+    }
 
-        if ($this->parameters->size() > 0) {
-            $parameters = $this->parameters->map(
-                static fn($parameter): string => $parameter->toString(),
-            );
-            $string .= ' '.Str::of(' ')->join($parameters)->toString();
-        }
-
-        return $this
-            ->redirection
-            ->map(static fn($redirection) => $redirection->toString())
-            ->map(static fn($redirection) => ' '.$redirection)
-            ->map(static fn($redirection) => $string.$redirection)
-            ->match(
-                static fn($string) => $string,
-                static fn() => $string,
-            );
+    /**
+     * This method is only to be used by innmind/testing
+     *
+     * @internal
+     */
+    public function internal(): Implementation
+    {
+        return $this->implementation;
     }
 }

@@ -4,19 +4,18 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server\Processes;
 
 use Innmind\Server\Control\{
-    Server\Processes\Unix,
-    Server\Processes,
+    Server,
     Server\Command,
     Server\Process,
     Server\Process\TimedOut,
     Server\Signal,
 };
 use Innmind\Filesystem\File\Content;
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
     Period,
+    Halt,
 };
-use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\IO\IO;
 use Innmind\Immutable\{
     SideEffect,
@@ -29,24 +28,13 @@ class UnixTest extends TestCase
 {
     #[Group('ci')]
     #[Group('local')]
-    public function testInterface()
-    {
-        $this->assertInstanceOf(Processes::class, Unix::of(
-            Clock::live(),
-            IO::fromAmbientAuthority(),
-            Usleep::new(),
-        ));
-    }
-
-    #[Group('ci')]
-    #[Group('local')]
     public function testExecute()
     {
-        $processes = Unix::of(
+        $processes = Server::new(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
-        );
+            Halt::new(),
+        )->processes();
         $start = \time();
         $process = $processes->execute(
             Command::foreground('php')
@@ -55,7 +43,7 @@ class UnixTest extends TestCase
         )->unwrap();
 
         $this->assertInstanceOf(Process::class, $process);
-        $process->wait();
+        $_ = $process->wait();
         $this->assertTrue((\time() - $start) >= 6);
     }
 
@@ -63,11 +51,11 @@ class UnixTest extends TestCase
     #[Group('local')]
     public function testExecuteInBackground()
     {
-        $processes = Unix::of(
+        $processes = Server::new(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
-        );
+            Halt::new(),
+        )->processes();
         $start = \time();
         $process = $processes->execute(
             Command::background('php')
@@ -85,11 +73,11 @@ class UnixTest extends TestCase
     #[Group('local')]
     public function testExecuteWithInput()
     {
-        $processes = Unix::of(
+        $processes = Server::new(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
-        );
+            Halt::new(),
+        )->processes();
         $process = $processes->execute(
             Command::foreground('cat')->withInput(Content::oneShot(
                 IO::fromAmbientAuthority()
@@ -103,7 +91,7 @@ class UnixTest extends TestCase
             $process
                 ->output()
                 ->map(static fn($chunk) => $chunk->data())
-                ->fold(new Concat)
+                ->fold(Concat::monoid)
                 ->toString(),
         );
     }
@@ -117,11 +105,11 @@ class UnixTest extends TestCase
         // That's why it's never run in the CI
         // todo investigate more why this is happening only for linux
 
-        $processes = Unix::of(
+        $processes = Server::new(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
-        );
+            Halt::new(),
+        )->processes();
         $start = \time();
         $process = $processes->execute(
             Command::foreground('php')
@@ -150,11 +138,11 @@ class UnixTest extends TestCase
     #[Group('local')]
     public function testTimeout()
     {
-        $processes = Unix::of(
+        $processes = Server::new(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
-        );
+            Halt::new(),
+        )->processes();
         $start = \time();
         $process = $processes->execute(
             Command::foreground('sleep')
@@ -178,12 +166,12 @@ class UnixTest extends TestCase
     public function testStreamOutput()
     {
         $called = false;
-        $processes = Unix::of(
+        $processes = Server::new(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
-        );
-        $processes
+            Halt::new(),
+        )->processes();
+        $_ = $processes
             ->execute(
                 Command::foreground('cat')
                     ->withArgument('fixtures/symfony.log')
@@ -203,11 +191,11 @@ class UnixTest extends TestCase
     public function testSecondCallToStreamedOutputThrowsAnError()
     {
         $called = false;
-        $processes = Unix::of(
+        $processes = Server::new(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
-        );
+            Halt::new(),
+        )->processes();
         $process = $processes
             ->execute(
                 Command::foreground('cat')
@@ -215,11 +203,11 @@ class UnixTest extends TestCase
                     ->streamOutput(),
             )
             ->unwrap();
-        $process->output()->foreach(static fn() => null);
+        $_ = $process->output()->foreach(static fn() => null);
 
         $this->expectException(\LogicException::class);
 
-        $process->output()->foreach(static fn() => null);
+        $_ = $process->output()->foreach(static fn() => null);
     }
 
     #[Group('ci')]
@@ -227,19 +215,19 @@ class UnixTest extends TestCase
     public function testOutputIsNotLostByDefault()
     {
         $called = false;
-        $processes = Unix::of(
+        $processes = Server::new(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
-        );
+            Halt::new(),
+        )->processes();
         $process = $processes
             ->execute(
                 Command::foreground('cat')
                     ->withArgument('fixtures/symfony.log'),
             )
             ->unwrap();
-        $process->output()->foreach(static fn() => null);
-        $process
+        $_ = $process->output()->foreach(static fn() => null);
+        $_ = $process
             ->output()
             ->foreach(static function() use (&$called) {
                 $called = true;
@@ -254,17 +242,17 @@ class UnixTest extends TestCase
     {
         @\unlink('/tmp/test-file');
         \touch('/tmp/test-file');
-        $processes = Unix::of(
+        $processes = Server::new(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
-        );
-        $tail = $processes->execute(
+            Halt::new(),
+        )->processes();
+        $_ = $tail = $processes->execute(
             Command::foreground('tail')
                 ->withShortOption('f')
                 ->withArgument('/tmp/test-file'),
         )->unwrap();
-        $processes->execute(
+        $_ = $processes->execute(
             Command::background('sleep 2 && kill')
                 ->withArgument($tail->pid()->match(
                     static fn($pid) => $pid->toString(),
@@ -272,7 +260,7 @@ class UnixTest extends TestCase
                 )),
         )->unwrap();
 
-        $tail->output()->foreach(static fn() => null);
+        $_ = $tail->output()->foreach(static fn() => null);
         // when done correctly then the foreach above would run forever
         $this->assertTrue(true);
     }
@@ -281,11 +269,11 @@ class UnixTest extends TestCase
     #[Group('local')]
     public function testRegressionWhenProcessFinishesTooFastItsFlaggedAsFailingEvenThoughItSucceeded()
     {
-        $processes = Unix::of(
+        $processes = Server::new(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
-        );
+            Halt::new(),
+        )->processes();
 
         $this->assertTrue(
             $processes

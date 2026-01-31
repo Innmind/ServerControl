@@ -4,16 +4,16 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Server\Control\Server;
 
 use Innmind\Server\Control\{
+    Server,
     Server\Script,
     Server\Command,
-    Servers\Unix,
     Exception\ProcessFailed,
 };
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
     Period,
+    Halt,
 };
-use Innmind\TimeWarp\Halt\Usleep;
 use Innmind\IO\IO;
 use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
@@ -74,12 +74,12 @@ class ScriptTest extends TestCase
         $this->assertInstanceOf(ProcessFailed::class, $e);
     }
 
-    private function server(): Unix
+    private function server(): Server
     {
-        return Unix::of(
+        return Server::new(
             Clock::live(),
             IO::fromAmbientAuthority(),
-            Usleep::new(),
+            Halt::new(),
         );
     }
 }
