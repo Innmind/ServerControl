@@ -349,7 +349,7 @@ final class Definition implements Implementation
             ->append($this->redirection->toSequence())
             ->map(static fn($parameter) => ' '.$parameter->toString())
             ->map(Str::of(...))
-            ->fold(new Concat)
+            ->fold(Concat::monoid)
             ->prepend($this->executable)
             ->toString();
     }

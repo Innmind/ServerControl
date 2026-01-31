@@ -77,7 +77,7 @@ class BackgroundTest extends TestCase
             $process
                 ->output()
                 ->map(static fn($chunk) => $chunk->data())
-                ->fold(new Concat)
+                ->fold(Concat::monoid)
                 ->toString(),
         );
         $this->assertTrue((\time() - $start) < 1);

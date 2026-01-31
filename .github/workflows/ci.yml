@@ -4,15 +4,15 @@ on: [push, pull_request]
 
 jobs:
   blackbox:
-    uses: innmind/github-workflows/.github/workflows/black-box-matrix.yml@next
+    uses: innmind/github-workflows/.github/workflows/black-box-matrix.yml@main
     with:
       tags: 'ci'
   coverage:
-    uses: innmind/github-workflows/.github/workflows/coverage-matrix.yml@next
+    uses: innmind/github-workflows/.github/workflows/coverage-matrix.yml@main
     secrets: inherit
     with:
       tags: 'ci'
   psalm:
-    uses: innmind/github-workflows/.github/workflows/psalm-matrix.yml@next
+    uses: innmind/github-workflows/.github/workflows/psalm-matrix.yml@main
   cs:
-    uses: innmind/github-workflows/.github/workflows/cs.yml@next
+    uses: innmind/github-workflows/.github/workflows/cs.yml@main

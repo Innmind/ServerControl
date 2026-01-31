@@ -95,7 +95,7 @@ class ForegroundTest extends TestCase
             $process
                 ->output()
                 ->map(static fn($chunk) => $chunk->data())
-                ->fold(new Concat)
+                ->fold(Concat::monoid)
                 ->toString(),
         );
         $this->assertSame(6, $count);
@@ -246,7 +246,7 @@ class ForegroundTest extends TestCase
             $process
                 ->output()
                 ->map(static fn($chunk) => $chunk->data())
-                ->fold(new Concat)
+                ->fold(Concat::monoid)
                 ->toString(),
         );
     }
