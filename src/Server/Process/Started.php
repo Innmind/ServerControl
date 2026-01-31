@@ -3,10 +3,10 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\{
-    Server\Process\Output\Chunk,
-    Server\Process\Output\Type,
-    Server\Signal,
+use Innmind\Server\Control\Server\{
+    Process\Output\Chunk,
+    Process\Output\Type,
+    Signal,
 };
 use Innmind\Filesystem\File\Content;
 use Innmind\Time\{

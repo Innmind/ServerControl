@@ -6,7 +6,7 @@ namespace Tests\Innmind\Server\Control;
 use Innmind\Server\Control\{
     ServerFactory,
     Server,
-    Exception\UnsupportedOperatingSystem
+    Exception\UnsupportedOperatingSystem,
 };
 use Innmind\Time\{
     Clock,

@@ -3,9 +3,9 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Run;
 
-use Innmind\Server\Control\{
-    Server\Command,
-    Server\Process,
+use Innmind\Server\Control\Server\{
+    Command,
+    Process,
 };
 use Innmind\Time\{
     Clock,

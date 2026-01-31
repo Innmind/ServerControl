@@ -3,12 +3,12 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control;
 
-use Innmind\Server\Control\{
-    Server\Processes,
-    Server\Volumes,
-    Server\Process,
-    Server\Script,
-    Server\Command,
+use Innmind\Server\Control\Server\{
+    Processes,
+    Volumes,
+    Process,
+    Script,
+    Command,
 };
 use Innmind\IO\IO;
 use Innmind\Url\Authority\{

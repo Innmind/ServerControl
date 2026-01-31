@@ -3,9 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Server\Control\Run;
 
-use Innmind\Server\Control\Server\{
-    Command,
-};
+use Innmind\Server\Control\Server\Command;
 use Innmind\Immutable\Attempt;
 use Psr\Log\LoggerInterface;
 

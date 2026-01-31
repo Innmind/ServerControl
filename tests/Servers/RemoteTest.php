@@ -17,7 +17,7 @@ use Innmind\IO\IO;
 use Innmind\Url\Authority\{
     Host,
     Port,
-    UserInformation\User
+    UserInformation\User,
 };
 use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;

@@ -3,12 +3,12 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Server\Control\Server\Process;
 
-use Innmind\Server\Control\{
-    Server\Process\Unix,
-    Server\Process\Output\Chunk,
-    Server\Process\Output\Type,
-    Server\Process\ExitCode,
-    Server\Command,
+use Innmind\Server\Control\Server\{
+    Process\Unix,
+    Process\Output\Chunk,
+    Process\Output\Type,
+    Process\ExitCode,
+    Command,
 };
 use Innmind\Filesystem\File\Content;
 use Innmind\Time\{

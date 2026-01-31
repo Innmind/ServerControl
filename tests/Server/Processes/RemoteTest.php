@@ -19,7 +19,7 @@ use Innmind\Url\{
     Path,
     Authority\Host,
     Authority\Port,
-    Authority\UserInformation\User
+    Authority\UserInformation\User,
 };
 use Innmind\Immutable\SideEffect;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
