@@ -79,7 +79,7 @@ class ForegroundTest extends TestCase
 
         $start = \time();
         $count = 0;
-        $process
+        $_ = $process
             ->output()
             ->foreach(function($chunk) use ($start, &$count) {
                 $this->assertSame($count."\n", $chunk->data()->toString());
@@ -206,7 +206,7 @@ class ForegroundTest extends TestCase
                 ->withEnvironment('PATH', $_SERVER['PATH']),
         );
         $process = Process::foreground($slow());
-        $process->output()->memoize();
+        $_ = $process->output()->memoize();
 
         $this->assertInstanceOf(
             Success::class,

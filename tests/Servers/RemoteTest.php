@@ -41,7 +41,7 @@ class RemoteTest extends TestCase
             Processes::class,
             $remote->processes(),
         );
-        $remote->processes()->execute(Command::foreground('ls'));
+        $_ = $remote->processes()->execute(Command::foreground('ls'));
     }
 
     #[Group('ci')]
@@ -61,7 +61,7 @@ class RemoteTest extends TestCase
             Processes::class,
             $remote->processes(),
         );
-        $remote->processes()->execute(Command::foreground('ls'));
+        $_ = $remote->processes()->execute(Command::foreground('ls'));
     }
 
     #[Group('ci')]
@@ -83,7 +83,7 @@ class RemoteTest extends TestCase
             Volumes::class,
             $remote->volumes(),
         );
-        $remote->volumes()->unmount(Volumes\Name::of('/dev'));
+        $_ = $remote->volumes()->unmount(Volumes\Name::of('/dev'));
     }
 
     #[Group('ci')]

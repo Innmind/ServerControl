@@ -43,7 +43,7 @@ class UnixTest extends TestCase
         )->unwrap();
 
         $this->assertInstanceOf(Process::class, $process);
-        $process->wait();
+        $_ = $process->wait();
         $this->assertTrue((\time() - $start) >= 6);
     }
 
@@ -171,7 +171,7 @@ class UnixTest extends TestCase
             IO::fromAmbientAuthority(),
             Halt::new(),
         )->processes();
-        $processes
+        $_ = $processes
             ->execute(
                 Command::foreground('cat')
                     ->withArgument('fixtures/symfony.log')
@@ -203,11 +203,11 @@ class UnixTest extends TestCase
                     ->streamOutput(),
             )
             ->unwrap();
-        $process->output()->foreach(static fn() => null);
+        $_ = $process->output()->foreach(static fn() => null);
 
         $this->expectException(\LogicException::class);
 
-        $process->output()->foreach(static fn() => null);
+        $_ = $process->output()->foreach(static fn() => null);
     }
 
     #[Group('ci')]
@@ -226,8 +226,8 @@ class UnixTest extends TestCase
                     ->withArgument('fixtures/symfony.log'),
             )
             ->unwrap();
-        $process->output()->foreach(static fn() => null);
-        $process
+        $_ = $process->output()->foreach(static fn() => null);
+        $_ = $process
             ->output()
             ->foreach(static function() use (&$called) {
                 $called = true;
@@ -247,12 +247,12 @@ class UnixTest extends TestCase
             IO::fromAmbientAuthority(),
             Halt::new(),
         )->processes();
-        $tail = $processes->execute(
+        $_ = $tail = $processes->execute(
             Command::foreground('tail')
                 ->withShortOption('f')
                 ->withArgument('/tmp/test-file'),
         )->unwrap();
-        $processes->execute(
+        $_ = $processes->execute(
             Command::background('sleep 2 && kill')
                 ->withArgument($tail->pid()->match(
                     static fn($pid) => $pid->toString(),
@@ -260,7 +260,7 @@ class UnixTest extends TestCase
                 )),
         )->unwrap();
 
-        $tail->output()->foreach(static fn() => null);
+        $_ = $tail->output()->foreach(static fn() => null);
         // when done correctly then the foreach above would run forever
         $this->assertTrue(true);
     }

@@ -330,7 +330,7 @@ final class Started
     private function abort(): string
     {
         @\proc_terminate($this->process);
-        ($this->halt)($this->grace);
+        $_ = ($this->halt)($this->grace)->memoize();
 
         if ($this->status()['running']) {
             @\proc_terminate($this->process, Signal::kill->toInt());

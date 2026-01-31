@@ -36,7 +36,7 @@ class LoggerTest extends TestCase
             Processes::class,
             $logger->processes(),
         );
-        $logger->processes()->execute(Command::foreground('ls'));
+        $_ = $logger->processes()->execute(Command::foreground('ls'));
     }
 
     #[Group('ci')]
@@ -54,7 +54,7 @@ class LoggerTest extends TestCase
             Volumes::class,
             $logger->volumes(),
         );
-        $logger->volumes()->unmount(Volumes\Name::of('/dev'));
+        $_ = $logger->volumes()->unmount(Volumes\Name::of('/dev'));
     }
 
     #[Group('ci')]
