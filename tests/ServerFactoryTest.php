@@ -8,8 +8,10 @@ use Innmind\Server\Control\{
     Server,
     Exception\UnsupportedOperatingSystem
 };
-use Innmind\TimeContinuum\Clock;
-use Innmind\TimeWarp\Halt;
+use Innmind\Time\{
+    Clock,
+    Halt,
+};
 use Innmind\IO\IO;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\Group;

@@ -4,11 +4,11 @@ declare(strict_types = 1);
 namespace Innmind\Server\Control;
 
 use Innmind\Server\Control\Exception\UnsupportedOperatingSystem;
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
     Period,
+    Halt,
 };
-use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 
 final class ServerFactory

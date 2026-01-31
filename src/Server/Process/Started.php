@@ -9,12 +9,12 @@ use Innmind\Server\Control\{
     Server\Signal,
 };
 use Innmind\Filesystem\File\Content;
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
-    PointInTime,
+    Point,
     Period,
+    Halt,
 };
-use Innmind\TimeWarp\Halt;
 use Innmind\IO\{
     IO,
     Streams\Stream,
@@ -44,7 +44,7 @@ final class Started
     private Halt $halt;
     private Period $grace;
     private bool $background;
-    private PointInTime $startedAt;
+    private Point $startedAt;
     /** @var resource */
     private $process;
     private Stream $output;

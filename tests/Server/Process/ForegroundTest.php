@@ -11,11 +11,11 @@ use Innmind\Server\Control\Server\{
     Process\Success,
     Command,
 };
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
     Period,
+    Halt,
 };
-use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 use Innmind\Immutable\Monoid\Concat;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;

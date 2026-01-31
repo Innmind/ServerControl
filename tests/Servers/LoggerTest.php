@@ -9,8 +9,10 @@ use Innmind\Server\Control\{
     Server\Command,
     Server\Volumes,
 };
-use Innmind\TimeContinuum\Clock;
-use Innmind\TimeWarp\Halt;
+use Innmind\Time\{
+    Clock,
+    Halt,
+};
 use Innmind\IO\IO;
 use Innmind\Immutable\SideEffect;
 use Psr\Log\NullLogger;

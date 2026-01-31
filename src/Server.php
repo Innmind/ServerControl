@@ -10,16 +10,16 @@ use Innmind\Server\Control\{
     Server\Script,
     Server\Command,
 };
-use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 use Innmind\Url\Authority\{
     Host,
     Port,
     UserInformation\User,
 };
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
     Period,
+    Halt,
 };
 use Innmind\Immutable\{
     Attempt,

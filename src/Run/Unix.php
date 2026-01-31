@@ -7,11 +7,11 @@ use Innmind\Server\Control\{
     Server\Command,
     Server\Process,
 };
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
     Period,
+    Halt,
 };
-use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 use Innmind\Immutable\Attempt;
 

@@ -10,8 +10,10 @@ use Innmind\Server\Control\{
     Server\Signal,
     Server\Process\Pid,
 };
-use Innmind\TimeContinuum\Clock;
-use Innmind\TimeWarp\Halt;
+use Innmind\Time\{
+    Clock,
+    Halt,
+};
 use Innmind\IO\IO;
 use Innmind\Url\{
     Path,

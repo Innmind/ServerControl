@@ -7,11 +7,11 @@ use Innmind\Server\Control\{
     Server\Command,
     Exception\RuntimeException,
 };
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
     Period,
+    Halt,
 };
-use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 
 /**

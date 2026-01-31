@@ -11,11 +11,11 @@ use Innmind\Server\Control\{
     Server\Signal,
 };
 use Innmind\Filesystem\File\Content;
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
     Period,
+    Halt,
 };
-use Innmind\TimeWarp\Halt;
 use Innmind\IO\IO;
 use Innmind\Immutable\{
     SideEffect,

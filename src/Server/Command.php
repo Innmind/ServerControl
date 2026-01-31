@@ -8,7 +8,7 @@ use Innmind\Server\Control\Server\Command\{
     Definition,
     Pipe,
 };
-use Innmind\TimeContinuum\Period;
+use Innmind\Time\Period;
 use Innmind\Filesystem\File\Content;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
