@@ -49,13 +49,15 @@ final class Processes
                     ->withShortOption($signal->toString())
                     ->withArgument($pid->toString()),
             )
-            ->flatMap(static fn($process) => $process->wait()->match(
-                static fn() => Attempt::result(SideEffect::identity()),
-                static fn($e) => Attempt::error(new ProcessFailed(
-                    $command,
-                    $process,
-                    $e,
-                )),
-            ));
+            ->flatMap(
+                static fn($process) => $process
+                    ->wait()
+                    ->attempt(static fn($e) => new ProcessFailed(
+                        $command,
+                        $process,
+                        $e,
+                    ))
+                    ->map(SideEffect::identity(...)),
+            );
     }
 }
