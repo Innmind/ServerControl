@@ -5,6 +5,9 @@ namespace Innmind\Server\Control\Server\Process;
 
 use Innmind\Immutable\Sequence;
 
+/**
+ * @psalm-immutable
+ */
 final class Signaled
 {
     /**
