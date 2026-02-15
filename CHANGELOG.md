@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.1.0 - 2026-02-15
+
+### Added
+
+- `Innmind\Server\Control\Server\Process\Builder`, internal tool to mock processes
+
 ## 7.0.0 - 2026-01-31
 
 ### Changed

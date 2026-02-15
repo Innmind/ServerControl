@@ -1,6 +1,6 @@
 # ServerControl
 
-[![Build Status](https://github.com/innmind/servercontrol/workflows/CI/badge.svg?branch=master)](https://github.com/innmind/servercontrol/actions?query=workflow%3ACI)
+[![CI](https://github.com/Innmind/ServerControl/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Innmind/ServerControl/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/innmind/servercontrol/branch/develop/graph/badge.svg)](https://codecov.io/gh/innmind/servercontrol)
 [![Type Coverage](https://shepherd.dev/github/innmind/servercontrol/coverage.svg)](https://shepherd.dev/github/innmind/servercontrol)
 
