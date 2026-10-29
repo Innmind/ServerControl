@@ -98,7 +98,8 @@ final class Started
             ->read()
             ->pool(Type::output)
             ->with(Type::error, $this->error->read())
-            ->timeoutAfter(Period::millisecond(100));
+            ->timeoutAfter(Period::millisecond(100))
+            ->nonBlocking();
         $this->timeout = $timeout;
         $this->content = $content;
         $this->pid = new Pid($this->status()['pid']);
