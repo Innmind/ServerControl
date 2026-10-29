@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Iterating over a process output could result in a forever hang
+
 ## 7.2.0 - 2026-08-09
 
 ### Changed
